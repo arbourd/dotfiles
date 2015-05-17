@@ -15,7 +15,7 @@ A collection / backup of my dotfiles
 
   2. Copy dotfiles to home directory
 
-      `$ cp ~/.dotfiles ~/.`
+      `$ cp -r ~/.dotfiles ~/.`
 
 ## License
 

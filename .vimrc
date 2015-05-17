@@ -2,12 +2,11 @@
 execute pathogen#infect()
 syntax enable
 filetype plugin indent on
+" Clean on Vim quit
 au VimLeave * :!clear
-
 " Use the Solarized Dark theme
 set background=dark
 colorscheme solarized
-
 " Respect modeline in files
 set modeline
 set modelines=4
@@ -49,6 +48,8 @@ set showmode
 set title
 " Show the (partial) command as it’s being typed
 set showcmd
+" Allow Airline to access powerline fonts
+let g:airline_powerline_fonts = 1
 
 " Make bg transparent (inherit parent)
 hi Normal ctermbg=none
