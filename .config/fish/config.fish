@@ -9,6 +9,9 @@ set PATH $HOME/.rbenv/bin $PATH
 set PATH $HOME/.rbenv/shims $PATH
 rbenv rehash >/dev/null ^&1
 
+# go
+set -x GOPATH=$HOME/dev/go
+
 # Empty the greeting string
 set fish_greeting ""
 
