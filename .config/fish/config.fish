@@ -14,6 +14,7 @@ set -x GOPATH $HOME/dev/go
 
 # Set $SHELL env var for docker-machine
 set -x SHELL fish
+eval (docker-machine env)
 
 # Empty the greeting string
 set fish_greeting ""
