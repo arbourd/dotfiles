@@ -9,11 +9,6 @@ set PATH $HOME/.rbenv/bin $PATH
 set PATH $HOME/.rbenv/shims $PATH
 rbenv rehash >/dev/null ^&1
 
-# boot2docker
-set -x DOCKER_HOST tcp://192.168.59.103:2376
-set -x DOCKER_CERT_PATH /Users/dylan/.boot2docker/certs/boot2docker-vm
-set -x DOCKER_TLS_VERIFY 1
-
 # Empty the greeting string
 set fish_greeting ""
 
