@@ -8,57 +8,6 @@
  * http://www.lesscss.org
  */
 
-.tree-view {
-
-}
-
-atom-text-editor {
-
-}
-
-atom-text-editor .cursor {
-
-}
-
 atom-text-editor, atom-text-editor::shadow {
-
-  // Darker background color
   background-color: #1c1f24;
-
-  // Linter warning
-  .highlight {
-    // &.linter-warning .region {
-    //   background-color: yellow;
-    //   color: white;
-    // }
-    &.linter-warning .region {
-      border-bottom: 1px solid orange;
-      color: white;
-      background-image: none;
-      background-color: rgba(0, 0, 0, 0);
-    }
-    &.linter-error .region {
-      border-bottom: 1px solid red;
-      color: white;
-      background-image: none;
-      background-color: rgba(0, 0, 0, 0);
-    }
-  }
-
-  // Box
-  .highlight-selected .region {
-    border-color: #ddd;
-  }
-  // Background
-  .highlight-selected.background .region {
-    background-color: rgba(155, 149, 0, 0.6);
-  }
-  // Light theme box (set in settings)
-  .highlight-selected.light-theme .region {
-    border-color: rgba(255, 128, 64, 0.4);
-  }
-  // Light theme background (set in settings)
-  .highlight-selected.light-theme.background .region {
-    background-color: rgba(255, 128, 64, 0.2);
-  }
 }
