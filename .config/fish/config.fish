@@ -18,19 +18,11 @@ set -x SHELL fish
 # Empty the greeting string
 set fish_greeting ""
 
-# Path to your oh-my-fish.
-set fish_path $HOME/.oh-my-fish
+# Path to Oh My Fish Install
+set -gx OMF_PATH /Users/dylan/.local/share/omf
 
-# Theme
-set fish_theme cmorrell.com
-
-# All built-in plugins can be found at ~/.oh-my-fish/plugins/
-# Custom plugins may be added to ~/.oh-my-fish/custom/plugins/
-# Enable plugins by adding their name separated by a space to the line below.
-set fish_plugins theme
-
-# Path to your custom folder (default path is ~/.oh-my-fish/custom)
-#set fish_custom $HOME/dotfiles/oh-my-fish
-
-# Load oh-my-fish configuration.
-. $fish_path/oh-my-fish.fish
+# Customize Oh My Fish configuration path.
+# #set -gx OMF_CONFIG /Users/dylan/.config/omf
+#
+# # Load oh-my-fish configuration.
+source $OMF_PATH/init.fish
