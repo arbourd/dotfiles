@@ -1,9 +1,6 @@
 # Set default user
 set default_user dylan
 
-# Load nvm
-# fenv source ~/.nvm/nvm.sh
-
 # Set path for rbenv
 set PATH $HOME/.rbenv/bin $PATH
 set PATH $HOME/.rbenv/shims $PATH
