@@ -6,6 +6,9 @@ set PATH $HOME/.rbenv/bin $PATH
 set PATH $HOME/.rbenv/shims $PATH
 rbenv rehash >/dev/null ^&1
 
+# Set path for pyenv
+set PATH $HOME/.pyenv/shims $PATH
+
 # Set GOPATH for go
 set -x GOPATH $HOME/dev/go
 
@@ -14,4 +17,3 @@ set -x SHELL fish
 
 # Empty the greeting string
 set fish_greeting ""
-
