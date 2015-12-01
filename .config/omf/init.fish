@@ -9,6 +9,9 @@ rbenv rehash >/dev/null ^&1
 # Set path for pyenv
 set PATH $HOME/.pyenv/shims $PATH
 
+# Virtualfish with auto activation
+eval (python -m virtualfish auto_activation)
+
 # Set GOPATH for go
 set -x GOPATH $HOME/dev/go
 
