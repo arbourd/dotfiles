@@ -30,6 +30,9 @@
 ehthumbs.db
 Thumbs.db
 
+# Python virtualenv
+.venv
+
 # JS specific
 bower_components/
 node_modules/
