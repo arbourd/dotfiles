@@ -10,7 +10,9 @@
 #   editor.onDidSave ->
 #     console.log "Saved! #{editor.getPath()}"
 
-process.env.PATH = ['/usr/local/bin',
-                    '/Users/dylan/.rbenv/shims',
-                    process.env.PATH
-                   ].join(':')
+process.env.PATH = [
+  process.env.HOME + '/.rbenv/shims',
+  process.env.HOME + '/.pyenv/shims',
+  '/usr/local/bin',
+  process.env.PATH
+].join(':')
