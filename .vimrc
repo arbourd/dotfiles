@@ -53,6 +53,8 @@ set title
 set showcmd
 " Allow Airline to access powerline fonts
 let g:airline_powerline_fonts = 1
+" Enable numpad for vim
+set term=ansi
 
 " Make bg transparent (inherit parent)
 hi Normal ctermbg=none
