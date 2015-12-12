@@ -17,6 +17,10 @@ A collection / backup of my dotfiles
 
       `$ cp -r ~/.dotfiles ~/.`
 
+  3. Install `vim` plugins
+
+      `$ vim +BundleUpdate +BundleInstall! +BundleClean +qall`
+
 ## License
 
 Public Domain
