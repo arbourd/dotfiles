@@ -1,7 +1,17 @@
-" Pathogen setup
-execute pathogen#infect()
-syntax enable
-filetype plugin indent on
+" Vundle init
+set nocompatible
+filetype off
+
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+Plugin 'VundleVim/Vundle.vim' " let Vundle manage Vundle, required
+Plugin 'bling/vim-airline'
+
+Bundle 'altercation/vim-colors-solarized'
+
+call vundle#end()            " required
+filetype plugin indent on    " required
 
 " Clean on Vim quit
 au VimLeave * :!clear
