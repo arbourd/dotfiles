@@ -26,7 +26,11 @@ A collection / backup of my dotfiles
 
       `$ cp -r atom/.atom fish/.config git/ vim/.vim ~/`
 
-  5. Install `vim` plugins
+  5. Install `omf`
+
+      `$ curl -L https://github.com/oh-my-fish/oh-my-fish/raw/master/bin/install | fish`
+
+  6. Install `vim` plugins
 
       `$ vim +BundleUpdate +BundleInstall! +BundleClean +qall`
 
