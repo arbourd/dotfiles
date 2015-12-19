@@ -26,6 +26,10 @@ A collection / backup of my dotfiles
 
       `$ cp -r atom/.atom fish/.config git/ vim/.vim ~/`
 
+  5. Install `vim` plugins
+
+      `$ vim +BundleUpdate +BundleInstall! +BundleClean +qall`
+
 ## License
 
 Public Domain
