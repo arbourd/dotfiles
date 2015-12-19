@@ -12,7 +12,7 @@ A collection / backup of my dotfiles
 
   1. Clone the repo
 
-      `$ git clone git://github.com/arbourd/dotfiles ~/.dotfiles`
+      `$ git clone git://github.com/arbourd/dotfiles`
 
   2. Update submodules
 
