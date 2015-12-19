@@ -14,6 +14,18 @@ A collection / backup of my dotfiles
 
       `$ git clone git://github.com/arbourd/dotfiles ~/.dotfiles`
 
+  2. Update submodules
+
+      `$ git submodule update --init --recursive`
+
+  3. Install fonts
+
+      `$ bash ./fonts/install.sh`
+
+  4. Copy dotfiles
+
+      `$ cp -r atom/.atom fish/.config git/ vim/.vim ~/`
+
 ## License
 
 Public Domain
