@@ -37,6 +37,9 @@ Thumbs.db
 bower_components/
 node_modules/
 
+# Ruby specific
+.byebug_history
+
 # IDE specific
 .idea/
 *.iml
