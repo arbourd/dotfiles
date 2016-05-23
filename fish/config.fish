@@ -2,7 +2,6 @@
 set default_user dylan
 
 # Set path for rbenv
-set PATH $HOME/.rbenv/bin $PATH
 set PATH $HOME/.rbenv/shims $PATH
 rbenv rehash >/dev/null ^&1
 
