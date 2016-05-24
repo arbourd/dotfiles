@@ -1,13 +1,6 @@
 # Set default user
 set default_user dylan
 
-# Set path for rbenv
-set PATH $HOME/.rbenv/shims $PATH
-rbenv rehash >/dev/null ^&1
-
-# Set path for pyenv
-set PATH $HOME/.pyenv/shims $PATH
-
 # Virtualfish with auto activation
 eval (python -m virtualfish auto_activation)
 
