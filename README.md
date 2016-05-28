@@ -4,7 +4,7 @@ A collection / backup of my dotfiles
 
 * Atom
 * Fish
-* gitignore
+* git
 * iTerm 2
 * Vim
 
@@ -12,23 +12,46 @@ A collection / backup of my dotfiles
 
   1. Clone the repo
 
-      `$ git clone git://github.com/arbourd/dotfiles`
+    ```bash
+    $ git clone git://github.com/arbourd/dotfiles
+    ```
 
-  2. Update submodules
+  1. Init & update submodules
 
-      `$ git submodule update --init --recursive`
+    ```bash
+    $ git submodule update --init --recursive
+    ```
 
-  3. Install fonts
+  1. Install fonts
 
-      `$ bash ./fonts/install.sh`
+    ```bash
+    $ bash ./fonts/install.sh
+    ```
 
-  4. Copy dotfiles
+  1. Link dotfiles
 
-      `$ cp -r atom/.atom fish/.config git/ vim/.vim ~/`
+    ```bash
+    # Atom
+    $ ln -s $PWD/atom/ ~/.atom
 
-  5. Install `vim` plugins
+    # Fish
+    $ ln -s $PWD/fish/config.fish ~/.config/fish/config.fish
+    $ ln -s $PWD/fish/fishfile ~/.config/fish/fishfile
 
-      `$ vim +BundleUpdate +BundleInstall! +BundleClean +qall`
+    # Git
+    $ ln -s $PWD/git/.gitignore_global ~/.gitignore_global
+
+    # Vim
+    $ ln -s $PWD/vim/.vimrc ~/.vimrc
+    $ mkdir -p ~/.vim/bundle  # Create directory for Vundle
+    $ ln -s $PWD/vim/Vundle.vim ~/.vim/bundle/Vundle.vim
+    ```
+
+  1. Install `vim` plugins
+
+    ```bash
+    $ vim +BundleUpdate +BundleInstall! +BundleClean +qall
+    ```
 
 ## License
 
