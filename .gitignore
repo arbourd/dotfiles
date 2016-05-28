@@ -1,0 +1,5 @@
+# Whitelist files for atom
+atom/*
+!atom/init.coffee
+!atom/keymap.cson
+!atom/styles.less
