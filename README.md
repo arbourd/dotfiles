@@ -28,6 +28,14 @@ A collection / backup of my dotfiles
     $ bash ./fonts/install.sh
     ```
 
+  1. Brew bundle (assumes Homebrew is installed)
+
+    ```bash
+    $ brew bundle
+    # Move Chrome to /Applications to make 1Password work
+    $ mv /opt/homebrew-cask/Caskroom/google-chrome/latest/Google\ Chrome.app/ /Applications/
+    ```
+
   1. Link dotfiles
 
     ```bash
