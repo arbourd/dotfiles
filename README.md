@@ -3,9 +3,9 @@
 A collection / backup of my dotfiles
 
 * Atom
-* Fish
+* fish-shell
 * git
-* iTerm 2
+* iTerm2
 * Vim
 
 ## Installation
@@ -41,6 +41,7 @@ A collection / backup of my dotfiles
     $ ln -s $PWD/atom/ ~/.atom
 
     # Fish
+    $ mkdir -p ~/.config/fish  # Create directory for fish-shell
     $ ln -s $PWD/fish/config.fish ~/.config/fish/config.fish
     $ ln -s $PWD/fish/fishfile ~/.config/fish/fishfile
 
