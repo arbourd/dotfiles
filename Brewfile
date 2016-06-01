@@ -1,7 +1,6 @@
 cask_args appdir: '/Applications'
 
 tap 'fisherman/tap'
-tap 'homebrew/bundle'
 tap 'homebrew/services'
 tap 'homebrew/versions'
 tap 'vitorgalvao/tiny-scripts'
@@ -18,7 +17,7 @@ brew 'htop-osx'
 brew 'hub'
 brew 'keybase'
 brew 'kubernetes-helm'
-brew 'macvim'
+brew 'macvim'  # Requires full Xcode
 brew 'mas'
 brew 'mongodb'
 brew 'openssl'
