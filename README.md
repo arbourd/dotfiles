@@ -56,7 +56,7 @@ A collection / backup of my dotfiles
   1. Install `vim` plugins
 
     ```bash
-    $ vim +BundleUpdate +BundleInstall! +BundleClean +qall
+    $ vim +PluginInstall! +PluginClean! +qall
     ```
 
 ## License
