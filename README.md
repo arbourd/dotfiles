@@ -32,8 +32,6 @@ A collection / backup of my dotfiles
 
     ```bash
     $ brew bundle
-    # Move Chrome to /Applications to make 1Password work
-    $ mv /opt/homebrew-cask/Caskroom/google-chrome/latest/Google\ Chrome.app/ /Applications/
     ```
 
   1. Link dotfiles
