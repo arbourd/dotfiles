@@ -47,6 +47,7 @@ A collection / backup of my dotfiles
 
     # Git
     $ ln -s $PWD/git/.gitignore_global ~/.gitignore_global
+    $ ln -s $PWD/git/.gitconfig ~/.gitconfig
 
     # Vim
     $ ln -s $PWD/vim/.vimrc ~/.vimrc
