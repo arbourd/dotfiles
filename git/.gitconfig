@@ -1,3 +1,11 @@
+[commit]
+	gpgsign = true
 [core]
 	excludesfile = ~/.gitignore_global
 	editor = /usr/bin/vim
+[gpg]
+	program = gpg2
+[user]
+	name = Dylan Arbour
+	email = dylan.arbour@gmail.com
+	signingkey = 52582EDE
