@@ -45,6 +45,9 @@ A collection / backup of my dotfiles
     $ ln -s $PWD/fish/config.fish ~/.config/fish/config.fish
     $ ln -s $PWD/fish/fishfile ~/.config/fish/fishfile
 
+    # GPG
+    $ ln -s $PWD/gpg/.gpg-agent.conf ~/.gnupg/gpg-agent.conf
+
     # Git
     $ ln -s $PWD/git/.gitignore_global ~/.gitignore_global
     $ ln -s $PWD/git/.gitconfig ~/.gitconfig
