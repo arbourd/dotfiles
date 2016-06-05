@@ -52,6 +52,9 @@ A collection / backup of my dotfiles
     $ ln -s $PWD/git/.gitignore_global ~/.gitignore_global
     $ ln -s $PWD/git/.gitconfig ~/.gitconfig
 
+    # Ruby
+    $ ln -s $PWD/ruby/.gemrc ~/.gemrc
+
     # Vim
     $ ln -s $PWD/vim/.vimrc ~/.vimrc
     $ mkdir -p ~/.vim/bundle  # Create directory for Vundle
@@ -62,6 +65,12 @@ A collection / backup of my dotfiles
 
     ```bash
     $ vim +PluginInstall! +PluginClean! +qall
+    ```
+
+  1. Install global ruby gems
+
+    ```bash
+    $ bundle install
     ```
 
 ## License
