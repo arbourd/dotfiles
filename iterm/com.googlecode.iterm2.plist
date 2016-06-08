@@ -965,8 +965,6 @@
 	<string>828 719 606 456 0 0 2560 1417 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
 	<string>-1057 571 650 477 -1920 182 1920 1057 </string>
-	<key>NSWindow Frame iTerm Window 1</key>
-	<string>-960 187 954 1052 -1920 182 1920 1057 </string>
 	<key>NeverWarnAboutShortLivedSessions_2C791D39-BE6D-4BE9-9BB3-0F44D0FCDAA5</key>
 	<true/>
 	<key>New Bookmarks</key>
@@ -1364,9 +1362,9 @@
 				<key>0xf702-0x280000</key>
 				<dict>
 					<key>Action</key>
-					<integer>11</integer>
+					<integer>10</integer>
 					<key>Text</key>
-					<string>0x1b 0x1b 0x5b 0x44</string>
+					<string>b</string>
 				</dict>
 				<key>0xf703-0x220000</key>
 				<dict>
@@ -1392,9 +1390,9 @@
 				<key>0xf703-0x280000</key>
 				<dict>
 					<key>Action</key>
-					<integer>11</integer>
+					<integer>10</integer>
 					<key>Text</key>
-					<string>0x1b 0x1b 0x5b 0x43</string>
+					<string>f</string>
 				</dict>
 				<key>0xf704-0x20000</key>
 				<dict>
@@ -1697,24 +1695,6 @@
 			<string>/Users/dylan</string>
 		</dict>
 	</array>
-	<key>NoSyncDisablePromotions</key>
-	<true/>
-	<key>NoSyncHaveShownPromoWithId_4</key>
-	<true/>
-	<key>NoSyncInstallationId</key>
-	<string>7226E815-7503-4235-BA8B-DB38A6841917</string>
-	<key>NoSyncLastTipTime</key>
-	<real>486444286.49946702</real>
-	<key>NoSyncTimeOfFirstLaunchOfVersionWithTip</key>
-	<real>486444267.07649201</real>
-	<key>NoSyncTimeOfLastPromo</key>
-	<real>477787448.34113503</real>
-	<key>NoSyncTimeOfLastPromoDownload</key>
-	<real>478058689.37123102</real>
-	<key>NoSyncTipsToNotShow</key>
-	<array>
-		<string>000</string>
-	</array>
 	<key>OnlyWhenMoreTabs</key>
 	<true/>
 	<key>OpenArrangementAtStartup</key>
@@ -1763,7 +1743,7 @@
 		</dict>
 	</dict>
 	<key>PrefsCustomFolder</key>
-	<string>/Users/dylan/dev/dotfiles/iterm</string>
+	<string>~/dev/dotfiles/iterm</string>
 	<key>PromptOnQuit</key>
 	<true/>
 	<key>QuitWhenAllWindowsClosed</key>
@@ -1777,11 +1757,11 @@
 	<key>SUFeedAlternateAppNameKey</key>
 	<string>iTerm</string>
 	<key>SUFeedURL</key>
-	<string>https://iterm2.com/appcasts/testing.xml?shard=21</string>
+	<string>https://iterm2.com/appcasts/testing.xml</string>
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2016-06-01T03:38:13Z</date>
+	<date>2016-06-08T19:08:35Z</date>
 	<key>SavePasteHistory</key>
 	<false/>
 	<key>ShowBookmarkName</key>
