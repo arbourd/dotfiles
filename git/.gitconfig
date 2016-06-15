@@ -3,8 +3,12 @@
 [core]
 	excludesfile = ~/.gitignore_global
 	editor = /usr/local/bin/vim
+[diff]
+	compactionHeuristic = true
 [gpg]
 	program = gpg2
+[interactive]
+	diffFilter = diff-highlight
 [user]
 	name = Dylan Arbour
 	email = dylan.arbour@gmail.com
