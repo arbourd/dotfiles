@@ -8,7 +8,7 @@ eval (hub alias -s)
 eval (python -m virtualfish auto_activation)
 
 # Set GOPATH for go
-set -x GOPATH $HOME/dev/go
+set -x GOPATH $HOME/go
 
 # Set $SHELL env var for docker-machine
 set -x SHELL fish
