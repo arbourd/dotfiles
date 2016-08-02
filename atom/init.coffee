@@ -10,7 +10,9 @@
 #   editor.onDidSave ->
 #     console.log "Saved! #{editor.getPath()}"
 
+process.env.GOPATH = process.env.HOME + '/go'
 process.env.PATH = [
+  process.env.GOPATH + '/bin',
   process.env.HOME + '/.rbenv/shims',
   process.env.HOME + '/.pyenv/shims',
   '/usr/local/bin',
