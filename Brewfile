@@ -53,5 +53,4 @@ cask 'viscosity'
 mas '1Password', id: 443987910
 mas 'Dash', id: 449589707
 mas 'Slack', id: 803453959
-mas 'Sunrise Calendar', id: 886106985
 mas 'Todoist', id: 585829637
