@@ -1,9 +1,6 @@
 # Set default user
 set default_user dylan
 
-# Use hub
-eval (hub alias -s)
-
 # Virtualfish with auto activation
 eval (python -m virtualfish auto_activation)
 
