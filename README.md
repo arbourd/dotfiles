@@ -45,6 +45,7 @@ A collection / backup of my dotfiles
     $ mkdir -p ~/.config/fish  # Create directory for fish-shell
     $ ln -s $PWD/fish/config.fish ~/.config/fish/config.fish
     $ ln -s $PWD/fish/fishfile ~/.config/fish/fishfile
+    $ ln -s $PWD/fish/functions/docker-clean.fish ~/.config/fish/functions/docker-clean.fish
     $ ln -s $PWD/fish/functions/git.fish ~/.config/fish/functions/git.fish
 
     # GPG
