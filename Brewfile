@@ -6,7 +6,6 @@ tap 'homebrew/versions'
 tap 'vitorgalvao/tiny-scripts'
 
 brew 'bash'
-brew 'curl'
 brew 'fish'
 brew 'fisherman/tap/fisherman'
 brew 'git-lfs'
