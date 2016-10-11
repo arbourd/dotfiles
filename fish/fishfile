@@ -1,12 +1,13 @@
 fisherman/await
-oh-my-fish/theme-cmorrell.com
 fisherman/docker-completion
 fisherman/fnm
 fisherman/get_file_age
 fisherman/getopts
+fisherman/git_util
 fisherman/gitignore
 fisherman/last_job_id
 fisherman/menu
+arbourd/prompt
 fisherman/pyenv
 fisherman/rbenv
 fisherman/spin
