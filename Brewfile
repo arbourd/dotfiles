@@ -38,6 +38,7 @@ brew 'xz'
 cask 'appcleaner'
 cask 'atom'
 cask 'bettertouchtool'
+cask 'dash'
 cask 'docker'
 cask 'firefox'
 cask 'flux'
@@ -53,6 +54,5 @@ cask 'robomongo'
 cask 'viscosity'
 
 mas '1Password', id: 443987910
-mas 'Dash', id: 449589707
 mas 'Slack', id: 803453959
 mas 'Todoist', id: 585829637
