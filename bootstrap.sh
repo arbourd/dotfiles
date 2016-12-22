@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+echo 'Checking for Homebrew...'
+if ! which -s brew ; then
+    echo 'Installing Homebrew...'
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+fi
+
 echo 'Updating submodules...'
 (cd $DIR && exec git submodule update --init --recursive)
 
