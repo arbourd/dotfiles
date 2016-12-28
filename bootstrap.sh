@@ -32,7 +32,7 @@ ln -sf $DIR/fish/functions/git.fish ~/.config/fish/functions/git.fish
 
 # GPG
 mkdir -p ~/.gnupg
-ln -sf $DIR/gpg/.gpg-agent.conf ~/.gnupg/gpg-agent.conf
+ln -sf $DIR/gpg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
 
 # Git
 ln -sf $DIR/git/.gitignore_global ~/.gitignore_global
