@@ -27,7 +27,6 @@ ln -sf $DIR/atom/styles.less ~/.atom/styles.less
 mkdir -p ~/.config/fish/functions  # Create directory for fish-shell
 ln -sf $DIR/fish/config.fish ~/.config/fish/config.fish
 ln -sf $DIR/fish/fishfile ~/.config/fish/fishfile
-ln -sf $DIR/fish/functions/docker-clean.fish ~/.config/fish/functions/docker-clean.fish
 ln -sf $DIR/fish/functions/git.fish ~/.config/fish/functions/git.fish
 
 # GPG
