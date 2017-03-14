@@ -15,6 +15,7 @@ echo 'Installing fonts...'
 
 echo 'Installing items via Homebrew...'
 (cd $DIR && exec brew bundle)
+brew link gnupg@2.1 --force
 
 echo 'Symlinking dotfiles...'
 # Atom
