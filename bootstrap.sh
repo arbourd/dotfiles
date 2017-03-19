@@ -1,21 +1,8 @@
 #!/usr/bin/env bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-echo 'Checking for Homebrew...'
-if ! which -s brew ; then
-    echo 'Installing Homebrew...'
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-fi
-
 echo 'Updating submodules...'
 (cd $DIR && exec git submodule update --init --recursive)
-
-echo 'Installing fonts...'
-(cd $DIR && exec ./fonts/install.sh)
-
-echo 'Installing items via Homebrew...'
-(cd $DIR && exec brew bundle)
-brew link gnupg@2.1 --force
 
 echo 'Symlinking dotfiles...'
 # Atom
@@ -46,7 +33,45 @@ mkdir -p ~/.vim/bundle  # Create directory for Vundle
 ln -sf $DIR/vim/.vimrc ~/.vimrc
 ln -sfn $DIR/vim/Vundle.vim ~/.vim/bundle/Vundle.vim
 
+echo 'Installing fonts...'
+(cd $DIR && exec ./fonts/install.sh)
+
+# Install Homebrew if missing
+if ! which -s brew ; then
+    echo 'Installing Homebrew...'
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+fi
+# Install Homebrew packages
+echo 'Installing Homebrew packages...'
+(cd $DIR && exec brew bundle)
+if ! which -s gpg2 ; then
+    # Link gpg2 if gpg2 not linked
+    (brew link gnupg@2.1 --force)
+fi
+
+# Update and install fisherman plugins
+echo 'Updating and installing fisherman plugins'
+(cd $DIR && exec fish -c "fisher u" && fish -c exec "fisher")
+
+# Install ruby gems if bundler
+if which -s bundle ; then
+    echo 'Installing global ruby packages...'
+    (cd $DIR && exec gem update bundler && exec bundle install)
+    if test -f "$DIR/Gemfile.lock" ; then
+        # Remove root Gemfile.lock
+        rm "$DIR/Gemfile.lock"
+    fi
+fi
+
+# Install node if missing
+if ! which -s node ; then
+    echo 'Installing latest node via fnm...'
+    (fnm latest)
+fi
+echo 'Installing global node packages...'
+(npm install -g live-server webtorrent-cli yarn && npm update -g)
+
 echo 'Updating Vim plugins...'
-vim +PluginInstall! +PluginClean! +qall
+(vim +PluginInstall! +PluginClean! +qall)
 
 echo 'Done!'
