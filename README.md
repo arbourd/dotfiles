@@ -5,7 +5,7 @@ A collection / backup of my dotfiles
 * Atom
 * fish-shell
 * git
-* gpg
+* gpg2
 * iTerm2
 * Vim
 
@@ -13,15 +13,15 @@ A collection / backup of my dotfiles
 
   1. Clone the repo
 
-    ```bash
-    $ git clone --recursive git://github.com/arbourd/dotfiles
-    ```
+      ```sh
+      $ git clone --recursive git://github.com/arbourd/dotfiles
+      ```
 
   1. Run `bootstrap.sh`
 
-    ```bash
-    $ ./bootstrap.sh
-    ```
+      ```sh
+      $ ./bootstrap.sh
+      ```
 
 ## License
 
