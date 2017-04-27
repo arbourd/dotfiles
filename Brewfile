@@ -60,6 +60,7 @@ cask 'ngrok'
 cask 'postico'
 cask 'robomongo'
 cask 'sequel-pro'
+cask 'slack'
 cask 'viscosity'
 
 mas 'Slack', id: 803453959
