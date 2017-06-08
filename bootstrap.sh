@@ -44,10 +44,6 @@ fi
 # Install Homebrew packages
 echo 'Installing Homebrew packages...'
 (cd $DIR && exec brew bundle)
-if ! which -s gpg2 ; then
-    # Link gpg2 if gpg2 not linked
-    (brew link gnupg@2.1 --force)
-fi
 
 # Update and install fisherman plugins
 echo 'Updating and installing fisherman plugins'
@@ -63,13 +59,8 @@ if which -s bundle ; then
     fi
 fi
 
-# Install node if missing
-if ! which -s node ; then
-    echo 'Installing latest node via fnm...'
-    (fnm latest)
-fi
 echo 'Installing global node packages...'
-(npm install -g live-server webtorrent-cli yarn && npm update -g)
+(npm install -g live-server webtorrent-cli && npm update -g)
 
 echo 'Updating Vim plugins...'
 (vim +PluginInstall! +PluginClean! +qall)
