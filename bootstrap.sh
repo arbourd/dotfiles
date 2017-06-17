@@ -25,6 +25,9 @@ ln -sf $DIR/gpg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
 ln -sf $DIR/git/.gitignore_global ~/.gitignore_global
 ln -sf $DIR/git/.gitconfig ~/.gitconfig
 
+# Hyper
+ln -sf $DIR/hyper/.hyper.js ~/.hyper.js
+
 # Ruby
 ln -sf $DIR/ruby/.gemrc ~/.gemrc
 
