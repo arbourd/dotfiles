@@ -6,6 +6,7 @@ A collection / backup of my dotfiles
 * fish-shell
 * git
 * gpg2
+* Hyper
 * iTerm2
 * Vim
 
