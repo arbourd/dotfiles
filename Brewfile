@@ -68,6 +68,7 @@ cask 'ngrok'
 cask 'postico'
 cask 'robomongo'
 cask 'sequel-pro'
+cask 'skyfonts'
 cask 'slack'
 cask 'viscosity'
 
