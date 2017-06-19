@@ -2,12 +2,13 @@
 
 A collection / backup of my dotfiles
 
-* Atom
 * fish-shell
 * git
 * gpg2
+* Homebrew
 * Hyper
 * iTerm2
+* Ruby
 * Vim
 
 ## Installation
