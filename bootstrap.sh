@@ -5,11 +5,6 @@ echo 'Updating submodules...'
 (cd $DIR && exec git submodule update --init --recursive)
 
 echo 'Symlinking dotfiles...'
-# Atom
-mkdir -p ~/.atom
-ln -sf $DIR/atom/init.coffee ~/.atom/init.coffee
-ln -sf $DIR/atom/keymap.cson ~/.atom/keymap.cson
-ln -sf $DIR/atom/styles.less ~/.atom/styles.less
 
 # Fish
 mkdir -p ~/.config/fish/functions  # Create directory for fish-shell
