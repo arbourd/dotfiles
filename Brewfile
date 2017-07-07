@@ -1,5 +1,6 @@
 cask_args appdir: '/Applications'
 
+tap 'arbourd/tap'
 tap 'caskroom/drivers'
 tap 'caskroom/versions'
 tap 'fisherman/tap'
@@ -60,6 +61,7 @@ cask 'hyper'
 cask 'insomnia'
 cask 'iterm2'
 cask 'kap'
+cask 'kin'
 cask 'keybase'
 cask 'logitech-gaming-software'
 cask 'macvim'
@@ -70,6 +72,7 @@ cask 'robomongo'
 cask 'sequel-pro'
 cask 'skyfonts'
 cask 'slack'
+cask 'veertu-desktop'
 cask 'viscosity'
 
 mas 'Todoist', id: 585829637
