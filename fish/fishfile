@@ -10,7 +10,6 @@ fisherman/gitignore
 fisherman/last_job_id
 fisherman/menu
 arbourd/prompt
-fisherman/pyenv
 fisherman/rbenv
 fisherman/spin
 arbourd/trash

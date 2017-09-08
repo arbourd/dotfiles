@@ -1,5 +1,8 @@
 # Set default user
-set default_user dylan
+set default_user (whoami)
+
+# Set GPG TTY
+set -x GPG_TTY (tty)
 
 # Set GOPATH for go
 set -x GOPATH $HOME/go
