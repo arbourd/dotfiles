@@ -10,7 +10,7 @@
 	smudge = git-lfs smudge -- %f
 	required = true
 [gpg]
-	program = gpg2
+	program = gpg
 [interactive]
 	diffFilter = diff-highlight
 [user]
