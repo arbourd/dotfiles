@@ -9,6 +9,7 @@ tap 'homebrew/versions'
 
 brew 'awscli'
 brew 'bash'
+brew 'dep'
 brew 'docker-clean'
 brew 'doctl'
 brew 'fish'
