@@ -3,6 +3,8 @@
 [core]
 	excludesfile = ~/.gitignore_global
 	editor = /usr/local/bin/vim
+[credential]
+	helper = store
 [diff]
 	compactionHeuristic = true
 [filter "lfs"]
@@ -13,8 +15,10 @@
 	program = gpg
 [interactive]
 	diffFilter = diff-highlight
-[url "git@github.com:"]
-	insteadOf = https://github.com/
+[url "https://github.com/"]
+	insteadOf = git://github.com/
+	insteadOf = git@github.com:
+	insteadOf = http://github.com/
 [user]
 	name = Dylan Arbour
 	email = dylan.arbour@gmail.com

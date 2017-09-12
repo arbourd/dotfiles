@@ -13,10 +13,16 @@ A collection / backup of my dotfiles
 
 ## Installation
 
+  1. Set Github personal access token
+
+      ```sh
+      $ ./git-credentials.sh
+      ```
+
   1. Clone the repo
 
       ```sh
-      $ git clone --recursive git://github.com/arbourd/dotfiles
+      $ git clone --recursive https://github.com/arbourd/dotfiles
       ```
 
   1. Run `bootstrap.sh`
