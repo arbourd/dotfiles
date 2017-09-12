@@ -13,6 +13,8 @@
 	program = gpg
 [interactive]
 	diffFilter = diff-highlight
+[url "git@github.com:"]
+	insteadOf = https://github.com/
 [user]
 	name = Dylan Arbour
 	email = dylan.arbour@gmail.com
