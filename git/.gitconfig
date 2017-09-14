@@ -5,10 +5,11 @@
 [core]
 	excludesfile = ~/.gitignore_global
 	editor = /usr/local/bin/vim
+	pager = `brew --prefix git`/share/git-core/contrib/diff-highlight/diff-highlight | less
 [credential]
 	helper = store
 [diff]
-	compactionHeuristic = true
+	indentHeuristic = true
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
