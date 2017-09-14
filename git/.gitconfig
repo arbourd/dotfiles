@@ -1,3 +1,5 @@
+[color]
+	ui = true
 [commit]
 	gpgsign = true
 [core]
@@ -13,8 +15,6 @@
 	required = true
 [gpg]
 	program = gpg
-[interactive]
-	diffFilter = diff-highlight
 [url "https://github.com/"]
 	insteadOf = git://github.com/
 	insteadOf = git@github.com:

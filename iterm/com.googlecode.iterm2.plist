@@ -1368,7 +1368,7 @@
 			<key>Custom Command</key>
 			<string>Yes</string>
 			<key>Custom Directory</key>
-			<string>Yes</string>
+			<string>Recycle</string>
 			<key>Default Bookmark</key>
 			<string>No</string>
 			<key>Disable Printing</key>
@@ -1922,7 +1922,7 @@
 		</dict>
 	</dict>
 	<key>PrefsCustomFolder</key>
-	<string>~/dev/dotfiles/iterm</string>
+	<string>~/dotfiles/iterm</string>
 	<key>PromptOnQuit</key>
 	<true/>
 	<key>QuitWhenAllWindowsClosed</key>
