@@ -8,6 +8,7 @@ echo 'Symlinking dotfiles...'
 
 # Fish
 mkdir -p ~/.config/fish/functions  # Create directory for fish-shell
+touch ~/.config/fish/private.fish  # Create private env vars file if doesn't exist
 ln -sf $DIR/fish/config.fish ~/.config/fish/config.fish
 ln -sf $DIR/fish/fishfile ~/.config/fish/fishfile
 ln -sf $DIR/fish/functions/git.fish ~/.config/fish/functions/git.fish

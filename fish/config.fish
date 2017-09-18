@@ -13,3 +13,5 @@ set -x SHELL fish
 
 # Empty the greeting string
 set fish_greeting ""
+
+source ~/.config/fish/private.fish
