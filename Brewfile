@@ -69,5 +69,6 @@ cask 'postico'
 cask 'skyfonts'
 cask 'slack'
 cask 'viscosity'
+cask 'visual-studio-code'
 
 mas 'Todoist', id: 585829637
