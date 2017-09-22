@@ -13,12 +13,17 @@ ln -sf $DIR/fish/config.fish ~/.config/fish/config.fish
 ln -sf $DIR/fish/fishfile ~/.config/fish/fishfile
 ln -sf $DIR/fish/functions/git.fish ~/.config/fish/functions/git.fish
 
+# Bash
+ln -sf $DIR/bash/.bash_profile ~/.bash_profile
+
 # Git
 ln -sf $DIR/git/.gitignore_global ~/.gitignore_global
 ln -sf $DIR/git/.gitconfig ~/.gitconfig
 
 # Go
-mkdir -p ~/go/bin
+mkdir -p ~/bin
+mkdir -p ~/pkg
+mkdir -p ~/src
 
 # GPG
 mkdir -p ~/.gnupg
