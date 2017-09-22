@@ -4,8 +4,8 @@ set default_user (whoami)
 # Set GPG TTY
 set -x GPG_TTY (tty)
 
-# Set GOPATH for go
-set -x GOPATH $HOME/go
+# Go
+set -x GOPATH $HOME
 set -x PATH $GOPATH/bin $PATH
 
 set -x HOMEBREW_EDITOR vim
