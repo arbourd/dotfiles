@@ -26,7 +26,7 @@ mkdir -p ~/pkg
 mkdir -p ~/src
 
 # GPG
-mkdir -p ~/.gnupg
+mkdir -p -m 700 ~/.gnupg
 ln -sf $DIR/gpg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
 
 # Hyper
