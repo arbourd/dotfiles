@@ -1,7 +1,8 @@
 # dotfiles
 
-A collection / backup of my dotfiles
+Automating the personal environment
 
+* bash
 * fish-shell
 * git
 * gpg2
@@ -12,12 +13,6 @@ A collection / backup of my dotfiles
 * Vim
 
 ## Installation
-
-  1. Set Github personal access token
-
-      ```sh
-      $ ./git-credentials.sh
-      ```
 
   1. Clone the repo
 
