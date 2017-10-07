@@ -7,7 +7,7 @@
 	editor = /usr/local/bin/vim
 	pager = `brew --prefix git`/share/git-core/contrib/diff-highlight/diff-highlight | less
 [credential]
-	helper = store
+	helper = osxkeychain
 [diff]
 	indentHeuristic = true
 [filter "lfs"]
