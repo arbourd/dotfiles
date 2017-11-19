@@ -20,10 +20,10 @@ Automating the personal environment
       $ git clone --recursive https://github.com/arbourd/dotfiles
       ```
 
-  1. Run `bootstrap.sh`
+  1. Run `dot.sh`
 
       ```sh
-      $ ./bootstrap.sh
+      $ ./dot.sh
       ```
 
 ## License
