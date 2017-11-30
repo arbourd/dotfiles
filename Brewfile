@@ -33,6 +33,7 @@ brew 'qrencode'
 brew 'rancher-cli'
 brew 'rbenv'
 brew 'ruby-build'
+brew 'rust'
 brew 'shellcheck'
 brew 'ssh-copy-id'
 brew 'the_silver_searcher'
@@ -76,3 +77,4 @@ cask 'viscosity'
 cask 'visual-studio-code'
 
 mas 'Todoist', id: 585829637
+mas 'Xcode', id: 497799835
