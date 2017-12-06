@@ -8,6 +8,9 @@ set -x GPG_TTY (tty)
 set -x GOPATH $HOME
 set -x PATH $GOPATH/bin $PATH
 
+# Rust
+set -x PATH $HOME/.cargo/bin $PATH
+
 set -x HOMEBREW_EDITOR vim
 
 # Set $SHELL env var for fish
