@@ -18,6 +18,9 @@ _init() {
     # GPG
     mkdir -p -m 700 ~/.gnupg
 
+    # Rust
+    mkdir -p ~/.cargo/bin
+
     # Vim
     mkdir -p ~/.vim/bundle  # Create directory for Vundle
 }
