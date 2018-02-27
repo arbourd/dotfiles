@@ -7,6 +7,7 @@ fisherman/get_file_age
 fisherman/getopts
 fisherman/git_util
 fisherman/gitignore
+evanlucas/fish-kubectl-completions
 fisherman/last_job_id
 fisherman/menu
 arbourd/prompt
