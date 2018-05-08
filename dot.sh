@@ -31,7 +31,9 @@ _link() {
     # Fish
     ln -sf $DIR/fish/config.fish ~/.config/fish/config.fish
     ln -sf $DIR/fish/fishfile ~/.config/fish/fishfile
-    ln -sf $DIR/fish/functions/git.fish ~/.config/fish/functions/git.fish
+    for file in $(ls -1 $DIR/fish/functions); do
+        ln -sf $DIR/fish/functions/$file ~/.config/fish/functions/$file
+    done
 
     # Bash
     ln -sf $DIR/bash/.bash_profile ~/.bash_profile
