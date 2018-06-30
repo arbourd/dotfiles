@@ -44,6 +44,7 @@ brew 'vim'
 brew 'yarn'
 brew 'wget'
 brew 'watch'
+brew 'webtorrent-cli'
 
 cask '1password-beta'
 cask 'appcleaner'
