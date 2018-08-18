@@ -14,6 +14,7 @@
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	required = true
+	process = git-lfs filter-process
 [interactive]
 	diffFilter = `brew --prefix git`/share/git-core/contrib/diff-highlight/diff-highlight | less
 [gpg]
