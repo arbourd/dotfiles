@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-action="$1"
+
+_usage() {
+    echo "Usage: ./dot.sh [COMMAND]
+Commands:
+  help          prints this dialog
+  init          updates submodules and creates directories (if needed)
+  link          symlinks dotfiles
+  install       installs packages for homebrew, fish shell, ruby, node and vim
+  bootstrap     initializes, links and installs"
+}
 
 _init() {
     echo 'Updating submodules...'
@@ -91,7 +100,7 @@ _install() {
     (vim +PluginInstall! +PluginClean! +qall)
 }
 
-case $action in
+case $1 in
     init)
         _init
         ;;
@@ -101,12 +110,17 @@ case $action in
     install)
         _install
         ;;
-    help)
-        exit 0
-        ;;
-    *)
+    bootstrap)
         _init
         _link
         _install
+        ;;
+    help)
+        _usage
+        exit 0
+        ;;
+    *)
+        _usage
+        exit 0
         ;;
 esac
