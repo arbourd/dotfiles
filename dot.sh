@@ -79,9 +79,12 @@ _install() {
     echo 'Installing Homebrew packages...'
     (cd $DIR && exec brew bundle)
 
-    # Update and install fisherman plugins
-    echo 'Updating and installing fisherman plugins'
-    (cd $DIR && exec fish -c "fisher u" && fish -c exec "fisher")
+    # Install fisherman and plugins
+    echo 'Updating and installing fisherman plugins...'
+    if [ ! -f ~/.config/fish/functions/fisher.fish ]; then
+        curl -sLo ~/.config/fish/functions/fisher.fish --create-dirs git.io/fisher
+        (cd $DIR && exec fish -c "fisher u" && fish -c exec "fisher")
+    fi
 
     # Install ruby gems if bundler
     if which -s bundle ; then
