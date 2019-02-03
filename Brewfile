@@ -1,5 +1,4 @@
 tap 'arbourd/tap'
-tap 'caskroom/versions'
 tap 'homebrew/services'
 tap 'wagoodman/dive'
 tap 'weaveworks/tap'
