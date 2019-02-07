@@ -1,8 +1,8 @@
-fisherman/fishtape
-fisherman/getopts
-fisherman/git_util
-fisherman/gitignore
-evanlucas/fish-kubectl-completions
 arbourd/prompt
-fisherman/rbenv
-fisherman/spin
+daenney/rbenv
+evanlucas/fish-kubectl-completions
+fishpkg/fish-git-util
+jorgebucaran/fish-getopts
+jorgebucaran/fish-wip
+jorgebucaran/fishtape
+sijad/gitignore
