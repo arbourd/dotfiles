@@ -81,10 +81,8 @@ _install() {
 
     # Install fisherman and plugins
     echo 'Updating and installing fisherman plugins...'
-    if [ ! -f ~/.config/fish/functions/fisher.fish ]; then
-        curl -sLo ~/.config/fish/functions/fisher.fish --create-dirs git.io/fisher
-        (cd $DIR && exec fish -c "fisher u" && fish -c exec "fisher")
-    fi
+    curl -sLo ~/.config/fish/functions/fisher.fish --create-dirs git.io/fisher
+    (cd $DIR && exec fish -c "fisher")
 
     # Install ruby gems if bundler
     if which -s bundle ; then
