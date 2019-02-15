@@ -60,6 +60,9 @@ _link() {
     # Ruby
     ln -sf $DIR/ruby/.gemrc ~/.gemrc
 
+    # ssh
+    ln -sf $DIR/ssh/config ~/.ssh/config
+
     # Vim
     ln -sf $DIR/vim/.vimrc ~/.vimrc
     ln -sfn $DIR/vim/Vundle.vim ~/.vim/bundle/Vundle.vim
