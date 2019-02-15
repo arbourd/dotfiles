@@ -3,13 +3,14 @@
 Automating the personal environment
 
 * bash
-* fish-shell
+* fish
 * git
 * gpg2
 * Homebrew
 * Hyper
 * iTerm2
 * Ruby
+* ssh
 * Vim
 
 ## Installation
