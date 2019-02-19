@@ -1,3 +1,3 @@
-function g --description 'Alias for git.'
+function g -w 'git' --description 'Alias for git.'
     git $argv
 end
