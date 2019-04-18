@@ -97,9 +97,6 @@ _install() {
         fi
     fi
 
-    echo 'Installing global node packages...'
-    (npm install -g live-server webtorrent-cli && npm update -g)
-
     echo 'Updating Vim plugins...'
     (vim +PluginInstall! +PluginClean! +qall)
 }
