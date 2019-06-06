@@ -5,7 +5,7 @@ set default_user (whoami)
 set -x GPG_TTY (tty)
 
 # Go
-set -x GOPATH $HOME
+set -x GOPATH $HOME/go
 set -x PATH $GOPATH/bin $PATH
 set -x GO111MODULE auto
 
