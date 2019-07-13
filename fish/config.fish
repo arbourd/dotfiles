@@ -7,7 +7,7 @@ set -x GPG_TTY (tty)
 # Go
 set -x GOPATH $HOME/go
 set -x PATH $GOPATH/bin $PATH
-set -x GO111MODULE on
+set -x GO111MODULE auto
 
 # Rust
 set -x PATH $HOME/.cargo/bin $PATH
