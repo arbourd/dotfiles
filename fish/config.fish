@@ -15,7 +15,7 @@ set -x PATH $HOME/.cargo/bin $PATH
 set -x HOMEBREW_EDITOR vim
 
 # Set $SHELL env var for fish
-set -x SHELL fish
+set -x SHELL /usr/local/bin/fish
 
 # Empty the greeting string
 set fish_greeting ""
