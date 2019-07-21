@@ -2,7 +2,6 @@ tap 'arbourd/tap'
 tap 'homebrew/services'
 tap 'instrumenta/instrumenta'
 tap 'wagoodman/dive'
-tap 'wata727/tflint'
 tap 'weaveworks/tap'
 
 brew 'awscli'

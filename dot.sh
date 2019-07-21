@@ -11,18 +11,18 @@ Commands:
   bootstrap     initializes, links and installs"
 }
 
-_init() {
-    echo 'Updating submodules...'
-    (cd $DIR && exec git submodule update --init --recursive)
+_pre() {
+    . $DIR/bash/.bash_profile
 
     # Fish
     mkdir -p ~/.config/fish/functions  # Create directory for fish-shell
     touch ~/.config/fish/private.fish  # Create private env vars file if doesn't exist
 
+    # git-get
+    mkdir -p $GETPATH/github.com/arbourd
+
     # Go
-    mkdir -p ~/bin
-    mkdir -p ~/pkg
-    mkdir -p ~/src
+    mkdir -p ~/go
 
     # GPG
     mkdir -p -m 700 ~/.gnupg
@@ -32,6 +32,11 @@ _init() {
 
     # Vim
     mkdir -p ~/.vim/bundle  # Create directory for Vundle
+}
+
+_init() {
+    echo 'Updating submodules...'
+    (cd $DIR && exec git submodule update --init --recursive)
 }
 
 _link() {
@@ -81,6 +86,7 @@ _install() {
     # Install Homebrew packages
     echo 'Installing Homebrew packages...'
     (cd $DIR && exec brew bundle)
+    (ln -sf $(brew --repository arbourd/tap) $GETPATH/github.com/arbourd/homebrew-tap)
 
     # Install fisherman and plugins
     echo 'Updating and installing fisherman plugins...'
@@ -103,15 +109,19 @@ _install() {
 
 case $1 in
     init)
+        _pre
         _init
         ;;
     link)
+        _pre
         _link
         ;;
     install)
+        _pre
         _install
         ;;
     bootstrap)
+        _pre
         _init
         _link
         _install
