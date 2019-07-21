@@ -1,6 +1,9 @@
 # Set default user
 set default_user (whoami)
 
+set -x GETPATH $HOME/src
+set -x HOMEBREW_EDITOR vim
+
 # Set GPG TTY
 set -x GPG_TTY (tty)
 
@@ -11,8 +14,6 @@ set -x GO111MODULE auto
 
 # Rust
 set -x PATH $HOME/.cargo/bin $PATH
-
-set -x HOMEBREW_EDITOR vim
 
 # Set $SHELL env var for fish
 set -x SHELL /usr/local/bin/fish
