@@ -7,7 +7,6 @@ Automating the personal environment
 * git
 * gpg2
 * Homebrew
-* Hyper
 * iTerm2
 * Ruby
 * ssh
@@ -17,13 +16,13 @@ Automating the personal environment
 
   1. Clone the repo
 
-      ```sh
+      ```console
       $ git clone --recursive https://github.com/arbourd/dotfiles
       ```
 
   1. Run `dot.sh`
 
-      ```sh
+      ```console
       $ ./dot.sh
       ```
 
