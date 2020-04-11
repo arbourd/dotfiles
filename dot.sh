@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#!/usr/bin/env zsh
+DIR="$( cd "$( dirname "${(%):-%N}" )" && pwd )"
 
 _usage() {
     echo "Usage: ./dot.sh [COMMAND]
@@ -97,6 +97,13 @@ _install_vim() {
     (vim +PluginInstall! +PluginClean! +qall)
 }
 
+_install() {
+    _install_brew
+    _install_fonts
+    _install_fisher
+    _install_vim
+}
+
 case $1 in
     init)
         _pre
@@ -108,10 +115,7 @@ case $1 in
         ;;
     install)
         _pre
-        _install_brew
-        _install_fonts
-        _install_fisher
-        _install_vim
+        _install
         ;;
     install-brew)
         _pre
