@@ -79,7 +79,7 @@ _install() {
 
     # Install Homebrew packages
     echo 'Installing Homebrew packages...'
-    (cd $DIR && exec brew bundle)
+    (cd $DIR && exec brew bundle --no-lock)
     (ln -sf $(brew --repository arbourd/tap) $GETPATH/github.com/arbourd/homebrew-tap)
 
     # Install fisherman and plugins
