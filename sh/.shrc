@@ -1,5 +1,7 @@
-# Go
+# git-get
 export GETPATH=$HOME/src
+
+# Go
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$PATH
 
