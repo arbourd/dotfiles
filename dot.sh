@@ -12,7 +12,7 @@ Commands:
 }
 
 _pre() {
-    . $DIR/bash/.bash_profile
+    . $DIR/sh/.shrc
 
     # fish
     mkdir -p ~/.config/fish/functions  # Create directory for fish-shell
@@ -42,27 +42,28 @@ _init() {
 _link() {
     echo 'Symlinking dotfiles...'
 
-    # Fish
+    # fish
     ln -sf $DIR/fish/config.fish ~/.config/fish/config.fish
     ln -sf $DIR/fish/fishfile ~/.config/fish/fishfile
     for file in $(ls -1 $DIR/fish/functions); do
         ln -sf $DIR/fish/functions/$file ~/.config/fish/functions/$file
     done
 
-    # Bash
-    ln -sf $DIR/bash/.bash_profile ~/.bash_profile
+    # bash and zsh
+    ln -sf $DIR/sh/.shrc ~/.bash_profile
+    ln -sf $DIR/sh/.shrc ~/.zshrc
 
-    # Git
+    # git
     ln -sf $DIR/git/.gitignore_global ~/.gitignore_global
     ln -sf $DIR/git/.gitconfig ~/.gitconfig
 
-    # GPG
+    # gpg
     ln -sf $DIR/gpg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
 
     # ssh
     ln -sf $DIR/ssh/config ~/.ssh/config
 
-    # Vim
+    # vim
     ln -sf $DIR/vim/.vimrc ~/.vimrc
     ln -sfn $DIR/vim/Vundle.vim ~/.vim/bundle/Vundle.vim
 }
