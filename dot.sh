@@ -59,12 +59,6 @@ _link() {
     # GPG
     ln -sf $DIR/gpg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
 
-    # Hyper
-    ln -sf $DIR/hyper/.hyper.js ~/.hyper.js
-
-    # Ruby
-    ln -sf $DIR/ruby/.gemrc ~/.gemrc
-
     # ssh
     ln -sf $DIR/ssh/config ~/.ssh/config
 
@@ -92,16 +86,6 @@ _install() {
     echo 'Updating and installing fisherman plugins...'
     curl -sLo ~/.config/fish/functions/fisher.fish --create-dirs git.io/fisher
     (cd $DIR && exec fish -c "fisher")
-
-    # Install ruby gems if bundler
-    if which -s bundle ; then
-        echo 'Installing global ruby packages...'
-        (cd $DIR && exec gem update bundler && exec bundle install)
-        if test -f "$DIR/Gemfile.lock" ; then
-            # Remove root Gemfile.lock
-            rm "$DIR/Gemfile.lock"
-        fi
-    fi
 
     echo 'Updating Vim plugins...'
     (vim +PluginInstall! +PluginClean! +qall)
