@@ -4,7 +4,7 @@ on:
   - push
 
 jobs:
-  make:
+  build:
 
     runs-on: macos-latest
 
@@ -16,5 +16,15 @@ jobs:
       run:  ./dot.sh init
     - name: Link
       run:  ./dot.sh link
-    - name: Install
-      run:  ./dot.sh install
+    - name: Install Homebrew packages
+      run:  ./dot.sh install-brew
+      env:
+        HOMEBREW_BUNDLE_BREW_SKIP: 'node'
+    - name: Install macOS defaults
+      run:  ./dot.sh install-defaults
+    - name: Install fonts
+      run:  mkdir -p ~/Library/Fonts && ./dot.sh install-fonts
+    - name: Install fisher
+      run:  ./dot.sh install-fisher
+    - name: Install vim
+      run:  ./dot.sh install-vim
