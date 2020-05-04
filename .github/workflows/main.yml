@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  - push
+
+jobs:
+  make:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Print help
+      run:  ./dot.sh help
+    - name: Initialize
+      run:  ./dot.sh init
+    - name: Link
+      run:  ./dot.sh link
+    - name: Install
+      run:  ./dot.sh install

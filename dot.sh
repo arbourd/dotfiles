@@ -7,7 +7,7 @@ Commands:
   help          prints this dialog
   init          updates submodules and creates directories (if needed)
   link          symlinks dotfiles
-  install       installs packages for homebrew, fonts, fish and vim
+  install       installs packages
   bootstrap     initializes, links and installs"
 }
 
