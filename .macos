@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+
+## Global
+#
+
+# Disable automatic capitalization
+defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
+
+# Disable automatic period substitution
+defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false
+
+# Disable smart dashes
+defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+
+# Disable smart quotes
+defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+
+# Disable auto-correct
+defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
+
+
+## Menu
+#
+
+# Enable WiFi, battery, Bluetooth, Clock, Airplay and Volume menus
+defaults write com.apple.systemuiserver menuExtras -array \
+  '/System/Library/CoreServices/Menu Extras/AirPort.menu' \
+  '/System/Library/CoreServices/Menu Extras/Battery.menu' \
+  '/System/Library/CoreServices/Menu Extras/Bluetooth.menu' \
+  '/System/Library/CoreServices/Menu Extras/Clock.menu' \
+  '/System/Library/CoreServices/Menu Extras/Displays.menu' \
+  '/System/Library/CoreServices/Menu Extras/Volume.menu'
+
+# Disable keyboard menu
+defaults write com.apple.TextInputMenu visible -bool false
+
+
+## Keyboard
+#
+
+# Disable dictation
+defaults write com.apple.HIToolbox AppleDictationAutoEnable -int 0
+
+
+## Mouse
+#
+
+# Disable mouse shake magnification
+defaults write ~/Library/Preferences/.GlobalPreferences CGDisableCursorLocationMagnification -bool true
+
+
+## Login
+#
+
+# Disable app resume on login
+defaults write com.apple.loginwindow TALLogoutSavesState -bool false
+
+
+## Dock
+#
+
+# Set dock size
+defaults write com.apple.dock tilesize -int 38
+
+# Disable recent applications
+defaults write com.apple.dock show-recents -bool false
+
+# Disable mouseover magnification
+defaults write com.apple.dock magnification -bool false
+
+
+## Touchbar
+#
+
+# Only display control strip
+defaults write com.apple.touchbar.agent 'PresentationModeGlobal' -string fullControlStrip
+
+# Remove Siri from control strip
+defaults write com.apple.controlStrip 'FullCustomized' -array \
+  'com.apple.system.group.brightness' \
+  'com.apple.system.mission-control' \
+  'com.apple.system.launchpad' \
+  'com.apple.system.group.keyboard-brightness' \
+  'com.apple.system.group.media' \
+  'com.apple.system.group.volume'
+
+
+## Network
+#
+
+# Disable .DS_Store creation on network drives
+# Ref: https://support.apple.com/en-ca/HT208209
+defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+
+
+## Siri
+#
+
+# Disable Siri
+defaults write com.apple.Siri StatusMenuVisible -bool false
+defaults write com.apple.assistant.support 'Assistant Enabled' -bool false
