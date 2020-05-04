@@ -68,6 +68,11 @@ _link() {
     ln -sfn $DIR/vim/Vundle.vim ~/.vim/bundle/Vundle.vim
 }
 
+_install_defaults() {
+    echo 'Setting MacOS defaults...'
+    (cd $DIR && exec ./.macos)
+}
+
 _install_fonts() {
     echo 'Installing fonts...'
     (cd $DIR && exec ./fonts/install.sh)
@@ -98,8 +103,9 @@ _install_vim() {
 }
 
 _install() {
-    _install_brew
+    _install_defaults
     _install_fonts
+    _install_brew
     _install_fisher
     _install_vim
 }
@@ -120,6 +126,10 @@ case $1 in
     install-brew)
         _pre
         _install_brew
+        ;;
+    install-defaults)
+        _pre
+        _install_defaults
         ;;
     install-fonts)
         _pre
