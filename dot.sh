@@ -21,16 +21,19 @@ _pre() {
     # git-get
     mkdir -p $GETPATH/github.com/arbourd
 
-    # Go
+    # golang
     mkdir -p ~/go
 
-    # GPG
+    # gpg
     mkdir -p -m 700 ~/.gnupg
 
-    # Rust
+    # rust
     mkdir -p ~/.cargo/bin
 
-    # Vim
+    # ssh
+    mkdir -p ~/.ssh/config
+
+    # vim
     mkdir -p ~/.vim/bundle  # Create directory for Vundle
 }
 
@@ -88,7 +91,7 @@ _install_brew() {
     # Install Homebrew packages
     echo 'Installing Homebrew packages...'
     (cd $DIR && exec brew bundle --no-lock)
-    (ln -sf $(brew --repository arbourd/tap) $GETPATH/github.com/arbourd/homebrew-tap)
+    ln -sf $(brew --repository arbourd/tap) $GETPATH/github.com/arbourd/homebrew-tap
 }
 
 _install_fisher() {
