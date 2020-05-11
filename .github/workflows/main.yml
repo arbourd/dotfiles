@@ -22,9 +22,8 @@ jobs:
         HOMEBREW_BUNDLE_BREW_SKIP: 'node'
     - name: Install macOS defaults
       run:  ./dot.sh install-defaults
-    - name: Install fonts
-      run:  mkdir -p ~/Library/Fonts && ./dot.sh install-fonts
     - name: Install fisher
       run:  ./dot.sh install-fisher
-    - name: Install vim
-      run:  ./dot.sh install-vim
+    # Vim needs a tty which actions doesn't provide
+    # - name: Install vim
+    #   run:  ./dot.sh install-vim
