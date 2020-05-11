@@ -2,6 +2,7 @@ tap 'arbourd/tap'
 tap 'github/gh'
 tap 'homebrew/cask'
 tap 'homebrew/cask-drivers'
+tap 'homebrew/cask-fonts'
 tap 'homebrew/services'
 tap 'instrumenta/instrumenta'
 tap 'wagoodman/dive'
@@ -84,6 +85,8 @@ cask 'viscosity'
 cask 'visual-studio-code'
 cask 'whatsapp'
 cask 'zoomus'
+
+cask 'font-source-code-pro-for-powerline'
 
 unless ENV.has_key?('CI') then
     brew 'mas'

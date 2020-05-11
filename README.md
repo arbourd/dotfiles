@@ -2,16 +2,6 @@
 
 Automating the personal environment
 
-* bash
-* fish
-* git
-* gpg2
-* Homebrew
-* iTerm2
-* Ruby
-* ssh
-* Vim
-
 ## Installation
 
   1. Clone the repo
