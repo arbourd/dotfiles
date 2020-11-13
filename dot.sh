@@ -76,11 +76,6 @@ _install_defaults() {
     (cd $DIR && exec ./.macos)
 }
 
-_install_fonts() {
-    echo 'Installing fonts...'
-    (cd $DIR && exec ./fonts/install.sh)
-}
-
 _install_brew() {
     # Install Homebrew if missing
     if ! which -s brew ; then
@@ -107,7 +102,6 @@ _install_vim() {
 
 _install() {
     _install_defaults
-    _install_fonts
     _install_brew
     _install_fisher
     _install_vim
@@ -133,10 +127,6 @@ case $1 in
     install-defaults)
         _pre
         _install_defaults
-        ;;
-    install-fonts)
-        _pre
-        _install_fonts
         ;;
     install-fisher)
         _pre
