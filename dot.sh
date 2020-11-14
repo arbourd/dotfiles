@@ -30,9 +30,6 @@ _pre() {
     # rust
     mkdir -p ~/.cargo/bin
 
-    # ssh
-    mkdir -p ~/.ssh/config
-
     # vim
     mkdir -p ~/.vim/bundle  # Create directory for Vundle
 }
