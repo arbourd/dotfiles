@@ -41,6 +41,7 @@ brew 'rust'
 brew 'shellcheck'
 brew 'ssh-copy-id'
 brew 'stern'
+brew 'svn'
 brew 'terraform'
 brew 'tflint'
 brew 'tmux'
@@ -84,6 +85,7 @@ cask 'visual-studio-code'
 cask 'whatsapp'
 cask 'zoomus'
 
+cask 'font-source-code-pro'
 cask 'font-source-code-pro-for-powerline'
 
 unless ENV.has_key?('CI') then
