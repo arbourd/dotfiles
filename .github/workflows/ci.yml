@@ -1,0 +1,21 @@
+name: ci
+
+on:
+  - push
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - run:  ./dot.sh help
+    - run:  ./dot.sh init
+    - run:  ./dot.sh link
+    - run:  ./dot.sh install-brew
+      env:
+        HOMEBREW_BUNDLE_BREW_SKIP: 'node'
+    - run:  ./dot.sh install-defaults
+    - run:  ./dot.sh install-fisher
+    # Vim needs a tty which actions does not provide
+    # - run:  ./dot.sh install-vim
