@@ -16,6 +16,8 @@
 	smudge = git-lfs smudge -- %f
 	required = true
 	process = git-lfs filter-process
+[init]
+	defaultBranch = main
 [interactive]
 	diffFilter = `brew --prefix git`/share/git-core/contrib/diff-highlight/diff-highlight | less
 [gpg]
