@@ -3,5 +3,6 @@ evanlucas/fish-kubectl-completions
 fishpkg/fish-git-util
 jorgebucaran/fish-getopts
 jorgebucaran/fish-wip
-jorgebucaran/nvm.fish
 sijad/gitignore
+jorgebucaran/nvm.fish
+jorgebucaran/fisher
