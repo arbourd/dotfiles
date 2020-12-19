@@ -44,7 +44,7 @@ _link() {
 
     # fish
     ln -sf $DIR/fish/config.fish ~/.config/fish/config.fish
-    ln -sf $DIR/fish/fishfile ~/.config/fish/fishfile
+    ln -sf $DIR/fish/fish_plugins ~/.config/fish/fish_plugins
     for file in $(ls -1 $DIR/fish/functions); do
         ln -sf $DIR/fish/functions/$file ~/.config/fish/functions/$file
     done
@@ -69,8 +69,8 @@ _link() {
 }
 
 _install_defaults() {
-    echo 'Setting MacOS defaults...'
-    (cd $DIR && exec ./.macos)
+    echo 'Setting macOS defaults...'
+    (cd $DIR && exec ./.macOS)
 }
 
 _install_brew() {
@@ -89,7 +89,7 @@ _install_brew() {
 _install_fisher() {
     echo 'Updating and installing fisher plugins...'
     curl -sLo ~/.config/fish/functions/fisher.fish --create-dirs git.io/fisher
-    (cd $DIR && exec fish -c "fisher")
+    (cd $DIR && exec fish -c "fisher update")
 }
 
 _install_vim() {
