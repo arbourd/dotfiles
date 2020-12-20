@@ -75,21 +75,41 @@ _install_defaults() {
 
 _install_brew() {
     # Install Homebrew if missing
-    if ! which -s brew ; then
+    if ! command -v brew &> /dev/null ; then
         echo 'Installing Homebrew...'
         ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     fi
 
-    # Install Homebrew packages
     echo 'Installing Homebrew packages...'
     (cd $DIR && exec brew bundle --no-lock)
-    ln -sf $(brew --repository arbourd/tap) $GETPATH/github.com/arbourd/homebrew-tap
 }
 
 _install_fisher() {
     echo 'Updating and installing fisher plugins...'
     curl -sLo ~/.config/fish/functions/fisher.fish --create-dirs git.io/fisher
     (cd $DIR && exec fish -c "fisher update")
+}
+
+_install_gofish() {
+    # Install gofish if missing
+    if ! command -v gofish &> /dev/null ; then
+        echo 'Installing gofish...'
+        curl -fsSL https://raw.githubusercontent.com/fishworks/gofish/main/scripts/install.sh | bash
+        gofish rig add https://github.com/arbourd/rig
+    fi
+
+    echo 'Installing gofish packages...'
+    (gofish update)
+    (gofish install flux)
+    (gofish install gh)
+    (gofish install git-get)
+    (gofish install go)
+    (gofish install gofish)
+    (gofish install helm)
+    (gofish install kubectl)
+    (gofish install kubectx)
+    (gofish install terraform)
+    (gofish install trash)
 }
 
 _install_vim() {
@@ -101,6 +121,7 @@ _install() {
     _install_defaults
     _install_brew
     _install_fisher
+    _install_gofish
     _install_vim
 }
 
@@ -128,6 +149,10 @@ case $1 in
     install-fisher)
         _pre
         _install_fisher
+        ;;
+    install-gofish)
+        _pre
+        _install_gofish
         ;;
     install-vim)
         _pre
