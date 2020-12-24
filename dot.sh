@@ -45,9 +45,6 @@ _link() {
     # fish
     ln -sf $DIR/fish/config.fish ~/.config/fish/config.fish
     ln -sf $DIR/fish/fish_plugins ~/.config/fish/fish_plugins
-    for file in $(ls -1 $DIR/fish/functions); do
-        ln -sf $DIR/fish/functions/$file ~/.config/fish/functions/$file
-    done
 
     # bash and zsh
     ln -sf $DIR/sh/.shrc ~/.bash_profile
