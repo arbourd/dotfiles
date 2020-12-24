@@ -103,6 +103,7 @@ _install_gofish() {
     (gofish install flux)
     (gofish install gh)
     (gofish install git-get)
+    (gofish install git-sync)
     (gofish install go)
     (gofish install gofish)
     (gofish install helm)
