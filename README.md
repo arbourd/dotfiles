@@ -15,7 +15,3 @@ Automating the personal environment
       ```console
       $ ./dot.sh
       ```
-
-## License
-
-Public Domain
