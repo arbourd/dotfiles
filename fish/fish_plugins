@@ -1,9 +1,7 @@
 arbourd/prompt
 evanlucas/fish-kubectl-completions
-fishpkg/fish-git-util
-jorgebucaran/fish-getopts
-jorgebucaran/fish-wip
-sijad/gitignore
 jorgebucaran/nvm.fish
 jorgebucaran/fisher
 arbourd/fish-aliases
+arbourd/fish-git-util
+jorgebucaran/replay.fish
