@@ -14,6 +14,7 @@ set -x GO111MODULE auto             # go mod
 ## Misc
 set -x GETPATH $HOME/src            # git-get
 set -x GPG_TTY (tty)                # gpg
+set -x EDITOR vim                   #
 set -x HOMEBREW_EDITOR vim          # brew edit
 
 source ~/.config/fish/private.fish
