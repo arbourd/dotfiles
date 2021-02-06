@@ -2,5 +2,5 @@ arbourd/prompt
 evanlucas/fish-kubectl-completions
 jorgebucaran/nvm.fish
 jorgebucaran/fisher
-arbourd/fish-aliases
 jorgebucaran/replay.fish
+arbourd/fish-env
