@@ -1,6 +1,6 @@
 arbourd/prompt
 evanlucas/fish-kubectl-completions
 jorgebucaran/nvm.fish
-jorgebucaran/fisher
 jorgebucaran/replay.fish
 arbourd/fish-env
+lilyball/nix-env.fish

@@ -92,6 +92,7 @@ _install_gofish() {
     if ! command -v gofish &> /dev/null ; then
         echo 'Installing gofish...'
         curl -fsSL https://raw.githubusercontent.com/fishworks/gofish/main/scripts/install.sh | bash
+        gofish init
         gofish rig add https://github.com/arbourd/rig
     fi
 
@@ -121,6 +122,18 @@ _install_gofish() {
     (gofish install trash)
     (gofish install yaegi)
     (gofish install yq)
+}
+
+_install_nix() {
+    # Install nix if missing
+    if ! command -v nix &> /dev/null ; then
+        echo 'Installing nix...'
+        sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume
+
+        nix-env -iA nixpkgs.nixUnstable
+        mkdir -p ~/.config/nix
+        echo 'experimental-features = nix-command flakes ca-references' >> ~/.config/nix/nix.conf
+    fi
 }
 
 _install_vim() {
