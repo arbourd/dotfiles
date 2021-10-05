@@ -17,4 +17,8 @@ set -x GPG_TTY (tty)                # gpg
 set -x EDITOR vim                   #
 set -x HOMEBREW_EDITOR vim          # brew edit
 
+if test -e /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.fish.inc
+  source "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.fish.inc"
+end
+
 source ~/.config/fish/private.fish
