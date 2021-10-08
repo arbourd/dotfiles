@@ -99,8 +99,6 @@ _install_gofish() {
     echo 'Installing gofish packages...'
     (gofish update)
     (gofish install act)
-    (gofish install argocd)
-    (gofish install berglas)
     (gofish install flux)
     (gofish install gh)
     (gofish install git-get)
@@ -111,6 +109,7 @@ _install_gofish() {
     (gofish install helm)
     (gofish install jq)
     (gofish install kubectl)
+    (gofish install kubeseal)
     (gofish install kustomize)
     (gofish install kubectx)
     (gofish install kubens)
@@ -120,7 +119,6 @@ _install_gofish() {
     (gofish install tflint)
     (gofish install tilt)
     (gofish install trash)
-    (gofish install yaegi)
     (gofish install yq)
 }
 
