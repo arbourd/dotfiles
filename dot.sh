@@ -146,7 +146,7 @@ _install_vim() {
     fi
 
     echo 'Updating Vim plugins...'
-    (vim +PluginInstall! +PluginClean! +qall)
+    (echo | echo | vim +PluginInstall! +PluginClean! +qall &>/dev/null)
 }
 
 _install() {
