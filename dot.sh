@@ -6,11 +6,12 @@ _usage() {
 Commands:
   help              prints this dialog
   bootstrap         links and installs
+  clone             clones dotfiles to \$GETPATH
   link              symlinks dotfiles
   install           installs all packages
 
   install-defaults  installs macos defaults
-  install-brew      installs homebrew
+  install-brew      installs homebrew packages
   install-fisher    installs fisher packages
   install-gofish    installs gofish packages
   install-nix       installs nix
@@ -50,13 +51,11 @@ _pre() {
 _link() {
     echo 'Symlinking dotfiles...'
 
-    # bash and zsh
+    # bash, fish and zsh
     ln -vsf $DIR/sh/.shrc ~/.bash_profile
     ln -vsf $DIR/sh/.shrc ~/.zshrc
-
-    # fish
-    ln -vsf $DIR/fish/config.fish ~/.config/fish/config.fish
-    ln -vsf $DIR/fish/fish_plugins ~/.config/fish/fish_plugins
+    ln -vsf $DIR/sh/config.fish ~/.config/fish/config.fish
+    ln -vsf $DIR/sh/fish_plugins ~/.config/fish/fish_plugins
 
     # git
     ln -vsf $DIR/git/.gitignore_global ~/.gitignore_global
