@@ -5,6 +5,7 @@ export GETPATH=$HOME/src
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$PATH
 
-alias k="kubectl"
-
+# nix
 if [ -e $HOME/.nix-profile/etc/profile.d/nix.sh ]; then . $HOME/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
+
+alias k="kubectl"
