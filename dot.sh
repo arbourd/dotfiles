@@ -86,7 +86,7 @@ _install_brew() {
 
 _install_fisher() {
     echo 'Updating and installing fisher plugins...'
-    curl -sLo ~/.config/fish/functions/fisher.fish --create-dirs git.io/fisher
+    (cd $DIR && exec fish -c "curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher")
     (cd $DIR && exec fish -c "fisher update")
 }
 
