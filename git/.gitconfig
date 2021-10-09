@@ -1,7 +1,7 @@
 [color]
 	ui = true
 [commit]
-	gpgsign = true
+	# gpgsign = true
 [core]
 	excludesfile = ~/.gitignore_global
 	editor = /usr/local/bin/vim
@@ -29,4 +29,4 @@
 [user]
 	name = Dylan Arbour
 	email = dylan.arbour@gmail.com
-	signingkey = 52582EDE
+	# signingkey = 52582EDE
