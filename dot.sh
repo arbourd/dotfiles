@@ -27,6 +27,9 @@ _pre() {
     # gpg
     mkdir -p -m 700 ~/.gnupg
 
+    # nix
+    mkdir -p ~/.config/nix
+
     # rust
     mkdir -p ~/.cargo/bin
 
@@ -129,7 +132,6 @@ _install_nix() {
         sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume
 
         nix-env -iA nixpkgs.nixUnstable
-        mkdir -p ~/.config/nix
         echo 'experimental-features = nix-command flakes ca-references' >> ~/.config/nix/nix.conf
     fi
 }
