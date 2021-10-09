@@ -20,7 +20,6 @@ Commands:
 
 _pre() {
     . $DIR/sh/.shrc
-    (cd $DIR && exec git submodule update --init --recursive)
 
     # fish
     mkdir -p ~/.config/fish/functions  # Create directory for fish-shell
@@ -48,13 +47,13 @@ _pre() {
 _link() {
     echo 'Symlinking dotfiles...'
 
-    # fish
-    ln -sf $DIR/fish/config.fish ~/.config/fish/config.fish
-    ln -sf $DIR/fish/fish_plugins ~/.config/fish/fish_plugins
-
     # bash and zsh
     ln -sf $DIR/sh/.shrc ~/.bash_profile
     ln -sf $DIR/sh/.shrc ~/.zshrc
+
+    # fish
+    ln -sf $DIR/fish/config.fish ~/.config/fish/config.fish
+    ln -sf $DIR/fish/fish_plugins ~/.config/fish/fish_plugins
 
     # git
     ln -sf $DIR/git/.gitignore_global ~/.gitignore_global
@@ -140,6 +139,12 @@ _install_nix() {
 }
 
 _install_vim() {
+    # Install vundle if missing
+    if [ ! -d ~/.vim/bundle/Vundle.vim ]; then
+        echo 'Installing vundle...'
+        git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+    fi
+
     echo 'Updating Vim plugins...'
     (vim +PluginInstall! +PluginClean! +qall)
 }

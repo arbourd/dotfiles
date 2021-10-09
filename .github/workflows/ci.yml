@@ -10,7 +10,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run:  ./dot.sh help
-    - run:  ./dot.sh init
     - run:  ./dot.sh link
     - run:  ./dot.sh install-defaults
 
