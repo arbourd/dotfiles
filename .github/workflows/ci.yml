@@ -29,7 +29,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run:  brew install fish
-    - run:  ./dot.sh install-fisher
+    - run:  ./dot.sh link && ./dot.sh install-fisher
 
   test-gofish:
     runs-on: macos-11
