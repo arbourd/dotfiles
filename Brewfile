@@ -61,9 +61,3 @@ cask 'zoom'
 
 cask 'font-source-code-pro'
 cask 'font-source-code-pro-for-powerline'
-
-unless ENV.has_key?('CI') then
-    brew 'mas'
-    mas 'Xcode', id: 497799835
-end
-
