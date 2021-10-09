@@ -40,6 +40,9 @@ _pre() {
     # rust
     mkdir -p ~/.cargo/bin
 
+    # ssh
+    mkdir -p ~/.ssh
+
     # vim
     mkdir -p ~/.vim/bundle  # Create directory for Vundle
 }
@@ -48,48 +51,53 @@ _link() {
     echo 'Symlinking dotfiles...'
 
     # bash and zsh
-    ln -sf $DIR/sh/.shrc ~/.bash_profile
-    ln -sf $DIR/sh/.shrc ~/.zshrc
+    ln -vsf $DIR/sh/.shrc ~/.bash_profile
+    ln -vsf $DIR/sh/.shrc ~/.zshrc
 
     # fish
-    ln -sf $DIR/fish/config.fish ~/.config/fish/config.fish
-    ln -sf $DIR/fish/fish_plugins ~/.config/fish/fish_plugins
+    ln -vsf $DIR/fish/config.fish ~/.config/fish/config.fish
+    ln -vsf $DIR/fish/fish_plugins ~/.config/fish/fish_plugins
 
     # git
-    ln -sf $DIR/git/.gitignore_global ~/.gitignore_global
-    ln -sf $DIR/git/.gitconfig ~/.gitconfig
+    ln -vsf $DIR/git/.gitignore_global ~/.gitignore_global
+    ln -vsf $DIR/git/.gitconfig ~/.gitconfig
 
     # gpg
-    ln -sf $DIR/gpg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
+    ln -vsf $DIR/gpg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
 
     # ssh
-    ln -sf $DIR/ssh/config ~/.ssh/config
+    ln -vsf $DIR/ssh/config ~/.ssh/config
 
     # vim
-    ln -sf $DIR/vim/.vimrc ~/.vimrc
-    ln -sfn $DIR/vim/Vundle.vim ~/.vim/bundle/Vundle.vim
+    ln -vsf $DIR/vim/.vimrc ~/.vimrc
 }
 
 _install_defaults() {
     echo 'Setting macOS defaults...'
-    (cd $DIR && exec ./.macOS)
+    $DIR/.macOS
 }
 
 _install_brew() {
     # Install Homebrew if missing
     if ! command -v brew &> /dev/null ; then
         echo 'Installing Homebrew...'
-        ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
 
     echo 'Installing Homebrew packages...'
-    (cd $DIR && exec brew bundle --no-lock)
+    brew bundle --no-lock --file $DIR/Brewfile
 }
 
 _install_fisher() {
+    # Install fish if missing
+    if ! command -v brew &> /dev/null ; then
+        echo 'Installing fish...'
+        brew install fish
+    fi
+
     echo 'Updating and installing fisher plugins...'
-    (cd $DIR && exec fish -c "curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher")
-    (cd $DIR && exec fish -c "fisher update")
+    fish -c "curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher"
+    fish -c "fisher update"
 }
 
 _install_gofish() {
@@ -102,29 +110,29 @@ _install_gofish() {
     fi
 
     echo 'Installing gofish packages...'
-    (gofish update)
-    (gofish install act)
-    (gofish install flux)
-    (gofish install gh)
-    (gofish install git-get)
-    (gofish install git-sync)
-    (gofish install go)
-    (gofish install gofish)
-    (gofish install goreleaser)
-    (gofish install helm)
-    (gofish install jq)
-    (gofish install kubectl)
-    (gofish install kubeseal)
-    (gofish install kustomize)
-    (gofish install kubectx)
-    (gofish install kubens)
-    (gofish install ripgrep)
-    (gofish install stern)
-    (gofish install terraform)
-    (gofish install tflint)
-    (gofish install tilt)
-    (gofish install trash)
-    (gofish install yq)
+    gofish update
+    gofish install act
+    gofish install flux
+    gofish install gh
+    gofish install git-get
+    gofish install git-sync
+    gofish install go
+    gofish install gofish
+    gofish install goreleaser
+    gofish install helm
+    gofish install jq
+    gofish install kubectl
+    gofish install kubeseal
+    gofish install kustomize
+    gofish install kubectx
+    gofish install kubens
+    gofish install ripgrep
+    gofish install stern
+    gofish install terraform
+    gofish install tflint
+    gofish install tilt
+    gofish install trash
+    gofish install yq
 }
 
 _install_nix() {
@@ -146,7 +154,7 @@ _install_vim() {
     fi
 
     echo 'Updating Vim plugins...'
-    (echo | echo | vim +PluginInstall! +PluginClean! +qall &>/dev/null)
+    echo | echo | vim +PluginInstall! +PluginClean! +qall &>/dev/null
 }
 
 _install() {
@@ -159,6 +167,11 @@ _install() {
 }
 
 case $1 in
+    bootstrap)
+        _pre
+        _link
+        _install
+        ;;
     link)
         _pre
         _link
@@ -190,11 +203,6 @@ case $1 in
     install-vim)
         _pre
         _install_vim
-        ;;
-    bootstrap)
-        _pre
-        _link
-        _install
         ;;
     help)
         _usage
