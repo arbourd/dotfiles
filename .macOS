@@ -41,9 +41,6 @@ defaults write com.apple.TextInputMenu visible -bool false
 # Disable dictation
 defaults write com.apple.HIToolbox AppleDictationAutoEnable -int 0
 
-# Bind capslock to esc
-hidutil property --set '{"UserKeyMapping":[{"HIDKeyboardModifierMappingSrc":0x700000039,"HIDKeyboardModifierMappingDst":0x700000029}]}'
-
 
 ## Mouse
 #
