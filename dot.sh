@@ -144,6 +144,7 @@ _install() {
     _install_brew
     _install_fisher
     _install_gofish
+    _install_nix
     _install_vim
 }
 
@@ -175,6 +176,10 @@ case $1 in
     install-gofish)
         _pre
         _install_gofish
+        ;;
+    install-nix)
+        _pre
+        _install_nix
         ;;
     install-vim)
         _pre
