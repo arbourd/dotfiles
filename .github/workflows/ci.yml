@@ -4,7 +4,7 @@ on:
   - push
 
 jobs:
-  build:
+  test:
     runs-on: macos-11
 
     steps:
@@ -12,11 +12,34 @@ jobs:
     - run:  ./dot.sh help
     - run:  ./dot.sh init
     - run:  ./dot.sh link
+    - run:  ./dot.sh install-defaults
+
+  test-brew:
+    runs-on: macos-11
+
+    steps:
+    - uses: actions/checkout@v2
     - run:  ./dot.sh install-brew
       env:
         HOMEBREW_BUNDLE_BREW_SKIP: 'awscli node'
-    - run:  ./dot.sh install-defaults
+
+  test-fisher:
+    runs-on: macos-11
+
+    steps:
+    - uses: actions/checkout@v2
     - run:  ./dot.sh install-fisher
+
+  test-gofish:
+    runs-on: macos-11
+
+    steps:
+    - uses: actions/checkout@v2
     - run:  ./dot.sh install-gofish
-    # Vim needs a tty which actions does not provide
-    # - run:  ./dot.sh install-vim
+
+  test-nix:
+    runs-on: macos-11
+
+    steps:
+    - uses: actions/checkout@v2
+    - run:  ./dot.sh install-nix
