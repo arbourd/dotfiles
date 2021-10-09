@@ -145,8 +145,8 @@ _install_vim() {
 }
 
 _install() {
-    _install_defaults
     _install_brew
+    _install_defaults
     _install_fisher
     _install_gofish
     _install_nix
