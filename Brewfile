@@ -17,7 +17,6 @@ brew 'mkcert'
 brew 'openssl'
 brew 'pinentry-mac'
 brew 'postgresql'
-brew 'pulumi'
 brew 'python3'
 brew 'ruby'
 brew 'rust'
@@ -35,6 +34,7 @@ brew 'zsh'
 
 cask '1password'
 cask 'appcleaner'
+cask 'bettertouchtool'
 cask 'brave-browser'
 cask 'caret'
 cask 'discord'
@@ -47,10 +47,8 @@ cask 'insomnia'
 cask 'iterm2'
 cask 'kap'
 cask 'logitech-options'
-cask 'middleclick'
 cask 'monodraw'
 cask 'ngrok'
-cask 'nordvpn'
 cask 'notion'
 cask 'plex'
 # cask 'postico'   replace with postico2 when available
@@ -66,8 +64,6 @@ cask 'font-source-code-pro-for-powerline'
 
 unless ENV.has_key?('CI') then
     brew 'mas'
-    mas 'Jira', id: 1475897096
-    mas 'Todoist', id: 585829637
     mas 'Xcode', id: 497799835
 end
 
