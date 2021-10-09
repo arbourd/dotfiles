@@ -90,7 +90,7 @@ _install_brew() {
 
 _install_fisher() {
     # Install fish if missing
-    if ! command -v brew &> /dev/null ; then
+    if ! command -v fish &> /dev/null ; then
         echo 'Installing fish...'
         brew install fish
     fi
