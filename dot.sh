@@ -4,15 +4,23 @@ DIR="$( cd "$( dirname "${(%):-%N}" )" && pwd )"
 _usage() {
     echo "Usage: ./dot.sh [COMMAND]
 Commands:
-  help          prints this dialog
-  init          updates submodules and creates directories (if needed)
-  link          symlinks dotfiles
-  install       installs packages
-  bootstrap     initializes, links and installs"
+  help              prints this dialog
+  bootstrap         links and installs
+  link              symlinks dotfiles
+  install           installs all packages
+
+  install-defaults  installs macos defaults
+  install-brew      installs homebrew
+  install-fisher    installs fisher packages
+  install-gofish    installs gofish packages
+  install-nix       installs nix
+  install-vim       installs vim packages
+"
 }
 
 _pre() {
     . $DIR/sh/.shrc
+    (cd $DIR && exec git submodule update --init --recursive)
 
     # fish
     mkdir -p ~/.config/fish/functions  # Create directory for fish-shell
@@ -35,11 +43,6 @@ _pre() {
 
     # vim
     mkdir -p ~/.vim/bundle  # Create directory for Vundle
-}
-
-_init() {
-    echo 'Updating submodules...'
-    (cd $DIR && exec git submodule update --init --recursive)
 }
 
 _link() {
@@ -151,10 +154,6 @@ _install() {
 }
 
 case $1 in
-    init)
-        _pre
-        _init
-        ;;
     link)
         _pre
         _link
@@ -189,7 +188,6 @@ case $1 in
         ;;
     bootstrap)
         _pre
-        _init
         _link
         _install
         ;;
