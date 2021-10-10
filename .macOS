@@ -34,12 +34,18 @@ defaults write com.apple.systemuiserver menuExtras -array \
 # Disable keyboard menu
 defaults write com.apple.TextInputMenu visible -bool false
 
+# Remove date from time
+defaults write com.apple.menuextra.clock 'DateFormat' -string 'h:mm a'
+
 
 ## Keyboard
 #
 
 # Disable dictation
 defaults write com.apple.HIToolbox AppleDictationAutoEnable -int 0
+
+# Disable emoji function key
+defaults write com.apple.HIToolbox AppleFnUsageType -int 0
 
 
 ## Mouse
@@ -60,7 +66,7 @@ defaults write com.apple.loginwindow TALLogoutSavesState -bool false
 #
 
 # Set dock size
-defaults write com.apple.dock tilesize -int 38
+defaults write com.apple.dock tilesize -int 30
 
 # Disable recent applications
 defaults write com.apple.dock show-recents -bool false
@@ -73,7 +79,7 @@ defaults write com.apple.dock magnification -bool false
 #
 
 # Only display control strip
-defaults write com.apple.touchbar.agent 'PresentationModeGlobal' -string fullControlStrip
+defaults write com.apple.touchbar.agent 'PresentationModeGlobal' -string 'fullControlStrip'
 
 # Remove Siri from control strip
 defaults write com.apple.controlStrip 'FullCustomized' -array \
@@ -99,3 +105,17 @@ defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 # Disable Siri
 defaults write com.apple.Siri StatusMenuVisible -bool false
 defaults write com.apple.assistant.support 'Assistant Enabled' -bool false
+
+
+## Time Machine
+#
+
+# Disable popup when new disk is mounted
+defaults write com.apple.TimeMachine 'DoNotOfferNewDisksForBackup' -bool true
+
+
+## Restart services
+#
+
+killall Dock
+killall SystemUIServer
