@@ -142,6 +142,7 @@ _install_nix() {
     if ! command -v nix &> /dev/null ; then
         echo 'Installing nix...'
         sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume
+        . ~/.nix-profile/etc/profile.d/nix.sh
 
         nix-env -iA nixpkgs.nixUnstable
     fi
