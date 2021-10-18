@@ -64,6 +64,9 @@ _link() {
     # gpg
     ln -vsf $DIR/gpg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
 
+    # nix
+    ln -vsf $DIR/nix/nix.conf ~/.config/nix/nix.conf
+
     # ssh
     ln -vsf $DIR/ssh/config ~/.ssh/config
 
@@ -141,7 +144,6 @@ _install_nix() {
         sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume
 
         nix-env -iA nixpkgs.nixUnstable
-        echo 'experimental-features = nix-command flakes ca-references' >> ~/.config/nix/nix.conf
     fi
 }
 
