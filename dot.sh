@@ -141,9 +141,8 @@ _install_nix() {
     # Install nix if missing
     if ! command -v nix &> /dev/null ; then
         echo 'Installing nix...'
-        sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume
-        . ~/.nix-profile/etc/profile.d/nix.sh
-
+        curl -L https://nixos.org/nix/install | sh -s -- --daemon
+        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
         nix-env -iA nixpkgs.nixUnstable
     fi
 }
@@ -156,6 +155,7 @@ _install_vim() {
     fi
 
     echo 'Updating Vim plugins...'
+    # Supress attaching to tty
     echo | echo | vim +PluginInstall! +PluginClean! +qall &>/dev/null
 }
 
