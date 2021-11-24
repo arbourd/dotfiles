@@ -113,6 +113,7 @@ _install_gofish() {
 
     echo 'Installing gofish packages...'
     gofish update
+    gofish install direnv
     gofish install flux
     gofish install gh
     gofish install git-get
@@ -128,11 +129,9 @@ _install_gofish() {
     gofish install kustomize
     gofish install mkcert
     gofish install ripgrep
-    gofish install stern
     gofish install terraform
     gofish install tflint
     gofish install tfsec
-    gofish install tilt
     gofish install trash
     gofish install yq
 }
