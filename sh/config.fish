@@ -20,6 +20,4 @@ if test -e /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.fis
     source "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.fish.inc"
 end
 
-direnv hook fish | source
-
 source ~/.config/fish/private.fish
