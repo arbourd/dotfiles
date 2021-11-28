@@ -113,7 +113,6 @@ _install_gofish() {
 
     echo 'Installing gofish packages...'
     gofish update
-    gofish install direnv
     gofish install flux
     gofish install gh
     gofish install git-get
