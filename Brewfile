@@ -48,7 +48,6 @@ cask 'logitech-options'
 cask 'monodraw'
 cask 'ngrok'
 cask 'notion'
-cask 'plex'
 # cask 'postico'   replace with postico2 when available
 cask 'signal'
 cask 'slack'
