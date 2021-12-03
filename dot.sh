@@ -142,7 +142,6 @@ _install_nix() {
         curl -L https://nixos.org/nix/install | sh -s -- --daemon
         . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 
-        echo 'experimental-features = nix-command flakes ca-references' | sudo tee -a /etc/nix/nix.conf
         nix-env -iA nixpkgs.nixUnstable
     fi
 }
