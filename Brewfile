@@ -3,6 +3,7 @@ tap 'homebrew/cask-drivers'
 tap 'homebrew/cask-fonts'
 tap 'homebrew/services'
 
+brew 'ansifilter'
 brew 'awscli'
 brew 'bash'
 brew 'coreutils'
