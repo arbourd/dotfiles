@@ -5,6 +5,7 @@ tap 'homebrew/services'
 
 brew 'awscli'
 brew 'bash'
+brew 'coreutils'
 brew 'fish'
 brew 'git'
 brew 'gnupg'
