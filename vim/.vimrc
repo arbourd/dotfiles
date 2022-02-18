@@ -20,7 +20,7 @@ au VimLeave * :!clear
 set background=dark
 colorscheme solarized
 " Set $SHELL to POSIX type
-set shell=/usr/local/bin/bash
+set shell=/opt/homebrew/bin/bash
 " Respect modeline in files
 set modeline
 set modelines=4

@@ -4,7 +4,7 @@
 	# gpgsign = true
 [core]
 	excludesfile = ~/.gitignore_global
-	editor = /usr/local/bin/vim
+	editor = /opt/homebrew/bin/vim
 	pager = `brew --prefix git`/share/git-core/contrib/diff-highlight/diff-highlight | less
 	autocrlf = input
 [credential]

@@ -1,6 +1,6 @@
 set default_user (whoami) # set default user
 set fish_greeting "" # empty the greeting string
-set -x SHELL /usr/local/bin/fish # let everyone know about fish
+set -x SHELL /opt/homebrew/bin/fish # let everyone know about fish
 
 ## Exports
 #
@@ -16,8 +16,12 @@ set -x PATH $HOME/.krew/bin $PATH # krew bin
 
 ## Initializations
 #
-if test -e /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.fish.inc
-    source "/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.fish.inc"
+if test -e /opt/homebrew/bin/brew
+    eval (/opt/homebrew/bin/brew shellenv)
+end
+
+if test -e /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.fish.inc
+    source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.fish.inc"
 end
 
 source ~/.config/fish/private.fish
