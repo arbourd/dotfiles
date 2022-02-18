@@ -14,7 +14,6 @@ Commands:
   install-brew      installs homebrew packages
   install-fisher    installs fisher packages
   install-gofish    installs gofish packages
-  install-nix       installs nix
   install-vim       installs vim packages
 "
 }
@@ -34,9 +33,6 @@ _pre() {
 
     # gpg
     mkdir -p -m 700 ~/.gnupg
-
-    # nix
-    mkdir -p ~/.config/nix
 
     # rust
     mkdir -p ~/.cargo/bin
@@ -135,17 +131,6 @@ _install_gofish() {
     gofish install yq
 }
 
-_install_nix() {
-    # Install nix if missing
-    if ! command -v nix &> /dev/null ; then
-        echo 'Installing nix...'
-        curl -L https://nixos.org/nix/install | sh -s -- --daemon
-        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-
-        nix-env -iA nixpkgs.nixUnstable
-    fi
-}
-
 _install_vim() {
     # Install vundle if missing
     if [ ! -d ~/.vim/bundle/Vundle.vim ]; then
@@ -196,10 +181,6 @@ case $1 in
     install-gofish)
         _pre
         _install_gofish
-        ;;
-    install-nix)
-        _pre
-        _install_nix
         ;;
     install-vim)
         _pre
