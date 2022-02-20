@@ -110,20 +110,18 @@ _install_gofish() {
     echo 'Installing gofish packages...'
     gofish update
     gofish install flux
-    gofish install gh
+    # gofish install gh
     gofish install git-get
     gofish install git-sync
     gofish install go
     gofish install goreleaser
     gofish install helm
-    gofish install jq
     gofish install kubectl
     gofish install kubectx
     gofish install kubens
-    gofish install kubeseal
     gofish install kustomize
-    gofish install mkcert
-    gofish install ripgrep
+    # gofish install mkcert
+    # gofish install ripgrep
     gofish install terraform
     gofish install tflint
     gofish install tfsec
