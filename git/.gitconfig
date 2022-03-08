@@ -1,7 +1,7 @@
 [color]
 	ui = true
 [commit]
-	# gpgsign = true
+	gpgsign = true
 [core]
 	excludesfile = ~/.gitignore_global
 	editor = /opt/homebrew/bin/vim
@@ -29,4 +29,4 @@
 [user]
 	name = Dylan Arbour
 	email = arbourd@users.noreply.github.com
-	# signingkey = 52582EDE
+	signingkey = 25332EB09B3F27FD
