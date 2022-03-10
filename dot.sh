@@ -13,7 +13,6 @@ Commands:
   install-defaults  installs macos defaults
   install-brew      installs homebrew packages
   install-fisher    installs fisher packages
-  install-gofish    installs gofish packages
   install-vim       installs vim packages
 "
 }
@@ -98,37 +97,6 @@ _install_fisher() {
     fish -c "fisher update"
 }
 
-_install_gofish() {
-    # Install gofish if missing
-    if ! command -v gofish &> /dev/null ; then
-        echo 'Installing gofish...'
-        curl -fsSL https://raw.githubusercontent.com/fishworks/gofish/main/scripts/install.sh | bash
-        gofish init
-        gofish rig add https://github.com/arbourd/rig
-    fi
-
-    echo 'Installing gofish packages...'
-    gofish update
-    gofish install flux
-    # gofish install gh
-    gofish install git-get
-    gofish install git-sync
-    gofish install go
-    gofish install goreleaser
-    gofish install helm
-    gofish install kubectl
-    gofish install kubectx
-    gofish install kubens
-    gofish install kustomize
-    # gofish install mkcert
-    # gofish install ripgrep
-    gofish install terraform
-    gofish install tflint
-    gofish install tfsec
-    gofish install trash
-    gofish install yq
-}
-
 _install_vim() {
     # Install vundle if missing
     if [ ! -d ~/.vim/bundle/Vundle.vim ]; then
@@ -145,7 +113,6 @@ _install() {
     _install_brew
     _install_defaults
     _install_fisher
-    _install_gofish
     _install_nix
     _install_vim
 }
@@ -175,10 +142,6 @@ case $1 in
     install-fisher)
         _pre
         _install_fisher
-        ;;
-    install-gofish)
-        _pre
-        _install_gofish
         ;;
     install-vim)
         _pre

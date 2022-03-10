@@ -10,7 +10,7 @@ jobs:
     runs-on: macos-11
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - run:  ./dot.sh help
     - run:  ./dot.sh link
     - run:  ./dot.sh install-defaults
@@ -19,7 +19,7 @@ jobs:
     runs-on: macos-11
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - run:  ./dot.sh install-brew
       env:
         HOMEBREW_BUNDLE_BREW_SKIP: 'awscli node'
@@ -28,27 +28,20 @@ jobs:
     runs-on: macos-11
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - run:  ./dot.sh link
     - run:  ./dot.sh install-fisher
-
-  test-gofish:
-    runs-on: macos-11
-
-    steps:
-    - uses: actions/checkout@v2
-    - run:  ./dot.sh install-gofish
 
   test-nix:
     runs-on: macos-11
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - run:  ./dot.sh install-nix
 
   test-vim:
     runs-on: macos-11
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - run:  ./dot.sh install-vim
