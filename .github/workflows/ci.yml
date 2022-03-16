@@ -22,7 +22,7 @@ jobs:
     - uses: actions/checkout@v3
     - run:  ./dot.sh install-brew
       env:
-        HOMEBREW_BUNDLE_BREW_SKIP: 'awscli node'
+        HOMEBREW_BUNDLE_BREW_SKIP: 'awscli go node'
 
   test-fisher:
     runs-on: macos-11
