@@ -20,9 +20,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - run:  brew uninstall go@1.15
     - run:  ./dot.sh install-brew
       env:
-        HOMEBREW_BUNDLE_BREW_SKIP: 'awscli go node'
+        HOMEBREW_BUNDLE_BREW_SKIP: 'awscli node'
 
   test-fisher:
     runs-on: macos-11
