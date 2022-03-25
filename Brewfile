@@ -10,7 +10,6 @@ tap 'planetscale/tap'
 tap 'suborbital/subo'
 
 brew 'ansifilter'
-brew 'awscli'
 brew 'bash'
 brew 'coreutils'
 brew 'fish'
