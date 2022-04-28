@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - run: brew uninstall go@1.15
+      - run: brew uninstall go@1.17
       - run: ./dot.sh install-brew
         env:
           HOMEBREW_BUNDLE_BREW_SKIP: 'node'
