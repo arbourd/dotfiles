@@ -2,13 +2,11 @@
 #
 export EDITOR=vim                   # default editor
 export GETPATH=$HOME/src            # git-get
-export GO111MODULE=auto             # go mod
 export GOPATH=$HOME/go              # go code home
 export GPG_TTY=$(tty)               # gpg
 export HOMEBREW_EDITOR=$EDITOR      # brew edit
 export PATH=$GOPATH/bin:$PATH       # go bin
 export PATH=$HOME/.cargo/bin:$PATH  # rust bin
-export PATH=$HOME/.krew/bin:$PATH   # krew bin
 
 ## Initializations
 #

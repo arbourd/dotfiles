@@ -6,13 +6,11 @@ set -x SHELL /opt/homebrew/bin/fish # let everyone know about fish
 #
 set -x EDITOR vim # default editor
 set -x GETPATH $HOME/src # git-get
-set -x GO111MODULE auto # go mod
 set -x GOPATH $HOME/go # go code home
 set -x GPG_TTY (tty) # gpg
 set -x HOMEBREW_EDITOR $EDITOR # brew edit
 set -x PATH $GOPATH/bin $PATH # go bin
 set -x PATH $HOME/.cargo/bin $PATH # rust bin
-set -x PATH $HOME/.krew/bin $PATH # krew bin
 
 ## Initializations
 #
