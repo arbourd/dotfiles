@@ -12,6 +12,9 @@ set -x HOMEBREW_EDITOR $EDITOR # brew edit
 set -x PATH $GOPATH/bin $PATH # go bin
 set -x PATH $HOME/.cargo/bin $PATH # rust bin
 
+# kubectl and GKE for < 1.25
+set -x USE_GKE_GCLOUD_AUTH_PLUGIN True
+
 ## Initializations
 #
 if test -e /opt/homebrew/bin/brew
