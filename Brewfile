@@ -81,7 +81,6 @@ cask 'signal'
 cask 'slack'
 cask 'visual-studio-code'
 cask 'whatsapp'
-cask 'zoom'
 
 cask 'font-source-code-pro'
 cask 'font-source-code-pro-for-powerline'

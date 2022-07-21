@@ -16,3 +16,8 @@ if [ -e /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh
 ## Aliases
 #
 alias k="kubectl"
+
+complete -C /opt/homebrew/bin/nomad nomad
+
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C /opt/homebrew/bin/nomad nomad
