@@ -35,13 +35,6 @@ jobs:
       - run: ./dot.sh link
       - run: ./dot.sh install-fisher
 
-  test-nix:
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - run: ./dot.sh install-nix
-
   test-vim:
     runs-on: macos-latest
 

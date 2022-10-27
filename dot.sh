@@ -59,9 +59,6 @@ _link() {
     # gpg
     ln -vsf $DIR/gpg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
 
-    # nix
-    ln -vsf $DIR/nix/nix.conf ~/.config/nix/nix.conf
-
     # ssh
     ln -vsf $DIR/ssh/config ~/.ssh/config
 
@@ -113,7 +110,6 @@ _install() {
     _install_brew
     _install_defaults
     _install_fisher
-    _install_nix
     _install_vim
 }
 
