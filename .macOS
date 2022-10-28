@@ -22,20 +22,13 @@ defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
 ## Menu
 #
 
-# Enable WiFi, battery, Bluetooth, Clock, Airplay and Volume menus
-defaults write com.apple.systemuiserver menuExtras -array \
-  '/System/Library/CoreServices/Menu Extras/AirPort.menu' \
-  '/System/Library/CoreServices/Menu Extras/Battery.menu' \
-  '/System/Library/CoreServices/Menu Extras/Bluetooth.menu' \
-  '/System/Library/CoreServices/Menu Extras/Clock.menu' \
-  '/System/Library/CoreServices/Menu Extras/Displays.menu' \
-  '/System/Library/CoreServices/Menu Extras/Volume.menu'
+# Remove date and day of the week from time
+defaults write com.apple.menuextra.clock 'ShowAMPM' -bool true
+defaults write com.apple.menuextra.clock 'ShowDate' -int 2
+defaults write com.apple.menuextra.clock 'ShowDayOfWeek' -bool false
 
 # Disable keyboard menu
 defaults write com.apple.TextInputMenu visible -bool false
-
-# Remove date from time
-defaults write com.apple.menuextra.clock 'DateFormat' -string 'h:mm a'
 
 
 ## Keyboard
@@ -75,22 +68,6 @@ defaults write com.apple.dock show-recents -bool false
 defaults write com.apple.dock magnification -bool false
 
 
-## Touchbar
-#
-
-# Only display control strip
-defaults write com.apple.touchbar.agent 'PresentationModeGlobal' -string 'fullControlStrip'
-
-# Remove Siri from control strip
-defaults write com.apple.controlStrip 'FullCustomized' -array \
-  'com.apple.system.group.brightness' \
-  'com.apple.system.mission-control' \
-  'com.apple.system.launchpad' \
-  'com.apple.system.group.keyboard-brightness' \
-  'com.apple.system.group.media' \
-  'com.apple.system.group.volume'
-
-
 ## Network
 #
 
@@ -118,4 +95,3 @@ defaults write com.apple.TimeMachine 'DoNotOfferNewDisksForBackup' -bool true
 #
 
 killall Dock
-killall SystemUIServer
