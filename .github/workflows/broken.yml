@@ -1,0 +1,22 @@
+name: broken
+
+on:
+  push:
+
+jobs:
+  example:
+    runs-on: ubuntu-latest
+    container:
+      image: alpine
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: ls -la
+      - run: ls -la /github
+      - run: ls -la /github/home
+      - run: whoami
+      - run: pwd
+      - run: apk add git --update
+      - run: which git
+      - run: git config --global --list
