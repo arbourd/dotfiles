@@ -1,3 +1,5 @@
+Include /Users/dylan/.colima/ssh_config
+
 Host 192.168.1.1
   UseKeychain yes
   AddKeysToAgent yes
