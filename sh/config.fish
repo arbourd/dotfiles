@@ -26,5 +26,3 @@ if test -e /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.
 end
 
 source ~/.config/fish/private.fish
-
-source /Users/dylan/.docker/init-fish.sh || true # Added by Docker Desktop
