@@ -32,7 +32,14 @@
 	insteadOf = git://github.com/
 	insteadOf = git@github.com:
 	insteadOf = http://github.com/
+[url "https://gitlab.com/"]
+	insteadOf = git://gitlab.com/
+	insteadOf = git@gitlab.com:
+	insteadOf = http://gitlab.com/
 [user]
 	name = Dylan Arbour
 	email = arbourd@users.noreply.github.com
 	signingkey = 25332EB09B3F27FD
+
+[includeIf "hasconfig:remote.*.url:https://gitlab.com/**"]
+	path = ~/.gitconfig_gitlab
