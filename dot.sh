@@ -1,12 +1,12 @@
 #!/usr/bin/env zsh
-DIR="$( cd "$( dirname "${(%):-%N}" )" && pwd )"
+DIR="$(dirname "$(readlink -f "$0")")"
+getpath="${GETPATH:-~/src}"
 
 _usage() {
     echo "Usage: ./dot.sh [COMMAND]
 Commands:
   help              prints this dialog
-  bootstrap         links and installs
-  clone             clones dotfiles to \$GETPATH
+  clone             clones dotfiles to \$GETPATH (${getpath})
   link              symlinks dotfiles
   install           installs all packages
 
@@ -43,27 +43,36 @@ _pre() {
     mkdir -p ~/.vim/bundle  # Create directory for Vundle
 }
 
+_clone() {
+    echo "Cloning dotfiles to $getpath/github.com/arbourd/dotfiles ..."
+
+    mkdir -p "$getpath/github.com/arbourd"
+
+    git clone https://github.com/arbourd/dotfiles.git "$getpath/github.com/arbourd/dotfiles"
+    echo "$getpath/github.com/arbourd/dotfiles"
+}
+
 _link() {
     echo 'Symlinking dotfiles ...'
 
     # bash, fish and zsh
-    ln -vsf $DIR/sh/.shrc ~/.bash_profile
-    ln -vsf $DIR/sh/.shrc ~/.zshrc
-    ln -vsf $DIR/sh/config.fish ~/.config/fish/config.fish
-    ln -vsf $DIR/sh/fish_plugins ~/.config/fish/fish_plugins
+    ln -vsf "$DIR/sh/.shrc" ~/.bash_profile
+    ln -vsf "$DIR/sh/.shrc" ~/.zshrc
+    ln -vsf "$DIR/sh/config.fish" ~/.config/fish/config.fish
+    ln -vsf "$DIR/sh/fish_plugins" ~/.config/fish/fish_plugins
 
     # git
-    ln -vsf $DIR/git/config ~/.config/git/config
-    ln -vsf $DIR/git/gitignore ~/.config/git/gitignore
+    ln -vsf "$DIR/git/config" ~/.config/git/config
+    ln -vsf "$DIR/git/gitignore" ~/.config/git/gitignore
 
     # gpg
-    ln -vsf $DIR/gpg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
+    ln -vsf "$DIR/gpg/gpg-agent.conf" ~/.gnupg/gpg-agent.conf
 
     # ssh
-    ln -vsf $DIR/ssh/config ~/.ssh/config
+    ln -vsf "$DIR/ssh/config" ~/.ssh/config
 
     # vim
-    ln -vsf $DIR/vim/vimrc ~/.vim/vimrc
+    ln -vsf "$DIR/vim/vimrc" ~/.vim/vimrc
 }
 
 _install_defaults() {
@@ -90,7 +99,8 @@ _install_fisher() {
     fi
 
     echo 'Updating and installing fisher plugins...'
-    fish -c "curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher"
+    fish -c "curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
+    fish -c "git checkout $DIR/sh/fish_plugins"
     fish -c "fisher update"
 }
 
@@ -117,10 +127,8 @@ _install() {
 }
 
 case $1 in
-    bootstrap)
-        _pre
-        _link
-        _install
+    clone)
+        _clone
         ;;
     link)
         _pre
