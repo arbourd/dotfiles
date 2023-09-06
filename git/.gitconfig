@@ -29,13 +29,15 @@
 [gpg]
 	program = gpg
 [url "https://github.com/"]
+	insteadOf = http://github.com/
 	insteadOf = git://github.com/
 	insteadOf = git@github.com:
-	insteadOf = http://github.com/
+	insteadOf = ssh://git@github.com/
 [url "https://gitlab.com/"]
+	insteadOf = http://gitlab.com/
 	insteadOf = git://gitlab.com/
 	insteadOf = git@gitlab.com:
-	insteadOf = http://gitlab.com/
+	insteadOf = ssh://git@gitlab.com/
 [user]
 	name = Dylan Arbour
 	email = arbourd@users.noreply.github.com
