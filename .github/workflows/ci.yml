@@ -10,7 +10,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: ./dot.sh help
       - run: ./dot.sh link
       - run: ./dot.sh install-defaults
@@ -19,7 +19,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: brew uninstall go@1.17
       - run: ./dot.sh install-brew
         env:
@@ -29,7 +29,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: ./dot.sh link
       - run: ./dot.sh install-fisher
 
@@ -37,5 +37,5 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: ./dot.sh install-vim
