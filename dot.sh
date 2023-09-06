@@ -22,10 +22,10 @@ _pre() {
 
     # fish
     mkdir -p ~/.config/fish/functions  # Create directory for fish-shell
-    touch ~/.config/fish/private.fish  # Create private env vars file if doesn't exist
+    touch ~/.config/fish/private.fish  # Create private env vars file
 
-    # git-get
-    mkdir -p $GETPATH/github.com/arbourd
+    # git
+    mkdir -p ~/.config/git
 
     # golang
     mkdir -p ~/go
@@ -53,8 +53,8 @@ _link() {
     ln -vsf $DIR/sh/fish_plugins ~/.config/fish/fish_plugins
 
     # git
-    ln -vsf $DIR/git/.gitignore_global ~/.gitignore_global
-    ln -vsf $DIR/git/.gitconfig ~/.gitconfig
+    ln -vsf $DIR/git/config ~/.config/git/config
+    ln -vsf $DIR/git/gitignore ~/.config/git/gitignore
 
     # gpg
     ln -vsf $DIR/gpg/gpg-agent.conf ~/.gnupg/gpg-agent.conf
@@ -63,7 +63,7 @@ _link() {
     ln -vsf $DIR/ssh/config ~/.ssh/config
 
     # vim
-    ln -vsf $DIR/vim/.vimrc ~/.vimrc
+    ln -vsf $DIR/vim/vimrc ~/.vim/vimrc
 }
 
 _install_defaults() {

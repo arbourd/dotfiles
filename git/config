@@ -3,7 +3,7 @@
 [commit]
 	gpgsign = true
 [core]
-	excludesfile = ~/.gitignore_global
+	excludesfile = ~/.config/git/gitignore
 	editor = /opt/homebrew/bin/vim
 	pager = `brew --prefix git`/share/git-core/contrib/diff-highlight/diff-highlight | less
 	autocrlf = input
@@ -22,6 +22,8 @@
 	smudge = git-lfs smudge -- %f
 	required = true
 	process = git-lfs filter-process
+[includeIf "hasconfig:remote.*.url:https://gitlab.com/**"]
+	path = ~/.config/git/config-gitlab
 [init]
 	defaultBranch = main
 [interactive]
@@ -42,6 +44,3 @@
 	name = Dylan Arbour
 	email = arbourd@users.noreply.github.com
 	signingkey = 25332EB09B3F27FD
-
-[includeIf "hasconfig:remote.*.url:https://gitlab.com/**"]
-	path = ~/.gitconfig_gitlab
