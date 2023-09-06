@@ -18,7 +18,7 @@ Commands:
 }
 
 _pre() {
-    . $DIR/sh/.shrc
+    . "$DIR/sh/.shrc"
 
     # fish
     mkdir -p ~/.config/fish/functions  # Create directory for fish-shell
@@ -44,7 +44,7 @@ _pre() {
 }
 
 _link() {
-    echo 'Symlinking dotfiles...'
+    echo 'Symlinking dotfiles ...'
 
     # bash, fish and zsh
     ln -vsf $DIR/sh/.shrc ~/.bash_profile
@@ -67,25 +67,25 @@ _link() {
 }
 
 _install_defaults() {
-    echo 'Setting macOS defaults...'
+    echo 'Setting macOS defaults ...'
     $DIR/.macOS
 }
 
 _install_brew() {
     # Install Homebrew if missing
     if ! command -v brew &> /dev/null ; then
-        echo 'Installing Homebrew...'
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        echo 'Installing Homebrew ...'
+        /bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
 
-    echo 'Installing Homebrew packages...'
-    brew bundle --no-lock --file $DIR/Brewfile
+    echo 'Installing Homebrew packages ...'
+    brew bundle --no-lock --file "$DIR/Brewfile"
 }
 
 _install_fisher() {
     # Install fish if missing
     if ! command -v fish &> /dev/null ; then
-        echo 'Installing fish...'
+        echo 'Installing fish ...'
         brew install fish
     fi
 
@@ -97,11 +97,14 @@ _install_fisher() {
 _install_vim() {
     # Install vundle if missing
     if [ ! -d ~/.vim/bundle/Vundle.vim ]; then
-        echo 'Installing vundle...'
+        echo 'Installing Vundle ...'
         git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
     fi
 
-    echo 'Updating Vim plugins...'
+    echo 'Updating Vundle ...'
+    /bin/zsh -c "cd ~/.vim/bundle/Vundle.vim; git pull origin master"
+
+    echo 'Updating Vim plugins ...'
     # Supress attaching to tty
     echo | echo | vim +PluginInstall! +PluginClean! +qall &>/dev/null
 }
