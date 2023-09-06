@@ -44,16 +44,16 @@ _pre() {
 }
 
 _clone() {
-    echo "Cloning dotfiles to $getpath/github.com/arbourd/dotfiles ..."
+    echo "\n$(tput bold)Cloning dotfiles to $getpath/github.com/arbourd/dotfiles $(tput sgr0)...\n"
 
     mkdir -p "$getpath/github.com/arbourd"
 
     git clone https://github.com/arbourd/dotfiles.git "$getpath/github.com/arbourd/dotfiles"
-    echo "$getpath/github.com/arbourd/dotfiles"
+    echo "\n$(tput bold)$getpath/github.com/arbourd/dotfiles$(tput sgr0)"
 }
 
 _link() {
-    echo 'Symlinking dotfiles ...'
+    echo "\n$(tput bold)Symlinking dotfiles $(tput sgr0)...\n"
 
     # bash, fish and zsh
     ln -vsf "$DIR/sh/.shrc" ~/.bash_profile
@@ -76,29 +76,29 @@ _link() {
 }
 
 _install_defaults() {
-    echo 'Setting macOS defaults ...'
+    echo "\n$(tput bold)Setting macOS defaults $(tput sgr0)...\n"
     $DIR/.macOS
 }
 
 _install_brew() {
     # Install Homebrew if missing
     if ! command -v brew &> /dev/null ; then
-        echo 'Installing Homebrew ...'
+        echo "\n$(tput bold)Installing Homebrew $(tput sgr0)...\n"
         /bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
 
-    echo 'Installing Homebrew packages ...'
+    echo "\n$(tput bold)Installing Homebrew packages $(tput sgr0)...\n"
     brew bundle --no-lock --file "$DIR/Brewfile"
 }
 
 _install_fisher() {
     # Install fish if missing
     if ! command -v fish &> /dev/null ; then
-        echo 'Installing fish ...'
+        echo "\n$(tput bold)Installing fish $(tput sgr0)...\n"
         brew install fish
     fi
 
-    echo 'Updating and installing fisher plugins...'
+    echo "\n$(tput bold)Updating and installing fisher plugins $(tput sgr0)...\n"
     fish -c "curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
     fish -c "git checkout $DIR/sh/fish_plugins"
     fish -c "fisher update"
@@ -107,14 +107,14 @@ _install_fisher() {
 _install_vim() {
     # Install vundle if missing
     if [ ! -d ~/.vim/bundle/Vundle.vim ]; then
-        echo 'Installing Vundle ...'
+        echo "\n$(tput bold)Installing Vundle $(tput sgr0) ...\n"
         git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
     fi
 
-    echo 'Updating Vundle ...'
+    echo "\n$(tput bold)Updating Vundle $(tput sgr0)...\n"
     /bin/zsh -c "cd ~/.vim/bundle/Vundle.vim; git pull origin master"
 
-    echo 'Updating Vim plugins ...'
+    echo "\n$(tput bold)Updating Vim plugins $(tput sgr0)...\n"
     # Supress attaching to tty
     echo | echo | vim +PluginInstall! +PluginClean! +qall &>/dev/null
 }
