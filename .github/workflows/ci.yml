@@ -6,50 +6,22 @@ on:
 
 env:
   TERM: xterm
+  HOMEBREW_BUNDLE_BREW_SKIP: 'node go'
 
 jobs:
-  test-clone:
+  test:
     runs-on: macos-latest
+    strategy:
+      matrix:
+        command:
+          - help
+          - clone
+          - link
+          - install-brew
+          - install-defaults
+          - install-fisher
+          - install-vim
 
     steps:
       - uses: actions/checkout@v4
-      - run: ./dot.sh clone
-
-  test-link:
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v4
-      - run: ./dot.sh help
-      - run: ./dot.sh link
-
-  test-brew:
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v4
-      - run: ./dot.sh install-brew
-        env:
-          HOMEBREW_BUNDLE_BREW_SKIP: 'node go'
-
-  test-defaults:
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v4
-      - run: ./dot.sh install-defaults
-
-  test-fisher:
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v4
-      - run: ./dot.sh link
-      - run: ./dot.sh install-fisher
-
-  test-vim:
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v4
-      - run: ./dot.sh install-vim
+      - run: ./dot.sh ${{ matrix.command }}
