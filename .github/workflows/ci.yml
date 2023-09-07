@@ -6,7 +6,7 @@ on:
 
 env:
   TERM: xterm
-  HOMEBREW_BUNDLE_BREW_SKIP: 'node go'
+  HOMEBREW_BUNDLE_BREW_SKIP: 'node arbourd/tap/go'
 
 jobs:
   test:
