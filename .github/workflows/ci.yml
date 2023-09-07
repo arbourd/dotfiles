@@ -2,28 +2,38 @@ name: ci
 
 on:
   push:
-  schedule:
-    - cron:  '0 17 * * 1'
 
 jobs:
-  test:
+  test-clone:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./dot.sh clone
+
+  test-link:
     runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v4
       - run: ./dot.sh help
       - run: ./dot.sh link
-      - run: ./dot.sh install-defaults
 
   test-brew:
     runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v4
-      - run: brew uninstall go@1.17
       - run: ./dot.sh install-brew
         env:
-          HOMEBREW_BUNDLE_BREW_SKIP: 'node'
+          HOMEBREW_BUNDLE_BREW_SKIP: 'node go'
+
+  test-defaults:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./dot.sh install-defaults
 
   test-fisher:
     runs-on: macos-latest
