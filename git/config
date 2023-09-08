@@ -17,6 +17,9 @@
 	helper = !/opt/homebrew/bin/gh auth git-credential
 [diff]
 	indentHeuristic = true
+[fetch]
+	pruneTags = true
+	prune = true
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
