@@ -6,7 +6,7 @@ on:
 
 env:
   TERM: xterm
-  HOMEBREW_BUNDLE_BREW_SKIP: 'node arbourd/tap/go'
+  HOMEBREW_BUNDLE_BREW_SKIP: 'node'
 
 jobs:
   test:
@@ -24,4 +24,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - if: ${{ matrix.command == 'install-brew' }}
+        name: brew uninstall go
+        run: |
+          versions=$(brew list | grep -E '^go$|^go@' || true)
+          echo $versions
+
+          for v in $versions
+          do
+            echo "brew uninstall $v"
+            brew uninstall $v
+          done
+
       - run: ./dot.sh ${{ matrix.command }}
