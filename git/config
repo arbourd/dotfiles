@@ -25,14 +25,14 @@
 	smudge = git-lfs smudge -- %f
 	required = true
 	process = git-lfs filter-process
-[includeIf "hasconfig:remote.*.url:https://gitlab.com/**"]
-	path = ~/.config/git/config-gitlab
+[git-get]
+	getpath = ~/src
+[gpg]
+	program = gpg
 [init]
 	defaultBranch = main
 [interactive]
 	diffFilter = `brew --prefix git`/share/git-core/contrib/diff-highlight/diff-highlight | less
-[gpg]
-	program = gpg
 [url "https://github.com/"]
 	insteadOf = http://github.com/
 	insteadOf = git://github.com/
@@ -47,3 +47,6 @@
 	name = Dylan Arbour
 	email = arbourd@users.noreply.github.com
 	signingkey = 25332EB09B3F27FD
+
+[includeIf "hasconfig:remote.*.url:https://gitlab.com/**"]
+	path = ~/.config/git/config-gitlab
