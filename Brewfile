@@ -30,6 +30,7 @@ brew 'kubectx'
 brew 'kubeseal'
 brew 'kustomize'
 brew 'make'
+brew 'mas'
 brew 'mkcert'
 brew 'hashicorp/tap/nomad'
 brew 'openssl'
@@ -57,7 +58,6 @@ brew 'zstd'
 cask '1password'
 cask 'appcleaner'
 cask 'bettertouchtool'
-cask 'brave-browser'
 cask 'caret'
 cask 'discord'
 cask 'docker'
@@ -78,3 +78,9 @@ cask 'whatsapp'
 
 cask 'font-source-code-pro'
 cask 'font-source-code-pro-for-powerline'
+
+mas '1Password for Safari', id: 1569813296
+mas 'AdGuard for Safari', id: 1440147259
+mas 'JSON Peep for Safari', id: 1458969831
+mas 'Noir', id: 1592917505
+mas 'Xcode', id: 497799835
