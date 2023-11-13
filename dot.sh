@@ -84,7 +84,7 @@ _install_brew() {
     # Install Homebrew if missing
     if ! command -v brew &> /dev/null ; then
         echo "\n$(tput bold)Installing Homebrew $(tput sgr0)...\n"
-        /bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
 
     echo "\n$(tput bold)Installing Homebrew packages $(tput sgr0)...\n"
