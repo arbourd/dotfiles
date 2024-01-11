@@ -39,7 +39,6 @@ brew 'pinentry-mac'
 brew 'ripgrep'
 brew 'rustup-init'
 brew 'shellcheck'
-brew 'svn'
 brew 'kylef/formulae/swiftenv'
 brew 'swiftlint'
 brew 'hashicorp/tap/terraform'
@@ -81,4 +80,5 @@ mas '1Password for Safari', id: 1569813296
 mas 'AdGuard for Safari', id: 1440147259
 mas 'JSON Peep for Safari', id: 1458969831
 mas 'Noir', id: 1592917505
+mas 'Refined GitHub', id: 1519867270
 mas 'Xcode', id: 497799835
