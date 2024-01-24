@@ -73,6 +73,7 @@ cask 'slack'
 cask 'utm'
 cask 'visual-studio-code'
 cask 'whatsapp'
+cask 'zed'
 
 cask 'font-source-code-pro'
 cask 'font-source-code-pro-for-powerline'
