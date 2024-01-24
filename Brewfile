@@ -70,6 +70,7 @@ cask 'ngrok'
 cask 'postman'
 cask 'signal'
 cask 'slack'
+cask 'utm'
 cask 'visual-studio-code'
 cask 'whatsapp'
 
