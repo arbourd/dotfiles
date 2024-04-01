@@ -1,7 +1,7 @@
 ## Exports
 #
 export EDITOR=vim                   # default editor
-export GETPATH=$HOME/src            # git-get
+export GITGET_GETPATH=$HOME/src            # git-get
 export GOPATH=$HOME/go              # go code home
 export GPG_TTY=$(tty)               # gpg
 export HOMEBREW_EDITOR=$EDITOR      # brew edit
