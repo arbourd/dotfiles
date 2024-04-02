@@ -25,6 +25,8 @@
 	smudge = git-lfs smudge -- %f
 	required = true
 	process = git-lfs filter-process
+[get]
+	path = ~/src
 [gpg]
 	program = gpg
 [init]
@@ -48,5 +50,3 @@
 
 [includeIf "hasconfig:remote.*.url:https://gitlab.com/**"]
 	path = ~/.config/git/config-gitlab
-[get]
-	path = ~/src
