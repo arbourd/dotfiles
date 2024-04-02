@@ -1,12 +1,16 @@
 #!/usr/bin/env zsh
 DIR="$(dirname "$(readlink -f "$0")")"
-getpath="${GITGET_GETPATH:-~/src}"
+
+getpath=$(git config --global get.path || echo "")
+if [ -z "$getpath" ]; then
+    getpath="${GETPATH:-~/src}"
+fi
 
 _usage() {
     echo "Usage: ./dot.sh [COMMAND]
 Commands:
   help              prints this dialog
-  clone             clones dotfiles to \$GITGET_GETPATH (${getpath})
+  clone             clones dotfiles to GETPATH (${getpath})
   link              symlinks dotfiles
   install           installs all packages
 

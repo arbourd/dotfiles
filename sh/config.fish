@@ -5,7 +5,6 @@ set -x SHELL /opt/homebrew/bin/fish # let everyone know about fish
 ## Exports
 #
 set -x EDITOR vim # default editor
-set -x GITGET_GETPATH $HOME/src # git-get
 set -x GOPATH $HOME/go # go code home
 set -x GPG_TTY (tty) # gpg
 set -x HOMEBREW_EDITOR $EDITOR # brew edit

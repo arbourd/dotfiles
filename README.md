@@ -17,7 +17,7 @@ Automated environment as code.
       Usage: ./dot.sh [COMMAND]
       Commands:
         help              prints this dialog
-        clone             clones dotfiles to $GITGET_GETPATH (~/src)
+        clone             clones dotfiles to GETPATH (~/src)
         link              symlinks dotfiles
         install           installs all packages
 
