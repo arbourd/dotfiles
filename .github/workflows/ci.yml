@@ -6,7 +6,6 @@ on:
 
 env:
   TERM: xterm
-  HOMEBREW_BUNDLE_BREW_SKIP: 'node'
 
 jobs:
   test:
@@ -37,4 +36,14 @@ jobs:
             brew uninstall $v
           done
 
+      - if: ${{ matrix.command == 'install-brew' }}
+        id: skip
+        name: Skip mas installs
+        run: |
+          ids=$(cat Brewfile | grep -oE "[0-9]{9,}" | tr '\n' ' ')
+          echo $ids
+          echo "ids=$ids" >> "$GITHUB_OUTPUT"
+
       - run: ./dot.sh ${{ matrix.command }}
+        env:
+          HOMEBREW_BUNDLE_MAS_SKIP: ${{ steps.skip.outputs.ids }}
