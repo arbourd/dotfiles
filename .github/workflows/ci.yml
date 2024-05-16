@@ -27,6 +27,8 @@ jobs:
       - if: ${{ matrix.command == 'install-brew' }}
         name: brew uninstall go
         run: |
+          brew update
+
           versions=$(brew list | grep -E '^go$|^go@' || true)
           echo $versions
 
