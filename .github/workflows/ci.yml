@@ -45,8 +45,6 @@ jobs:
         run: |
           ids=$(cat Brewfile | grep -oE "[0-9]{9,}" | tr '\n' ' ')
           echo $ids
-          echo "ids=$ids" >> "$GITHUB_OUTPUT"
+          echo "HOMEBREW_BUNDLE_MAS_SKIP=$ids" >> "$GITHUB_ENV"
 
       - run: ./dot.sh ${{ matrix.command }}
-        env:
-          HOMEBREW_BUNDLE_MAS_SKIP: ${{ steps.skip.outputs.ids }}
