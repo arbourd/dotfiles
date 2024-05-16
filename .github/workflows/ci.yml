@@ -25,10 +25,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - if: ${{ matrix.command == 'install-brew' }}
-        name: brew uninstall go
-        run: |
-          brew update
+        run: brew update
 
+      - if: ${{ matrix.command == 'install-brew' }}
+        name: Run brew uninstall go
+        run: |
           versions=$(brew list | grep -E '^go$|^go@' || true)
           echo $versions
 
