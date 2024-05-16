@@ -1,4 +1,3 @@
-tap 'homebrew/cask-fonts'
 tap 'homebrew/services'
 tap 'arbourd/tap'
 tap 'fluxcd/tap'
