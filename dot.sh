@@ -92,7 +92,7 @@ _install_brew() {
     fi
 
     echo "\n$(tput bold)Installing Homebrew packages $(tput sgr0)...\n"
-    brew bundle --no-lock --file "$DIR/Brewfile"
+    HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file "$DIR/Brewfile"
 }
 
 _install_fisher() {
