@@ -42,9 +42,6 @@ _pre() {
 
     # ssh
     mkdir -p ~/.ssh
-
-    # vim
-    mkdir -p ~/.vim/bundle  # Create directory for Vundle
 }
 
 _clone() {
@@ -109,18 +106,20 @@ _install_fisher() {
 }
 
 _install_vim() {
-    # Install vundle if missing
-    if [ ! -d ~/.vim/bundle/Vundle.vim ]; then
-        echo "\n$(tput bold)Installing Vundle $(tput sgr0) ...\n"
-        git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+    # Install vim-plug if missing
+    if [ ! -f ~/.vim/autoload/plug.vim ]; then
+        echo "\n$(tput bold)Installing vim-plug $(tput sgr0) ...\n"
+        curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+            https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    else
+        echo -e "\n$(tput bold)Updating vim-plug $(tput sgr0)...\n"
+        curl -fLo ~/.vim/autoload/plug.vim \
+            https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     fi
-
-    echo "\n$(tput bold)Updating Vundle $(tput sgr0)...\n"
-    /bin/zsh -c "cd ~/.vim/bundle/Vundle.vim; git pull origin master"
 
     echo "\n$(tput bold)Updating Vim plugins $(tput sgr0)...\n"
     # Supress attaching to tty
-    echo | echo | vim +PluginInstall! +PluginClean! +qall &>/dev/null
+    echo | echo | vim +PlugUpdate +PlugClean! +qall &>/dev/null
 }
 
 _install() {

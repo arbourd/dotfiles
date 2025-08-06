@@ -1,18 +1,12 @@
-" Vundle init
-set nocompatible
-filetype off
+" vim-plug init
+call plug#begin('~/.vim/plugged')
 
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+Plug 'altercation/vim-colors-solarized'
+Plug 'fatih/vim-go'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
 
-Plugin 'VundleVim/Vundle.vim' " let Vundle manage Vundle, required
-Plugin 'altercation/vim-colors-solarized'
-Plugin 'fatih/vim-go'
-Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
-
-call vundle#end()            " required
-filetype plugin indent on    " required
+call plug#end()
 
 " Clean on Vim quit
 au VimLeave * :!clear
