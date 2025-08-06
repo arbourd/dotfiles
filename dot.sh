@@ -42,6 +42,9 @@ _pre() {
 
     # ssh
     mkdir -p ~/.ssh
+
+    # vim
+    mkdir -p ~/.vim
 }
 
 _clone() {
