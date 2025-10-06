@@ -89,7 +89,6 @@ mas 'Consent-O-Matic', id: 1606897889
 mas 'Hush Nag Blocker', id: 1544743900
 mas 'JSON Peep for Safari', id: 1458969831
 mas 'Noir', id: 1592917505
-mas 'Refined GitHub', id: 1519867270
 mas 'Ubiquiti WiFiman', id: 1385561119
 mas 'UniFi', id: 1057750338
 mas 'UniFi Protect', id: 1057750338
