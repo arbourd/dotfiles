@@ -49,7 +49,6 @@ brew 'tmux'
 brew 'arbourd/tap/trash'
 brew 'vim'
 brew 'watch'
-brew 'webtorrent-cli'
 brew 'wget'
 brew 'yarn'
 brew 'yq'
@@ -60,22 +59,19 @@ cask 'appcleaner'
 cask 'bettertouchtool'
 cask 'chatgpt'
 cask 'discord'
-cask 'docker'
 cask 'firefox'
 cask 'google-chrome'
 cask 'goreleaser/tap/goreleaser'
+cask 'httpie-desktop'
 cask 'iterm2'
 cask 'kap'
 cask 'logi-options+'
 cask 'monitorcontrol'
 cask 'monodraw'
-cask 'ngrok'
 cask 'notion'
 cask 'notunes'
-cask 'postman'
 cask 'rwts-pdfwriter'
 cask 'signal'
-cask 'slack'
 cask 'utm'
 cask 'visual-studio-code'
 cask 'zed'
@@ -88,6 +84,7 @@ mas 'AdGuard for Safari', id: 1440147259
 mas 'Consent-O-Matic', id: 1606897889
 mas 'Hush Nag Blocker', id: 1544743900
 mas 'JSON Peep for Safari', id: 1458969831
+mas 'Kagi for Safari', id: 1622835804
 mas 'Noir', id: 1592917505
 mas 'Ubiquiti WiFiman', id: 1385561119
 mas 'UniFi', id: 1057750338
