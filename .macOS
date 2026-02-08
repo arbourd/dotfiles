@@ -94,6 +94,13 @@ defaults write com.apple.Siri StatusMenuVisible -bool false
 defaults write com.apple.Siri VoiceTriggerUserEnabled -bool false
 
 
+## App Store
+#
+
+# Disable review popups
+defaults write com.apple.appstore InAppReviewEnabled -bool false
+
+
 ## Time Machine
 #
 
