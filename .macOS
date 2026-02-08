@@ -27,8 +27,12 @@ defaults write com.apple.menuextra.clock ShowAMPM -bool true
 defaults write com.apple.menuextra.clock ShowDate -int 2
 defaults write com.apple.menuextra.clock ShowDayOfWeek -bool false
 
-# Disable keyboard menu
-defaults write com.apple.TextInputMenu visible -bool false
+
+## Control Center
+#
+
+# Disable input menu in Control Center
+defaults write com.apple.controlcenter "NSStatusItem Visible TextInputMenu" -bool false
 
 
 ## Keyboard
@@ -79,19 +83,9 @@ defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 ## Safari
 #
 
-# Set homepage to start page
-USER=$(whoami)
-sudo dscl . mcxset /Users/$USER com.apple.Safari HomePage always -string "favorites://"
-
-
-## Siri
-#
-
-# Disable Siri on Menu
-defaults write com.apple.Siri StatusMenuVisible -bool false
-
-# Disable "Hey Siri" voice triggers
-defaults write com.apple.Siri VoiceTriggerUserEnabled -bool false
+defaults write com.apple.Safari HomePage -string "favorites://"
+defaults write com.apple.Safari NewTabBehavior -int 4
+defaults write com.apple.Safari NewWindowBehavior -int 4
 
 
 ## App Store
@@ -118,4 +112,5 @@ defaults write com.apple.WindowManager EnableStandardClickToShowDesktop -bool fa
 ## Restart services
 #
 
+killall ControlCenter
 killall Dock
