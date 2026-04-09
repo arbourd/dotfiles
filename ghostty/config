@@ -1,2 +1,4 @@
 command = /opt/homebrew/bin/fish
 macos-option-as-alt = true
+font-family = Source Code Pro for Powerline
+font-size = 14
