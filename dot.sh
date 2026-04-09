@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-DIR="$(dirname "$(readlink -f "$0")")"
+DIR="${0:A:h}"
 
 getpath=$(git config --global get.path || echo "")
 if [ -z "$getpath" ]; then
@@ -121,7 +121,7 @@ _install_vim() {
         curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
             https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     else
-        echo -e "\n$(tput bold)Updating vim-plug $(tput sgr0)...\n"
+        echo "\n$(tput bold)Updating vim-plug $(tput sgr0)...\n"
         curl -fLo ~/.vim/autoload/plug.vim \
             https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     fi
