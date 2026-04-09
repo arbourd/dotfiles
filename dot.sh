@@ -31,6 +31,9 @@ _pre() {
     # git
     mkdir -p ~/.config/git
 
+    # ghostty
+    mkdir -p ~/.config/ghostty
+
     # golang
     mkdir -p ~/go
 
@@ -64,6 +67,9 @@ _link() {
     ln -vsf "$DIR/sh/.shrc" ~/.zshrc
     ln -vsf "$DIR/sh/config.fish" ~/.config/fish/config.fish
     ln -vsf "$DIR/sh/fish_plugins" ~/.config/fish/fish_plugins
+
+    # ghostty
+    ln -vsf "$DIR/ghostty/config" ~/.config/ghostty/config
 
     # git
     ln -vsf "$DIR/git/config" ~/.config/git/config
