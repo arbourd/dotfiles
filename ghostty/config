@@ -1,4 +1,11 @@
 command = /opt/homebrew/bin/fish
-macos-option-as-alt = true
+
+theme = iTerm2 Solarized Dark
 font-family = Source Code Pro for Powerline
 font-size = 14
+
+cursor-style = underline
+cursor-style-blink = true
+shell-integration-features = no-cursor
+
+macos-option-as-alt = true
