@@ -8,4 +8,9 @@ cursor-style = underline
 cursor-style-blink = true
 shell-integration-features = no-cursor
 
-macos-option-as-alt = true
+keybind = cmd+left=text:\x1b[1~
+keybind = cmd+right=text:\x1b[4~
+keybind = alt+left=text:\x1b[1;5D
+keybind = alt+right=text:\x1b[1;5C
+keybind = alt+backspace=text:\x17
+keybind = cmd+backspace=text:\x15
