@@ -48,5 +48,5 @@
 	email = arbourd@users.noreply.github.com
 	signingkey = 25332EB09B3F27FD
 
-[includeIf "hasconfig:remote.*.url:https://gitlab.com/**"]
-	path = ~/.config/git/config-gitlab
+[include]
+	path = ~/.config/git/private
