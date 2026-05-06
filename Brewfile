@@ -92,7 +92,9 @@ mas 'Hush Nag Blocker', id: 1544743900
 mas 'JSON Peep for Safari', id: 1458969831
 mas 'Kagi for Safari', id: 1622835804
 mas 'Noir', id: 1592917505
-mas 'Ubiquiti WiFiman', id: 1385561119
-mas 'UniFi', id: 1057750338
-mas 'UniFi Protect', id: 1057750338
+# iOS-only apps; mas cannot install them - install manually from the App Store
+# https://github.com/mas-cli/mas/issues/321
+# mas 'Ubiquiti WiFiman', id: 1385561119
+# mas 'UniFi', id: 1057750338
+# mas 'UniFi Protect', id: 1392492235
 mas 'Xcode', id: 497799835
