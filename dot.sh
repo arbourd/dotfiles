@@ -56,6 +56,9 @@ _pre() {
 
     # vim
     mkdir -p ~/.vim
+
+    # zed
+    mkdir -p ~/.config/zed
 }
 
 _clone() {
@@ -98,6 +101,9 @@ _link() {
 
     # vim
     ln -vsf "$DIR/vim/vimrc" ~/.vim/vimrc
+
+    # zed
+    ln -vsf "$DIR/zed/settings.json" ~/.config/zed/settings.json
 }
 
 _install_defaults() {

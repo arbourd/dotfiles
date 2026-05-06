@@ -23,15 +23,16 @@ On a new machine, run commands in this order: `clone` → `link` → `install`. 
 ## Repository layout
 
 ```
-dot.sh      # main script
-Brewfile    # Homebrew packages, casks, and MAS apps
-.macOS      # macOS defaults (zsh script)
-ghostty     # ghostty config
-git         # git config and global ignore
-gpg         # gpg config
+dot.sh      # entry point — clone/link/install subcommands
+Brewfile    # Homebrew formulae, casks, and Mac App Store apps
+.macOS      # zsh script that applies macOS defaults write settings
+ghostty     # Ghostty terminal emulator config
+git         # global git config, attributes, and gitignore
+gpg         # GPG agent and key config
 iterm       # iTerm 2 config (archived — do not modify or delete)
-sh          # bash, fish, zsh config
-vim         # vim config
+sh          # shell config: fish (primary), bash, and zsh fallback
+vim         # vimrc and vim-plug plugin list
+zed         # Zed editor settings and keybindings
 ```
 
 ## Shell
