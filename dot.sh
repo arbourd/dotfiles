@@ -1,4 +1,6 @@
 #!/usr/bin/env zsh
+set -euo pipefail
+
 DIR="${0:A:h}"
 
 getpath=$(git config --global get.path || echo "")
@@ -22,7 +24,7 @@ Commands:
 }
 
 _pre() {
-    . "$DIR/sh/.shrc"
+    [ -f "$DIR/sh/.shrc" ] && . "$DIR/sh/.shrc"
 
     # fish
     mkdir -p ~/.config/fish/functions  # Create directory for fish-shell
@@ -52,12 +54,18 @@ _pre() {
 }
 
 _clone() {
-    echo "\n$(tput bold)Cloning dotfiles to $getpath/github.com/arbourd/dotfiles $(tput sgr0)...\n"
+    local target="$getpath/github.com/arbourd/dotfiles"
+    echo "\n$(tput bold)Cloning dotfiles to $target $(tput sgr0)...\n"
 
-    mkdir -p "$getpath/github.com/arbourd"
+    if [ -d "$target" ]; then
+        echo "Directory already exists. Pulling latest changes..."
+        git -C "$target" pull
+    else
+        mkdir -p "$(dirname "$target")"
+        git clone https://github.com/arbourd/dotfiles.git "$target"
+    fi
 
-    git clone https://github.com/arbourd/dotfiles.git "$getpath/github.com/arbourd/dotfiles"
-    echo "\n$(tput bold)$getpath/github.com/arbourd/dotfiles$(tput sgr0)"
+    echo "\n$(tput bold)$target$(tput sgr0)"
 }
 
 _link() {
