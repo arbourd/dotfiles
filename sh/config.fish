@@ -20,16 +20,8 @@ if test -e /opt/homebrew/bin/brew
     eval (/opt/homebrew/bin/brew shellenv)
 end
 
-if test -e /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.fish.inc
-    source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.fish.inc"
-end
-
-if test -e /opt/homebrew/bin/pyenv
-    pyenv init - | source
-end
-
-if test -e /opt/homebrew/bin/swiftenv
-    eval (swiftenv init -)
+if test -e /opt/homebrew/bin/zoxide
+    zoxide init fish | source
 end
 
 source ~/.config/fish/private.fish

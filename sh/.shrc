@@ -10,8 +10,10 @@ export PATH=$HOME/.cargo/bin:$PATH  # rust bin
 ## Initializations
 #
 if [ -e /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"; fi
-if [ -e /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc ]; then . /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc; fi
-if [ -e /opt/homebrew/bin/swiftenv ]; then eval "$(/opt/homebrew/bin/swiftenv init -)"; fi
+if [ -e /opt/homebrew/bin/zoxide ]; then
+    if [ -n "$ZSH_VERSION" ]; then eval "$(/opt/homebrew/bin/zoxide init zsh)"
+    elif [ -n "$BASH_VERSION" ]; then eval "$(/opt/homebrew/bin/zoxide init bash)"; fi
+fi
 
 ## Aliases
 #

@@ -30,6 +30,7 @@ _pre() {
 
     # git
     mkdir -p ~/.config/git
+    touch ~/.config/git/private
 
     # ghostty
     mkdir -p ~/.config/ghostty
@@ -64,6 +65,7 @@ _link() {
 
     # bash, fish and zsh
     ln -vsf "$DIR/sh/.shrc" ~/.bash_profile
+    ln -vsf "$DIR/sh/.shrc" ~/.bashrc
     ln -vsf "$DIR/sh/.shrc" ~/.zshrc
     ln -vsf "$DIR/sh/config.fish" ~/.config/fish/config.fish
     ln -vsf "$DIR/sh/fish_plugins" ~/.config/fish/fish_plugins
