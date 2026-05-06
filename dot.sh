@@ -8,6 +8,10 @@ if [ -z "$getpath" ]; then
     getpath="${GETPATH:-~/src}"
 fi
 
+_log() {
+    echo "\n$(tput bold)$*$(tput sgr0)\n"
+}
+
 _usage() {
     echo "Usage: ./dot.sh [COMMAND]
 Commands:
@@ -24,6 +28,7 @@ Commands:
 }
 
 _pre() {
+    # Ensure environment is loaded
     [ -f "$DIR/sh/.shrc" ] && . "$DIR/sh/.shrc"
 
     # fish
@@ -55,7 +60,7 @@ _pre() {
 
 _clone() {
     local target="$getpath/github.com/arbourd/dotfiles"
-    echo "\n$(tput bold)Cloning dotfiles to $target $(tput sgr0)...\n"
+    _log "Cloning dotfiles to $target ..."
 
     if [ -d "$target" ]; then
         echo "Directory already exists. Pulling latest changes..."
@@ -65,11 +70,11 @@ _clone() {
         git clone https://github.com/arbourd/dotfiles.git "$target"
     fi
 
-    echo "\n$(tput bold)$target$(tput sgr0)"
+    _log "$target"
 }
 
 _link() {
-    echo "\n$(tput bold)Symlinking dotfiles $(tput sgr0)...\n"
+    _log "Symlinking dotfiles"
 
     # bash, fish and zsh
     ln -vsf "$DIR/sh/.shrc" ~/.bash_profile
@@ -96,29 +101,29 @@ _link() {
 }
 
 _install_defaults() {
-    echo "\n$(tput bold)Setting macOS defaults $(tput sgr0)...\n"
+    _log "Setting macOS defaults"
     $DIR/.macOS
 }
 
 _install_brew() {
     # Install Homebrew if missing
     if ! command -v brew &> /dev/null ; then
-        echo "\n$(tput bold)Installing Homebrew $(tput sgr0)...\n"
+        _log "Installing Homebrew"
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
 
-    echo "\n$(tput bold)Installing Homebrew packages $(tput sgr0)...\n"
+    _log "Installing Homebrew packages"
     HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file "$DIR/Brewfile"
 }
 
 _install_fisher() {
     # Install fish if missing
     if ! command -v fish &> /dev/null ; then
-        echo "\n$(tput bold)Installing fish $(tput sgr0)...\n"
+        _log "Installing fish"
         brew install fish
     fi
 
-    echo "\n$(tput bold)Updating and installing fisher plugins $(tput sgr0)...\n"
+    _log "Updating and installing fisher plugins"
     fish -c "curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
     fish -c "git checkout $DIR/sh/fish_plugins"
     fish -c "fisher update"
@@ -127,16 +132,16 @@ _install_fisher() {
 _install_vim() {
     # Install vim-plug if missing
     if [ ! -f ~/.vim/autoload/plug.vim ]; then
-        echo "\n$(tput bold)Installing vim-plug $(tput sgr0) ...\n"
+        _log "Installing vim-plug ..."
         curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
             https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     else
-        echo "\n$(tput bold)Updating vim-plug $(tput sgr0)...\n"
+        _log "Updating vim-plug"
         curl -fLo ~/.vim/autoload/plug.vim \
             https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     fi
 
-    echo "\n$(tput bold)Updating Vim plugins $(tput sgr0)...\n"
+    _log "Updating Vim plugins"
     # Supress attaching to tty
     echo | echo | vim +PlugUpdate +PlugClean! +qall &>/dev/null
 }
