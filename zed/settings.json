@@ -12,7 +12,17 @@
     "light": "One Light",
     "dark": "One Dark Pro",
   },
+  "icon_theme": "Zed (Default)",
+  "base_keymap": "SublimeText",
   "ui_font_size": 14,
   "buffer_font_size": 15,
   "buffer_font_family": "Source Code Pro",
+  "buffer_font_fallbacks": ["Menlo", "Monaco", "Courier New"],
+  "colorize_brackets": false,
+  "show_edit_predictions": true,
+  "ensure_final_newline_on_save": true,
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+  },
 }
