@@ -12,6 +12,13 @@ _log() {
     echo "\n$(tput bold)$*$(tput sgr0)\n"
 }
 
+_require() {
+    if ! command -v "$1" &> /dev/null; then
+        echo "Error: '$1' is required but not installed." >&2
+        exit 1
+    fi
+}
+
 _usage() {
     echo "Usage: ./dot.sh [COMMAND]
 Commands:
@@ -62,6 +69,7 @@ _pre() {
 }
 
 _clone() {
+    _require git
     local target="$getpath/github.com/arbourd/dotfiles"
     _log "Cloning dotfiles to $target ..."
 
@@ -112,6 +120,7 @@ _install_defaults() {
 }
 
 _install_brew() {
+    _require curl
     # Install Homebrew if missing
     if ! command -v brew &> /dev/null ; then
         _log "Installing Homebrew"
@@ -123,6 +132,10 @@ _install_brew() {
 }
 
 _install_fisher() {
+    _require brew
+    _require curl
+    _require git
+
     # Install fish if missing
     if ! command -v fish &> /dev/null ; then
         _log "Installing fish"
@@ -136,6 +149,9 @@ _install_fisher() {
 }
 
 _install_vim() {
+    _require vim
+    _require curl
+
     # Install vim-plug if missing
     if [ ! -f ~/.vim/autoload/plug.vim ]; then
         _log "Installing vim-plug ..."
