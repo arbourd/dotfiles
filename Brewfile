@@ -4,6 +4,7 @@ tap 'hashicorp/tap'
 
 brew 'ansifilter'
 brew 'bash'
+brew 'bash-completion@2'
 brew 'container'
 brew 'coreutils'
 brew 'curlie'
