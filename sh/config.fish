@@ -1,18 +1,12 @@
-set default_user (whoami) # set default user
-set fish_greeting "" # empty the greeting string
-set -x SHELL /opt/homebrew/bin/fish # let everyone know about fish
+set default_user (whoami)
+set fish_greeting ""
 
 ## Exports
 #
-set -x EDITOR vim # default editor
-set -x GOPATH $HOME/go # go code home
-set -x GPG_TTY (tty) # gpg
-set -x HOMEBREW_EDITOR $EDITOR # brew edit
-set -x PATH $GOPATH/bin $PATH # go bin
-set -x PATH $HOME/.cargo/bin $PATH # rust bin
-
-# kubectl and GKE for < 1.25
-set -x USE_GKE_GCLOUD_AUTH_PLUGIN True
+set -x SHELL /opt/homebrew/bin/fish
+set -x EDITOR vim
+set -x PATH $HOME/go/bin $PATH
+set -x PATH $HOME/.cargo/bin $PATH
 
 ## Initializations
 #

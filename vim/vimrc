@@ -14,8 +14,8 @@ au VimLeave * :!clear
 " Use the Solarized Dark theme
 set background=dark
 colorscheme solarized
-" Set $SHELL to POSIX type
-set shell=/opt/homebrew/bin/bash
+" Set $SHELL to POSIX type so vim-go and shell commands work correctly
+set shell=/bin/zsh
 " Respect modeline in files
 set modeline
 set modelines=4

@@ -17,16 +17,16 @@
       "type": "registry",
     },
     "gemini": {
-      "type": "registry"
+      "type": "registry",
     },
     "github-copilot-cli": {
-      "type": "registry"
+      "type": "registry",
     },
     "opencode": {
-      "type": "registry"
+      "type": "registry",
     },
     "pi-acp": {
-      "type": "registry"
+      "type": "registry",
     },
   },
   "project_panel": {
@@ -41,6 +41,7 @@
   "buffer_font_fallbacks": ["Menlo", "Monaco", "Courier New"],
   "buffer_font_family": "Source Code Pro",
   "buffer_font_size": 15,
+  "cli_default_open_behavior": "new_window",
   "colorize_brackets": false,
   "ensure_final_newline_on_save": true,
   "icon_theme": "Zed (Default)",

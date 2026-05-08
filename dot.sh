@@ -39,8 +39,8 @@ _pre() {
     [ -f "$DIR/sh/.shrc" ] && . "$DIR/sh/.shrc"
 
     # fish
-    mkdir -p ~/.config/fish/functions  # Create directory for fish-shell
-    touch ~/.config/fish/private.fish  # Create private env vars file
+    mkdir -p ~/.config/fish/functions
+    touch ~/.config/fish/private.fish
 
     # git
     mkdir -p ~/.config/git
@@ -144,27 +144,19 @@ _install_fisher() {
 
     _log "Updating and installing fisher plugins"
     fish -c "curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
-    fish -c "git checkout $DIR/sh/fish_plugins"
-    fish -c "fisher update"
+    fish -c "git checkout $DIR/sh/fish_plugins && fisher update"
 }
 
 _install_vim() {
     _require vim
     _require curl
 
-    # Install vim-plug if missing
-    if [ ! -f ~/.vim/autoload/plug.vim ]; then
-        _log "Installing vim-plug ..."
-        curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-            https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    else
-        _log "Updating vim-plug"
-        curl -fLo ~/.vim/autoload/plug.vim \
-            https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    fi
+    _log "Updating vim-plug"
+    curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
     _log "Updating Vim plugins"
-    # Supress attaching to tty
+    # pipe two newlines to dismiss vim-plug prompts without a tty
     echo | echo | vim +PlugUpdate +PlugClean! +qall &>/dev/null
 }
 
