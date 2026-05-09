@@ -1,0 +1,94 @@
+#!/usr/bin/env zunit
+
+@setup {
+    DOTFILES=$PWD
+    FAKE_HOME=$(mktemp -d)
+    source <(sed '/^case /,$d' "$DOTFILES/dot.sh")
+    DIR="$DOTFILES"
+    HOME="$FAKE_HOME"
+    _log() { :; }
+    mkdir -p \
+        "$HOME/.config/fish"   "$HOME/.config/ghostty" \
+        "$HOME/.config/git"    "$HOME/.config/zed" \
+        "$HOME/.gnupg"         "$HOME/.ssh" "$HOME/.vim" \
+        "$HOME/.claude/skills" "$HOME/.agents/skills" \
+        "$HOME/.claude/agents" "$HOME/.gemini/agents" \
+        "$HOME/.config/opencode/agents" "$HOME/.copilot/agents" \
+        "$HOME/.pi/agent/prompts"
+}
+
+@teardown {
+    rm -rf "$FAKE_HOME"
+}
+
+@test 'link creates dotfile symlinks' {
+    _link 2>/dev/null
+
+    assert "$HOME/.bash_profile" is_link
+    assert "$(readlink "$HOME/.bash_profile")" same_as "$DIR/sh/.shrc"
+    assert "$HOME/.bashrc" is_link
+    assert "$(readlink "$HOME/.bashrc")" same_as "$DIR/sh/.shrc"
+    assert "$HOME/.zshrc" is_link
+    assert "$(readlink "$HOME/.zshrc")" same_as "$DIR/sh/.shrc"
+    assert "$HOME/.config/fish/config.fish" is_link
+    assert "$(readlink "$HOME/.config/fish/config.fish")" same_as "$DIR/sh/config.fish"
+    assert "$HOME/.config/fish/fish_plugins" is_link
+    assert "$(readlink "$HOME/.config/fish/fish_plugins")" same_as "$DIR/sh/fish_plugins"
+    assert "$HOME/.config/ghostty/config" is_link
+    assert "$(readlink "$HOME/.config/ghostty/config")" same_as "$DIR/ghostty/config"
+    assert "$HOME/.config/git/config" is_link
+    assert "$(readlink "$HOME/.config/git/config")" same_as "$DIR/git/config"
+    assert "$HOME/.config/git/gitignore" is_link
+    assert "$(readlink "$HOME/.config/git/gitignore")" same_as "$DIR/git/gitignore"
+    assert "$HOME/.gnupg/gpg-agent.conf" is_link
+    assert "$(readlink "$HOME/.gnupg/gpg-agent.conf")" same_as "$DIR/gpg/gpg-agent.conf"
+    assert "$HOME/.ssh/config" is_link
+    assert "$(readlink "$HOME/.ssh/config")" same_as "$DIR/ssh/config"
+    assert "$HOME/.vim/vimrc" is_link
+    assert "$(readlink "$HOME/.vim/vimrc")" same_as "$DIR/vim/vimrc"
+    assert "$HOME/.config/zed/settings.json" is_link
+    assert "$(readlink "$HOME/.config/zed/settings.json")" same_as "$DIR/zed/settings.json"
+}
+
+@test 'link-agents creates agent symlinks' {
+    mkdir -p "$FAKE_HOME/agents/skills/test-skill" "$FAKE_HOME/agents/personas"
+    touch "$FAKE_HOME/agents/skills/test-skill/SKILL.md" \
+          "$FAKE_HOME/agents/personas/test-persona.md"
+
+    DIR="$FAKE_HOME" _link_agents 2>/dev/null
+
+    assert "$HOME/.claude/skills/test-skill" is_link
+    assert "$(readlink "$HOME/.claude/skills/test-skill")" same_as "$FAKE_HOME/agents/skills/test-skill"
+    assert "$HOME/.agents/skills/test-skill" is_link
+    assert "$(readlink "$HOME/.agents/skills/test-skill")" same_as "$FAKE_HOME/agents/skills/test-skill"
+    assert "$HOME/.claude/agents/test-persona.md" is_link
+    assert "$(readlink "$HOME/.claude/agents/test-persona.md")" same_as "$FAKE_HOME/agents/personas/test-persona.md"
+    assert "$HOME/.gemini/agents/test-persona.md" is_link
+    assert "$(readlink "$HOME/.gemini/agents/test-persona.md")" same_as "$FAKE_HOME/agents/personas/test-persona.md"
+    assert "$HOME/.config/opencode/agents/test-persona.md" is_link
+    assert "$(readlink "$HOME/.config/opencode/agents/test-persona.md")" same_as "$FAKE_HOME/agents/personas/test-persona.md"
+    assert "$HOME/.pi/agent/prompts/test-persona.md" is_link
+    assert "$(readlink "$HOME/.pi/agent/prompts/test-persona.md")" same_as "$FAKE_HOME/agents/personas/test-persona.md"
+    assert "$HOME/.copilot/agents/test-persona.agent.md" is_link
+    assert "$(readlink "$HOME/.copilot/agents/test-persona.agent.md")" same_as "$FAKE_HOME/agents/personas/test-persona.md"
+}
+
+@test 'clean removes stale symlinks' {
+    ln -sf "$DIR/sh/.shrc"    "$HOME/.clean-valid"
+    ln -sf "$DIR/nonexistent" "$HOME/.clean-stale"
+    ln -sf "/tmp"             "$HOME/.clean-unrelated"
+
+    ln -sf "$DIR/agents/skills/.gitkeep"    "$HOME/.claude/skills/valid-link"
+    ln -sf "$DIR/agents/skills/nonexistent" "$HOME/.claude/skills/stale-link"
+    ln -sf "$DIR/sh/.shrc"                  "$HOME/.claude/skills/unrelated-link"
+
+    _clean
+
+    assert "$HOME/.clean-valid" is_link
+    assert "$(readlink "$HOME/.clean-stale" 2>/dev/null)" is_empty
+    assert "$HOME/.clean-unrelated" is_link
+
+    assert "$HOME/.claude/skills/valid-link" is_link
+    assert "$(readlink "$HOME/.claude/skills/stale-link" 2>/dev/null)" is_empty
+    assert "$HOME/.claude/skills/unrelated-link" is_link
+}

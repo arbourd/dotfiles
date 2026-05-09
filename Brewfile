@@ -1,6 +1,8 @@
 tap 'arbourd/tap'
 tap 'fluxcd/tap'
 tap 'hashicorp/tap'
+tap 'molovo/revolver'
+tap 'zunit-zsh/zunit'
 
 brew 'ansifilter'
 brew 'bash'
@@ -58,6 +60,7 @@ brew 'wget'
 brew 'yq'
 brew 'zoxide'
 brew 'zstd'
+brew 'zunit-zsh/zunit/zunit'
 
 cask '1password'
 cask 'appcleaner'
