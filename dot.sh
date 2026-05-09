@@ -116,7 +116,7 @@ _link() {
 
 _install_defaults() {
     _log "Setting macOS defaults"
-    $DIR/.macOS
+    "$DIR/.macOS"
 }
 
 _install_brew() {
@@ -144,7 +144,7 @@ _install_fisher() {
 
     _log "Updating and installing fisher plugins"
     fish -c "curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
-    fish -c "git checkout $DIR/sh/fish_plugins && fisher update"
+    fish -c "git checkout \"$DIR/sh/fish_plugins\" && fisher update"
 }
 
 _install_vim() {
