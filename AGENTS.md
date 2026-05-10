@@ -17,8 +17,6 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 | `install-vim`       | Installs/updates vim-plug and Vim plugins               |
 | `clean`             | Removes stale dotfile symlinks                          |
 
-`_pre` (called before every install/link) creates required directories and the empty `~/.config/fish/private.fish` file.
-
 On a new machine, run commands in this order: `clone` → `link` → `install`. `link` must run before `install` because the install steps (fisher, vim) depend on config files already being in place at their expected locations.
 
 ## Repository layout
@@ -57,7 +55,7 @@ Individual symlinks are used to allow personal, non-repo agents and skills to co
 
 ## Shell
 
-Primary shell is **fish** (`/opt/homebrew/bin/fish`). `sh/.shrc` is a POSIX-compatible fallback used for bash and zsh.
+Primary shell is **fish** (`/opt/homebrew/bin/fish`). `sh/.shrc` is a POSIX-compatible fallback used for bash and zsh. `dot.sh` is zsh to maintain compatibility with macOS.
 
 Private/sensitive env vars go in `~/.config/fish/private.fish` (not tracked; created empty by `_pre`). Git private config goes in `~/.config/git/private` (not tracked; included via `git/config`).
 

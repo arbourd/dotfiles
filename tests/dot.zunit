@@ -3,26 +3,49 @@
 @setup {
     DOTFILES=$PWD
     FAKE_HOME=$(mktemp -d)
-    source <(sed '/^case /,$d' "$DOTFILES/dot.sh")
+
+    sed '/^case /,$d' "$DOTFILES/dot.sh" > "$FAKE_HOME/dot.sh"
+    source "$FAKE_HOME/dot.sh"
+
+    # Disable logging in tests
+    _log() { :; }
+
     DIR="$DOTFILES"
     HOME="$FAKE_HOME"
-    _log() { :; }
-    mkdir -p \
-        "$HOME/.config/fish"   "$HOME/.config/ghostty" \
-        "$HOME/.config/git"    "$HOME/.config/zed" \
-        "$HOME/.gnupg"         "$HOME/.ssh" "$HOME/.vim" \
-        "$HOME/.claude/skills" "$HOME/.agents/skills" \
-        "$HOME/.claude/agents" "$HOME/.gemini/agents" \
-        "$HOME/.config/opencode/agents" "$HOME/.copilot/agents" \
-        "$HOME/.pi/agent/prompts"
+
+    # zstat is consistent between platforms unlike stat
+    zmodload zsh/stat
 }
 
 @teardown {
     rm -rf "$FAKE_HOME"
 }
 
+@test '_ensure creates directories, files, and permissions' {
+    _ensure "$HOME/test-dir/"
+    assert "$HOME/test-dir" is_dir
+
+    _ensure "$HOME/test-parent/test-file"
+    assert "$HOME/test-parent/test-file" is_file
+
+    _ensure "$HOME/secret-dir/" 700
+    assert "$HOME/secret-dir" is_dir
+    assert "$(zstat -F "%A" +mode $HOME/secret-dir)" same_as "drwx------"
+}
+
+@test '_require fails when command is missing' {
+    run _require "missing_cmd_$(date +%s)"
+    assert $state equals 1
+    assert "$output" contains "Error:"
+}
+
+@test '_require succeeds when command exists' {
+    run _require zsh
+    assert $state equals 0
+}
+
 @test 'link creates dotfile symlinks' {
-    _link 2>/dev/null
+    _link > /dev/null
 
     assert "$HOME/.bash_profile" is_link
     assert "$(readlink "$HOME/.bash_profile")" same_as "$DIR/sh/.shrc"
@@ -48,47 +71,118 @@
     assert "$(readlink "$HOME/.vim/vimrc")" same_as "$DIR/vim/vimrc"
     assert "$HOME/.config/zed/settings.json" is_link
     assert "$(readlink "$HOME/.config/zed/settings.json")" same_as "$DIR/zed/settings.json"
+
+    assert "$HOME/.gnupg" is_dir
+    assert "$(zstat -F "%A" +mode $HOME/.gnupg)" same_as "drwx------"
+    assert "$HOME/.config/fish/private.fish" is_file
+    assert "$HOME/.config/git/private" is_file
 }
 
-@test 'link-agents creates agent symlinks' {
-    mkdir -p "$FAKE_HOME/agents/skills/test-skill" "$FAKE_HOME/agents/personas"
-    touch "$FAKE_HOME/agents/skills/test-skill/SKILL.md" \
-          "$FAKE_HOME/agents/personas/test-persona.md"
+@test 'link-agents creates agent symlinks with renaming' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/skills/skill-a" \
+             "$FAKE_HOME/repo-mock/agents/skills/skill-b" \
+             "$FAKE_HOME/repo-mock/agents/personas"
+    touch "$FAKE_HOME/repo-mock/agents/skills/skill-a/SKILL.md" \
+          "$FAKE_HOME/repo-mock/agents/skills/skill-b/SKILL.md" \
+          "$FAKE_HOME/repo-mock/agents/personas/helper.md" \
+          "$FAKE_HOME/repo-mock/agents/personas/reviewer.md"
 
-    DIR="$FAKE_HOME" _link_agents 2>/dev/null
+    DIR="$FAKE_HOME/repo-mock"
+    _link_agents > /dev/null
 
-    assert "$HOME/.claude/skills/test-skill" is_link
-    assert "$(readlink "$HOME/.claude/skills/test-skill")" same_as "$FAKE_HOME/agents/skills/test-skill"
-    assert "$HOME/.agents/skills/test-skill" is_link
-    assert "$(readlink "$HOME/.agents/skills/test-skill")" same_as "$FAKE_HOME/agents/skills/test-skill"
-    assert "$HOME/.claude/agents/test-persona.md" is_link
-    assert "$(readlink "$HOME/.claude/agents/test-persona.md")" same_as "$FAKE_HOME/agents/personas/test-persona.md"
-    assert "$HOME/.gemini/agents/test-persona.md" is_link
-    assert "$(readlink "$HOME/.gemini/agents/test-persona.md")" same_as "$FAKE_HOME/agents/personas/test-persona.md"
-    assert "$HOME/.config/opencode/agents/test-persona.md" is_link
-    assert "$(readlink "$HOME/.config/opencode/agents/test-persona.md")" same_as "$FAKE_HOME/agents/personas/test-persona.md"
-    assert "$HOME/.pi/agent/prompts/test-persona.md" is_link
-    assert "$(readlink "$HOME/.pi/agent/prompts/test-persona.md")" same_as "$FAKE_HOME/agents/personas/test-persona.md"
-    assert "$HOME/.copilot/agents/test-persona.agent.md" is_link
-    assert "$(readlink "$HOME/.copilot/agents/test-persona.agent.md")" same_as "$FAKE_HOME/agents/personas/test-persona.md"
+    assert "$HOME/.claude/skills/skill-a" is_link
+    assert "$HOME/.agents/skills/skill-a" is_link
+    assert "$HOME/.claude/skills/skill-b" is_link
+    assert "$HOME/.agents/skills/skill-b" is_link
+
+    assert "$HOME/.claude/agents/helper.md" is_link
+    assert "$(readlink "$HOME/.claude/agents/helper.md")" same_as "$FAKE_HOME/repo-mock/agents/personas/helper.md"
+    assert "$HOME/.gemini/agents/helper.md" is_link
+    assert "$HOME/.pi/agent/prompts/helper.md" is_link
+
+    assert "$HOME/.copilot/agents/helper.agent.md" is_link
+    assert "$(readlink "$HOME/.copilot/agents/helper.agent.md")" same_as "$FAKE_HOME/repo-mock/agents/personas/helper.md"
+    assert "$HOME/.copilot/agents/reviewer.agent.md" is_link
+    assert "$(readlink "$HOME/.copilot/agents/reviewer.agent.md")" same_as "$FAKE_HOME/repo-mock/agents/personas/reviewer.md"
 }
 
-@test 'clean removes stale symlinks' {
-    ln -sf "$DIR/sh/.shrc"    "$HOME/.clean-valid"
-    ln -sf "$DIR/nonexistent" "$HOME/.clean-stale"
-    ln -sf "/tmp"             "$HOME/.clean-unrelated"
+@test '_remove_stale_link guards and removal' {
+    touch "$HOME/real-file"
+    _remove_stale_link "$HOME/real-file" "$DIR/"
+    assert "$HOME/real-file" is_file
 
-    ln -sf "$DIR/agents/skills/.gitkeep"    "$HOME/.claude/skills/valid-link"
-    ln -sf "$DIR/agents/skills/nonexistent" "$HOME/.claude/skills/stale-link"
-    ln -sf "$DIR/sh/.shrc"                  "$HOME/.claude/skills/unrelated-link"
+    ln -sf "$DIR/sh/.shrc" "$HOME/live-link"
+    _remove_stale_link "$HOME/live-link" "$DIR/"
+    assert "$HOME/live-link" is_link
 
-    _clean
+    ln -sf "/etc/hosts" "$HOME/external-link"
+    _remove_stale_link "$HOME/external-link" "$DIR/"
+    assert "$HOME/external-link" is_link
 
-    assert "$HOME/.clean-valid" is_link
-    assert "$(readlink "$HOME/.clean-stale" 2>/dev/null)" is_empty
-    assert "$HOME/.clean-unrelated" is_link
+    ln -sf "$DIR/nonexistent" "$HOME/stale-link"
+    _remove_stale_link "$HOME/stale-link" "$DIR/"
+    assert "$(readlink "$HOME/stale-link" 2>/dev/null)" is_empty
+}
 
-    assert "$HOME/.claude/skills/valid-link" is_link
-    assert "$(readlink "$HOME/.claude/skills/stale-link" 2>/dev/null)" is_empty
-    assert "$HOME/.claude/skills/unrelated-link" is_link
+@test 'clean protects real files and unrelated symlinks' {
+    _link > /dev/null
+
+    touch "$HOME/.ssh/id_rsa"
+    ln -sf /etc/hosts "$HOME/.ssh/external_link"
+    ln -sf "$DIR/nonexistent" "$HOME/.ssh/stale_link"
+
+    _clean > /dev/null
+
+    assert "$HOME/.ssh/id_rsa" is_file
+    assert "$HOME/.ssh/external_link" is_link
+    assert "$(readlink "$HOME/.ssh/external_link")" same_as "/etc/hosts"
+    assert "$(readlink "$HOME/.ssh/stale_link" 2>/dev/null)" is_empty
+}
+
+@test 'clean removes stale agent symlinks' {
+    _link_agents > /dev/null
+
+    ln -sf "$DIR/agents/skills/nonexistent" "$HOME/.claude/skills/stale-skill"
+    ln -sf /etc/hosts "$HOME/.claude/skills/external-skill"
+
+    _clean > /dev/null
+
+    assert "$(readlink "$HOME/.claude/skills/stale-skill" 2>/dev/null)" is_empty
+    assert "$HOME/.claude/skills/external-skill" is_link
+}
+
+@test 'handling paths with spaces' {
+    SPACE_REPO="$FAKE_HOME/path with spaces"
+    mkdir -p "$SPACE_REPO/sh"
+    touch "$SPACE_REPO/sh/.shrc"
+
+    DIR="$SPACE_REPO"
+    _link > /dev/null
+
+    assert "$HOME/.bash_profile" is_link
+    assert "$(readlink "$HOME/.bash_profile")" same_as "$SPACE_REPO/sh/.shrc"
+}
+
+@test 'getpath resolution priority' {
+    git() {
+        if [[ "$*" == "config --global get.path" ]]; then
+            echo "/from/git/config"
+            return 0
+        fi
+        command git "$@"
+    }
+
+    unset getpath
+    source "$FAKE_HOME/dot.sh"
+    assert "$getpath" same_as "/from/git/config"
+
+    unset getpath
+    GETPATH="/from/env" source "$FAKE_HOME/dot.sh"
+    assert "$getpath" same_as "/from/env"
+
+    git() { return 1; }
+    unset GETPATH
+    unset getpath
+    source "$FAKE_HOME/dot.sh"
+    assert "$getpath" same_as "~/src"
 }
