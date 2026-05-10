@@ -44,6 +44,31 @@
     assert $state equals 0
 }
 
+@test 'clone creates parent dirs and clones when target missing' {
+    getpath="$FAKE_HOME/src"
+
+    local git_args
+    git() { git_args="$*"; }
+
+    _clone > /dev/null
+
+    assert "$FAKE_HOME/src/github.com/arbourd" is_dir
+    assert "$git_args" same_as "clone https://github.com/arbourd/dotfiles.git $FAKE_HOME/src/github.com/arbourd/dotfiles"
+}
+
+@test 'clone pulls when target already exists' {
+    local target="$FAKE_HOME/src/github.com/arbourd/dotfiles"
+    mkdir -p "$target"
+    getpath="$FAKE_HOME/src"
+
+    local git_args
+    git() { git_args="$*"; }
+
+    _clone > /dev/null
+
+    assert "$git_args" same_as "-C $target pull"
+}
+
 @test 'link creates dotfile symlinks' {
     _link > /dev/null
 

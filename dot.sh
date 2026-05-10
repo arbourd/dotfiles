@@ -82,7 +82,7 @@ _clone() {
         echo "Directory already exists. Pulling latest changes..."
         git -C "$target" pull
     else
-        _ensure "$(dirname "$target")"
+        _ensure "${target:h}/"
         git clone https://github.com/arbourd/dotfiles.git "$target"
     fi
 
