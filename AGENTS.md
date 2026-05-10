@@ -6,15 +6,16 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 
 `dot.sh` (zsh) is the single entry point for all setup tasks:
 
-| Command             | What it does                                      |
-|---------------------|---------------------------------------------------|
+| Command             | What it does                                            |
+|---------------------|-------------------------------------------------------- |
 | `clone`             | Clones this repo to `~/src/github.com/arbourd/dotfiles` |
-| `link`              | Symlinks all dotfiles into `~`                    |
-| `install`           | Runs brew + defaults + fisher + vim in order      |
-| `install-brew`      | Installs/updates Homebrew packages from Brewfile  |
-| `install-defaults`  | Applies macOS `defaults write` settings           |
-| `install-fisher`    | Installs/updates Fisher and fish plugins          |
-| `install-vim`       | Installs/updates vim-plug and Vim plugins         |
+| `link`              | Symlinks all dotfiles into `~`                          |
+| `install`           | Runs brew + defaults + fisher + vim in order            |
+| `install-brew`      | Installs/updates Homebrew packages from Brewfile        |
+| `install-defaults`  | Applies macOS `defaults write` settings                 |
+| `install-fisher`    | Installs/updates Fisher and fish plugins                |
+| `install-vim`       | Installs/updates vim-plug and Vim plugins               |
+| `clean`             | Removes stale dotfile symlinks                          |
 
 `_pre` (called before every install/link) creates required directories and the empty `~/.config/fish/private.fish` file.
 
@@ -24,8 +25,9 @@ On a new machine, run commands in this order: `clone` → `link` → `install`. 
 
 ```
 dot.sh      # entry point — clone/link/install subcommands
-Brewfile    # Homebrew formulae, casks, and Mac App Store apps
 .macOS      # zsh script that applies macOS defaults write settings
+Brewfile    # Homebrew formulae, casks, and Mac App Store apps
+agents      # global AI agent persona and skill definitions
 ghostty     # Ghostty terminal emulator config
 git         # global git config, attributes, and gitignore
 gpg         # GPG agent and key config
@@ -33,20 +35,29 @@ iterm       # iTerm 2 config (archived — do not modify or delete)
 sh          # shell config: fish (primary), bash, and zsh fallback
 vim         # vimrc and vim-plug plugin list
 zed         # Zed editor settings and keybindings
+tests       # zunit test suite for dotfiles
 ```
+
+## AI Agents & Skills
+
+AI configuration is managed via `agents/` and symlinked to tool-specific global paths.
+
+- `agents/personas`: Persona or subagent definitions.
+- `agents/skills`: Tool definitions and scripts.
+
+Individual symlinks are used to allow personal, non-repo agents and skills to coexist in the target directories.
+
+| Tool         | Skills                             | Personas / agents                |
+| ------------ | ---------------------------------- | -------------------------------- |
+| Claude Code  | `~/.claude/skills/<name>/SKILL.md` | `~/.claude/agents/*.md`          |
+| Gemini CLI   | `~/.agents/skills/<name>/SKILL.md` | `~/.gemini/agents/*.md`          |
+| OpenCode     | `~/.agents/skills/<name>/SKILL.md` | `~/.config/opencode/agents/*.md` |
+| Pi           | `~/.agents/skills/<name>/SKILL.md` | `~/.pi/agent/prompts/*.md`       |
+| Copilot      | `~/.agents/skills/<name>/SKILL.md` | `~/.copilot/agents/*.agent.md`   |
 
 ## Shell
 
 Primary shell is **fish** (`/opt/homebrew/bin/fish`). `sh/.shrc` is a POSIX-compatible fallback used for bash and zsh.
-
-Key environment variables set in both:
-
-- `EDITOR=vim`
-- `GOPATH=$HOME/go` with `$GOPATH/bin` on PATH
-- `$HOME/.cargo/bin` on PATH (Rust)
-- `GPG_TTY=$(tty)`
-
-Initializations (conditional on binary presence): Homebrew shellenv, zoxide.
 
 Private/sensitive env vars go in `~/.config/fish/private.fish` (not tracked; created empty by `_pre`). Git private config goes in `~/.config/git/private` (not tracked; included via `git/config`).
 

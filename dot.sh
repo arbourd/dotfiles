@@ -19,24 +19,49 @@ _require() {
     fi
 }
 
+_remove_stale_link() {
+    local link=$1 prefix=$2 target
+    [ -L "$link" ] || return 0
+    target=$(readlink "$link")
+    [[ "$target" == "$prefix"* ]] || return 0
+    [ -e "$target" ] && return 0
+    echo "$link"
+    unlink "$link"
+}
+
+_clean_dir() {
+    local prefix=$1 dir link; shift
+    for dir in "$@"; do
+        for link in "$dir"/*(DN@); do
+            _remove_stale_link "$link" "$prefix"
+        done
+    done
+}
+
 _usage() {
     echo "Usage: ./dot.sh [COMMAND]
 Commands:
   help              prints this dialog
   clone             clones dotfiles to GETPATH (${getpath})
   link              symlinks dotfiles
-  install           installs all packages
 
+  install           installs all packages
   install-defaults  installs macos defaults
   install-brew      installs homebrew packages
   install-fisher    installs fisher packages
   install-vim       installs vim packages
+
+  clean             removes stale dotfile symlinks
 "
 }
 
 _pre() {
     # Ensure environment is loaded
     [ -f "$DIR/sh/.shrc" ] && . "$DIR/sh/.shrc"
+
+    # agents
+    mkdir -p ~/.claude/skills ~/.agents/skills
+    mkdir -p ~/.claude/agents ~/.gemini/agents ~/.config/opencode/agents ~/.copilot/agents ~/.pi/agent/prompts
 
     # fish
     mkdir -p ~/.config/fish/functions
@@ -112,6 +137,32 @@ _link() {
 
     # zed
     ln -vsf "$DIR/zed/settings.json" ~/.config/zed/settings.json
+
+    _log "Symlinking agent dotfiles"
+    _link_agents
+}
+
+_link_agents() {
+    local skill
+    for skill in "$DIR/agents/skills"/*(/N); do
+        ln -vsf "$skill" ~/.claude/skills/
+        ln -vsf "$skill" ~/.agents/skills/
+    done
+
+    local persona
+    for persona in "$DIR/agents/personas"/*.md(N); do
+        ln -vsf "$persona" ~/.claude/agents/
+        ln -vsf "$persona" ~/.gemini/agents/
+        ln -vsf "$persona" ~/.config/opencode/agents/
+        ln -vsf "$persona" ~/.pi/agent/prompts/
+        ln -vsf "$persona" ~/.copilot/agents/"${persona:t:r}.agent.md"
+    done
+}
+
+_clean() {
+    _log "Cleaning stale dotfile symlinks"
+    _clean_dir "$DIR/" ~ ~/.config/fish ~/.config/ghostty ~/.config/git ~/.config/zed ~/.gnupg ~/.ssh ~/.vim
+    _clean_dir "$DIR/agents/" ~/.claude/skills ~/.agents/skills ~/.claude/agents ~/.gemini/agents ~/.config/opencode/agents ~/.copilot/agents ~/.pi/agent/prompts
 }
 
 _install_defaults() {
@@ -194,6 +245,9 @@ case $1 in
     install-vim)
         _pre
         _install_vim
+        ;;
+    clean)
+        _clean
         ;;
     help)
         _usage
