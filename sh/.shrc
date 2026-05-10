@@ -6,15 +6,15 @@ export PATH=$HOME/.cargo/bin:$PATH
 
 ## Initializations
 #
-if [ -n "$BASH_VERSION" ]; then
+if [ -n "${BASH_VERSION:-}" ]; then
     [[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]] && . "/opt/homebrew/etc/profile.d/bash_completion.sh"
 fi
 
 if [ -e /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"; fi
 
 if [ -e /opt/homebrew/bin/zoxide ]; then
-    if [ -n "$ZSH_VERSION" ]; then eval "$(/opt/homebrew/bin/zoxide init zsh)"
-    elif [ -n "$BASH_VERSION" ]; then eval "$(/opt/homebrew/bin/zoxide init bash)"; fi
+    if [ -n "${ZSH_VERSION:-}" ]; then eval "$(/opt/homebrew/bin/zoxide init zsh)"
+    elif [ -n "${BASH_VERSION:-}" ]; then eval "$(/opt/homebrew/bin/zoxide init bash)"; fi
 fi
 
 ## Aliases
