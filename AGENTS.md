@@ -6,23 +6,23 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 
 `dot.sh` (zsh) is the single entry point for all setup tasks:
 
-| Command             | What it does                                            |
-|---------------------|-------------------------------------------------------- |
-| `clone`             | Clones this repo to `~/src/github.com/arbourd/dotfiles` |
-| `link`              | Symlinks all dotfiles into `~`                          |
-| `install`           | Runs brew + defaults + fisher + vim in order            |
-| `install-brew`      | Installs/updates Homebrew packages from Brewfile        |
-| `install-defaults`  | Applies macOS `defaults write` settings                 |
-| `install-fisher`    | Installs/updates Fisher and fish plugins                |
-| `install-vim`       | Installs/updates vim-plug and Vim plugins               |
-| `clean`             | Removes stale dotfile symlinks                          |
+| Command             | What it does                                                                    |
+|---------------------|---------------------------------------------------------------------------------|
+| `init`              | Clones this repo to `~/src/github.com/arbourd/dotfiles` and symlinks `dot.sh` to `~/.local/bin/dot` |
+| `update`            | Pulls latest changes and reports the version and whether it was updated         |
+| `link`              | Symlinks all dotfiles into `~` and removes stale symlinks                       |
+| `install`           | Runs brew + defaults + fisher + vim in order                                    |
+| `install-brew`      | Installs/updates Homebrew packages from Brewfile                                |
+| `install-defaults`  | Applies macOS `defaults write` settings                                         |
+| `install-fisher`    | Installs/updates Fisher and fish plugins                                        |
+| `install-vim`       | Installs/updates vim-plug and Vim plugins                                       |
 
-On a new machine, run commands in this order: `clone` → `link` → `install`. `link` must run before `install` because the install steps (fisher, vim) depend on config files already being in place at their expected locations.
+On a new machine, run commands in this order: `init` → `link` → `install`. `link` must run before `install` because the install steps (fisher, vim) depend on config files already being in place at their expected locations.
 
 ## Repository layout
 
 ```
-dot.sh      # entry point — clone/link/install subcommands
+dot.sh      # entry point — init/update/link/install subcommands
 .macOS      # zsh script that applies macOS defaults write settings
 Brewfile    # Homebrew formulae, casks, and Mac App Store apps
 agents      # global AI agent persona and skill definitions
@@ -57,20 +57,30 @@ Individual symlinks are used to allow personal, non-repo agents and skills to co
 
 Primary shell is **fish** (`/opt/homebrew/bin/fish`). `sh/.shrc` is a POSIX-compatible fallback used for bash and zsh. `dot.sh` is zsh to maintain compatibility with macOS.
 
-Private/sensitive env vars go in `~/.config/fish/private.fish` (not tracked; created empty by `_pre`). Git private config goes in `~/.config/git/private` (not tracked; included via `git/config`).
+Private/sensitive env vars go in `~/.config/fish/private.fish` (not tracked; created empty by `_ensure`). Git private config goes in `~/.config/git/private` (not tracked; included via `git/config`).
 
 ## Homebrew
 
 Packages are in `Brewfile`. Run with `HOMEBREW_BUNDLE_NO_LOCK=1` — no `Brewfile.lock.json` is generated or committed.
 
+## Adding or removing a command
+
+When a `dot.sh` command is added, renamed, or removed, update all five of these in the same change:
+
+1. `dot.sh` — `_usage()` and the `case` statement
+2. `README.md` — usage block in Installation
+3. `AGENTS.md` — command table and repo layout comment
+4. `.github/workflows/ci.yml` — `matrix.command` list
+5. `tests/dot.zunit` — add or remove the corresponding test(s)
+
 ## CI
 
-GitHub Actions (`.github/workflows/ci.yml`) runs each `dot.sh` command as a matrix job on `macos-latest`. MAS installs are skipped in CI via `HOMEBREW_BUNDLE_MAS_SKIP`. Dependabot keeps Actions up to date daily.
+GitHub Actions (`.github/workflows/ci.yml`) runs each `dot.sh` command as a matrix job on `macos-latest`, plus a separate job that runs the zunit test suite on `ubuntu-latest`. MAS installs are skipped in CI via `HOMEBREW_BUNDLE_MAS_SKIP`. Dependabot keeps Actions up to date daily.
 
 ## Adding a new dotfile
 
 1. Add the config file under an appropriately named directory.
-2. Add a `mkdir -p` for its target directory in `_pre` if needed.
+2. Add an `_ensure` call for its target directory in `_link` if needed.
 3. Add an `ln -vsf` line in `_link` pointing it to its target path.
 4. If it requires a new package, add it to `Brewfile`.
 

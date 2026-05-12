@@ -7,20 +7,21 @@ Automated environment as code.
   1. Install with script
 
       ```console
-      $ curl -sSL https://raw.githubusercontent.com/arbourd/dotfiles/main/dot.sh | sh -s -- clone
+      $ curl -sSL https://raw.githubusercontent.com/arbourd/dotfiles/main/dot.sh | zsh -s -- init
       ```
 
-  1. Run `dot.sh`
+  1. Run `dot`
 
       ```console
-      $ ./dot.sh
-      Usage: ./dot.sh [COMMAND]
+      $ dot
+      Usage: dot [COMMAND]
       Commands:
         help              prints this dialog
-        clone             clones dotfiles to GETPATH (~/src)
-        link              symlinks dotfiles
-        install           installs all packages
+        init              clones dotfiles to GETPATH (~/src) and symlinks dot.sh to ~/.local/bin
+        update            updates the dotfiles repository
+        link              symlinks dotfiles and removes stale symlinks
 
+        install           installs all packages
         install-defaults  installs macos defaults
         install-brew      installs homebrew packages
         install-fisher    installs fisher packages
