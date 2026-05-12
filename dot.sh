@@ -10,7 +10,7 @@ fi
 if [ -z "$getpath" ]; then
     getpath=~/src
 fi
-# git config and env vars return "~/src" as a literal string, so expand ~ manually
+# expand $HOME as git config and env vars return literal string "~/src"
 getpath="${getpath/#\~/$HOME}"
 
 _log() {
@@ -76,7 +76,7 @@ Commands:
 
 _init() {
     _require git
-    local target="${${getpath%/}/#\~/$HOME}/github.com/arbourd/dotfiles"
+    local target="${getpath%/}/github.com/arbourd/dotfiles"
 
     _log "Initializing dotfiles to $target"
 
