@@ -4,11 +4,11 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 
 ## Entry point
 
-`dot.sh` (zsh) is the single entry point for all setup tasks:
+`dot` (zsh) is the single entry point for all setup tasks:
 
 | Command             | What it does                                                                    |
 |---------------------|---------------------------------------------------------------------------------|
-| `init`              | Clones this repo to `~/src/github.com/arbourd/dotfiles` and symlinks `dot.sh` to `~/.local/bin/dot` |
+| `init`              | Clones this repo to `~/src/github.com/arbourd/dotfiles` and symlinks `dot` to `~/.local/bin/dot` |
 | `update`            | Pulls latest changes and reports the version and whether it was updated         |
 | `link`              | Symlinks all dotfiles into `~` and removes stale symlinks                       |
 | `install`           | Runs brew + defaults + fisher + vim in order                                    |
@@ -22,7 +22,7 @@ On a new machine, run commands in this order: `init` → `link` → `install`. `
 ## Repository layout
 
 ```
-dot.sh      # entry point — init/update/link/install subcommands
+dot         # entry point — init/update/link/install subcommands
 .macOS      # zsh script that applies macOS defaults write settings
 Brewfile    # Homebrew formulae, casks, and Mac App Store apps
 agents      # global AI agent persona and skill definitions
@@ -55,7 +55,7 @@ Individual symlinks are used to allow personal, non-repo agents and skills to co
 
 ## Shell
 
-Primary shell is **fish** (`/opt/homebrew/bin/fish`). `sh/.shrc` is a POSIX-compatible fallback used for bash and zsh. `dot.sh` is zsh to maintain compatibility with macOS.
+Primary shell is **fish** (`/opt/homebrew/bin/fish`). `sh/.shrc` is a POSIX-compatible fallback used for bash and zsh. `dot` is zsh to maintain compatibility with macOS.
 
 Private/sensitive env vars go in `~/.config/fish/private.fish` (not tracked; created empty by `_ensure`). Git private config goes in `~/.config/git/private` (not tracked; included via `git/config`).
 
@@ -65,9 +65,9 @@ Packages are in `Brewfile`. Run with `HOMEBREW_BUNDLE_NO_LOCK=1` — no `Brewfil
 
 ## Adding or removing a command
 
-When a `dot.sh` command is added, renamed, or removed, update all five of these in the same change:
+When a `dot` command is added, renamed, or removed, update all five of these in the same change:
 
-1. `dot.sh` — `_usage()` and the `case` statement
+1. `dot` — `_usage()` and the `case` statement
 2. `README.md` — usage block in Installation
 3. `AGENTS.md` — command table and repo layout comment
 4. `.github/workflows/ci.yml` — `matrix.command` list
@@ -75,7 +75,7 @@ When a `dot.sh` command is added, renamed, or removed, update all five of these 
 
 ## CI
 
-GitHub Actions (`.github/workflows/ci.yml`) runs each `dot.sh` command as a matrix job on `macos-latest`, plus a separate job that runs the zunit test suite on `ubuntu-latest`. MAS installs are skipped in CI via `HOMEBREW_BUNDLE_MAS_SKIP`. Dependabot keeps Actions up to date daily.
+GitHub Actions (`.github/workflows/ci.yml`) runs each `dot` command as a matrix job on `macos-latest`, plus a separate job that runs the zunit test suite on `ubuntu-latest`. MAS installs are skipped in CI via `HOMEBREW_BUNDLE_MAS_SKIP`. Dependabot keeps Actions up to date daily.
 
 ## Adding a new dotfile
 

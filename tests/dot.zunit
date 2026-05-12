@@ -3,9 +3,10 @@
 @setup {
     DOTFILES=$PWD
     FAKE_HOME=$(mktemp -d)
+    unset GETPATH
 
-    sed '/^case /,$d' "$DOTFILES/dot.sh" > "$FAKE_HOME/dot.sh"
-    source "$FAKE_HOME/dot.sh"
+    sed '/^case /,$d' "$DOTFILES/dot" > "$FAKE_HOME/dot"
+    source "$FAKE_HOME/dot"
 
     # Disable logging in tests
     _log() { :; }
@@ -45,7 +46,7 @@
 }
 
 @test 'init creates parent dirs, clones, and symlinks dot when target missing' {
-    getpath="$FAKE_HOME/src"
+    GETPATH="$FAKE_HOME/src"
     local target="$FAKE_HOME/src/github.com/arbourd/dotfiles"
 
     local git_args
@@ -56,13 +57,13 @@
     assert "$FAKE_HOME/src/github.com/arbourd" is_dir
     assert "$git_args" same_as "clone https://github.com/arbourd/dotfiles.git $target"
     assert "$HOME/.local/bin/dot" is_link
-    assert "$(readlink "$HOME/.local/bin/dot")" same_as "$target/dot.sh"
+    assert "$(readlink "$HOME/.local/bin/dot")" same_as "$target/dot"
 }
 
 @test 'init pulls and re-symlinks dot when target already exists' {
+    GETPATH="$FAKE_HOME/src"
     local target="$FAKE_HOME/src/github.com/arbourd/dotfiles"
     mkdir -p "$target"
-    getpath="$FAKE_HOME/src"
 
     local git_args
     git() { git_args="$*"; }
@@ -71,7 +72,7 @@
 
     assert "$git_args" same_as "-C $target pull"
     assert "$HOME/.local/bin/dot" is_link
-    assert "$(readlink "$HOME/.local/bin/dot")" same_as "$target/dot.sh"
+    assert "$(readlink "$HOME/.local/bin/dot")" same_as "$target/dot"
 }
 
 @test 'update reports up to date when HEAD does not change' {
@@ -121,6 +122,12 @@
     assert "$(readlink "$HOME/.config/fish/config.fish")" same_as "$DIR/sh/config.fish"
     assert "$HOME/.config/fish/fish_plugins" is_link
     assert "$(readlink "$HOME/.config/fish/fish_plugins")" same_as "$DIR/sh/fish_plugins"
+    assert "$HOME/.config/fish/completions/dot.fish" is_link
+    assert "$(readlink "$HOME/.config/fish/completions/dot.fish")" same_as "$DIR/sh/completions/dot.fish"
+    assert "$HOME/.local/share/bash-completion/completions/dot" is_link
+    assert "$(readlink "$HOME/.local/share/bash-completion/completions/dot")" same_as "$DIR/sh/completions/dot.bash"
+    assert "$HOME/.zsh/completions/_dot" is_link
+    assert "$(readlink "$HOME/.zsh/completions/_dot")" same_as "$DIR/sh/completions/_dot"
     assert "$HOME/.config/ghostty/config" is_link
     assert "$(readlink "$HOME/.config/ghostty/config")" same_as "$DIR/ghostty/config"
     assert "$HOME/.config/git/config" is_link
@@ -236,24 +243,18 @@
         command git "$@"
     }
 
-    unset getpath
-    source "$FAKE_HOME/dot.sh"
-    assert "$getpath" same_as "/from/git/config"
+    assert "$(_resolve_getpath)" same_as "/from/git/config"
 
-    unset getpath
-    GETPATH="/from/env" source "$FAKE_HOME/dot.sh"
-    assert "$getpath" same_as "/from/env"
+    GETPATH="~/from/env"
+    assert "$(_resolve_getpath)" same_as "~/from/env"
+    unset GETPATH
 
     git() { return 1; }
-    unset GETPATH
-    unset getpath
-    source "$FAKE_HOME/dot.sh"
-    assert "$getpath" same_as "$HOME/src"
+    assert "$(_resolve_getpath)" same_as '~/src'
 }
 
 @test 'init symlink target is absolute when getpath contains a literal tilde' {
     GETPATH="~/src"
-    getpath="$GETPATH"
     local target="$HOME/src/github.com/arbourd/dotfiles"
 
     local git_args
@@ -262,5 +263,5 @@
     _init > /dev/null
 
     assert "$HOME/.local/bin/dot" is_link
-    assert "$(readlink "$HOME/.local/bin/dot")" same_as "$target/dot.sh"
+    assert "$(readlink "$HOME/.local/bin/dot")" same_as "$target/dot"
 }

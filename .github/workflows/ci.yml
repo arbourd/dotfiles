@@ -62,4 +62,4 @@ jobs:
           echo $ids
           echo "HOMEBREW_BUNDLE_MAS_SKIP=$ids" >> "$GITHUB_ENV"
 
-      - run: ./dot.sh ${{ matrix.command }}
+      - run: ./dot ${{ matrix.command }}

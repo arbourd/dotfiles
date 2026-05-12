@@ -11,6 +11,16 @@ if [ -n "${BASH_VERSION:-}" ]; then
     [[ -r "/opt/homebrew/etc/profile.d/bash_completion.sh" ]] && . "/opt/homebrew/etc/profile.d/bash_completion.sh"
 fi
 
+if [ -n "${ZSH_VERSION:-}" ]; then
+    fpath=(~/.zsh/completions $fpath)
+    autoload -Uz compinit
+    if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
+        compinit
+    else
+        compinit -C
+    fi
+fi
+
 if [ -e /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"; fi
 
 if [ -e /opt/homebrew/bin/zoxide ]; then

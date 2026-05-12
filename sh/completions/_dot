@@ -1,0 +1,26 @@
+#compdef dot
+
+_dot() {
+    local context state state_descr line
+    typeset -A opt_args
+
+    local -a commands=(
+        'help:Print usage information'
+        'init:Clone dotfiles and symlink dot to ~/.local/bin'
+        'update:Update the dotfiles repository'
+        'link:Symlink dotfiles and remove stale symlinks'
+        'install:Install all packages'
+        'install-defaults:Install macOS defaults'
+        'install-brew:Install Homebrew packages'
+        'install-fisher:Install Fisher packages'
+        'install-vim:Install Vim packages'
+    )
+
+    _arguments '1: :->cmd'
+
+    if [[ $state == cmd ]]; then
+        _describe 'command' commands
+    fi
+}
+
+_dot "$@"
