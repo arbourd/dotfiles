@@ -7,13 +7,14 @@ _dot() {
     local -a commands=(
         'help:Print usage information'
         'init:Clone dotfiles and symlink dot to ~/.local/bin'
-        'update:Update the dotfiles repository'
         'link:Symlink dotfiles and remove stale symlinks'
         'install:Install all packages'
         'install-defaults:Install macOS defaults'
         'install-brew:Install Homebrew packages'
         'install-fisher:Install Fisher packages'
         'install-vim:Install Vim packages'
+        'update:Update the dotfiles repository'
+        'version:Print the current commit SHA'
     )
 
     _arguments '1: :->cmd'
