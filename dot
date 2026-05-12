@@ -3,16 +3,6 @@ set -euo pipefail
 
 DIR="${0:A:h}"
 
-getpath="${GETPATH:-}"
-if [ -z "$getpath" ]; then
-    getpath=$(git config --global get.path || echo "")
-fi
-if [ -z "$getpath" ]; then
-    getpath=~/src
-fi
-# expand $HOME as git config and env vars return literal string "~/src"
-getpath="${getpath/#\~/$HOME}"
-
 _log() {
     echo "\n$(tput bold)$*$(tput sgr0)\n"
 }
@@ -37,6 +27,17 @@ _ensure() {
     if [[ -n "$mode" ]]; then chmod "$mode" "$target"; fi
 }
 
+_resolve_getpath() {
+    local getpath="${GETPATH:-}"
+    if [ -z "$getpath" ] && command -v git &>/dev/null; then
+        getpath=$(git config --global get.path || echo "")
+    fi
+    if [ -z "$getpath" ]; then
+        getpath="~/src"
+    fi
+    echo "$getpath"
+}
+
 _remove_stale_link() {
     local link=$1 prefix=$2 target
     [ -L "$link" ] || return 0
@@ -58,10 +59,12 @@ _clean_dir() {
 }
 
 _usage() {
+    local getpath=$(_resolve_getpath)
+
     echo "Usage: dot [COMMAND]
 Commands:
   help              prints this dialog
-  init              clones dotfiles to GETPATH (${getpath}) and symlinks dot.sh to ~/.local/bin
+  init              clones dotfiles to GETPATH (${getpath}) and symlinks dot to ~/.local/bin
   update            updates the dotfiles repository
   link              symlinks dotfiles and removes stale symlinks
 
@@ -76,7 +79,10 @@ Commands:
 
 _init() {
     _require git
-    local target="${getpath%/}/github.com/arbourd/dotfiles"
+
+    local getpath=$(_resolve_getpath)
+    local absolute_getpath="${getpath/#\~/$HOME}"
+    local target="${absolute_getpath%/}/github.com/arbourd/dotfiles"
 
     _log "Initializing dotfiles to $target"
 
@@ -88,9 +94,9 @@ _init() {
         git clone https://github.com/arbourd/dotfiles.git "$target"
     fi
 
-    _log "Symlinking dot.sh to ~/.local/bin/dot"
+    _log "Symlinking dot to $HOME/.local/bin/dot"
     _ensure ~/.local/bin/
-    ln -vsf "$target/dot.sh" ~/.local/bin/dot
+    ln -vsf "$target/dot" ~/.local/bin/dot
 }
 
 _update() {
@@ -118,6 +124,14 @@ _link() {
     ln -vsf "$DIR/sh/.shrc" ~/.zshrc
     ln -vsf "$DIR/sh/config.fish" ~/.config/fish/config.fish
     ln -vsf "$DIR/sh/fish_plugins" ~/.config/fish/fish_plugins
+
+    # completions
+    _ensure ~/.config/fish/completions/
+    ln -vsf "$DIR/sh/completions/dot.fish" ~/.config/fish/completions/dot.fish
+    _ensure ~/.local/share/bash-completion/completions/
+    ln -vsf "$DIR/sh/completions/dot.bash" ~/.local/share/bash-completion/completions/dot
+    _ensure ~/.zsh/completions/
+    ln -vsf "$DIR/sh/completions/_dot" ~/.zsh/completions/_dot
 
     # ghostty
     _ensure ~/.config/ghostty/
@@ -178,7 +192,7 @@ _link_agents() {
 
 _clean() {
     _log "Cleaning stale dotfile symlinks"
-    _clean_dir "$DIR/" ~ ~/.config/fish ~/.config/ghostty ~/.config/git ~/.config/zed ~/.gnupg ~/.ssh ~/.vim
+    _clean_dir "$DIR/" ~ ~/.config/fish ~/.config/fish/completions ~/.config/ghostty ~/.config/git ~/.config/zed ~/.gnupg ~/.local/share/bash-completion/completions ~/.ssh ~/.vim ~/.zsh/completions
 
     _log "Cleaning stale agent dotfile symlinks"
     _clean_dir "$DIR/agents/" ~/.claude/skills ~/.agents/skills ~/.claude/agents ~/.gemini/agents ~/.config/opencode/agents ~/.copilot/agents ~/.pi/agent/prompts

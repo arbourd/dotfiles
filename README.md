@@ -7,7 +7,7 @@ Automated environment as code.
   1. Install with script
 
       ```console
-      $ curl -sSL https://raw.githubusercontent.com/arbourd/dotfiles/main/dot.sh | zsh -s -- init
+      $ curl -sSL https://raw.githubusercontent.com/arbourd/dotfiles/main/dot | zsh -s -- init
       ```
 
   1. Run `dot`
@@ -17,7 +17,7 @@ Automated environment as code.
       Usage: dot [COMMAND]
       Commands:
         help              prints this dialog
-        init              clones dotfiles to GETPATH (~/src) and symlinks dot.sh to ~/.local/bin
+        init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
         update            updates the dotfiles repository
         link              symlinks dotfiles and removes stale symlinks
 
