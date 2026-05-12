@@ -44,19 +44,22 @@
     assert $state equals 0
 }
 
-@test 'clone creates parent dirs and clones when target missing' {
+@test 'init creates parent dirs, clones, and symlinks dot when target missing' {
     getpath="$FAKE_HOME/src"
+    local target="$FAKE_HOME/src/github.com/arbourd/dotfiles"
 
     local git_args
     git() { git_args="$*"; }
 
-    _clone > /dev/null
+    _init > /dev/null
 
     assert "$FAKE_HOME/src/github.com/arbourd" is_dir
-    assert "$git_args" same_as "clone https://github.com/arbourd/dotfiles.git $FAKE_HOME/src/github.com/arbourd/dotfiles"
+    assert "$git_args" same_as "clone https://github.com/arbourd/dotfiles.git $target"
+    assert "$HOME/.local/bin/dot" is_link
+    assert "$(readlink "$HOME/.local/bin/dot")" same_as "$target/dot.sh"
 }
 
-@test 'clone pulls when target already exists' {
+@test 'init pulls and re-symlinks dot when target already exists' {
     local target="$FAKE_HOME/src/github.com/arbourd/dotfiles"
     mkdir -p "$target"
     getpath="$FAKE_HOME/src"
@@ -64,9 +67,45 @@
     local git_args
     git() { git_args="$*"; }
 
-    _clone > /dev/null
+    _init > /dev/null
 
     assert "$git_args" same_as "-C $target pull"
+    assert "$HOME/.local/bin/dot" is_link
+    assert "$(readlink "$HOME/.local/bin/dot")" same_as "$target/dot.sh"
+}
+
+@test 'update reports up to date when HEAD does not change' {
+    git() {
+        if [[ "$*" == *"rev-parse --short HEAD" ]]; then echo "abc1234"; return 0; fi
+        if [[ "$*" == *"pull --quiet" ]]; then return 0; fi
+        command git "$@"
+    }
+
+    run _update
+
+    assert $state equals 0
+    assert "$output" contains "abc1234"
+    assert "$output" contains "up to date"
+}
+
+@test 'update reports old and new hashes when HEAD changes' {
+    local flag=$(mktemp)
+    rm "$flag"
+    git() {
+        if [[ "$*" == *"pull --quiet" ]]; then touch "$flag"; return 0; fi
+        if [[ "$*" == *"rev-parse --short HEAD" ]]; then
+            if [[ -e "$flag" ]]; then echo "def5678"; else echo "abc1234"; fi
+            return 0
+        fi
+        command git "$@"
+    }
+
+    run _update
+
+    rm -f "$flag"
+    assert $state equals 0
+    assert "$output" contains "abc1234"
+    assert "$output" contains "def5678"
 }
 
 @test 'link creates dotfile symlinks' {
@@ -209,5 +248,19 @@
     unset GETPATH
     unset getpath
     source "$FAKE_HOME/dot.sh"
-    assert "$getpath" same_as "~/src"
+    assert "$getpath" same_as "$HOME/src"
+}
+
+@test 'init symlink target is absolute when getpath contains a literal tilde' {
+    GETPATH="~/src"
+    getpath="$GETPATH"
+    local target="$HOME/src/github.com/arbourd/dotfiles"
+
+    local git_args
+    git() { git_args="$*"; }
+
+    _init > /dev/null
+
+    assert "$HOME/.local/bin/dot" is_link
+    assert "$(readlink "$HOME/.local/bin/dot")" same_as "$target/dot.sh"
 }

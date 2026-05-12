@@ -5,6 +5,7 @@ set fish_greeting ""
 #
 set -x SHELL /opt/homebrew/bin/fish
 set -x EDITOR vim
+set -x PATH $HOME/.local/bin $PATH
 set -x PATH $HOME/go/bin $PATH
 set -x PATH $HOME/.cargo/bin $PATH
 

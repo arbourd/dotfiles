@@ -28,13 +28,13 @@ jobs:
       matrix:
         command:
           - help
-          - clone
+          - init
+          - update
           - link
           - install-brew
           - install-defaults
           - install-fisher
           - install-vim
-          - clean
 
     steps:
       - uses: actions/checkout@v6

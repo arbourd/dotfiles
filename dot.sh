@@ -8,8 +8,10 @@ if [ -z "$getpath" ]; then
     getpath=$(git config --global get.path || echo "")
 fi
 if [ -z "$getpath" ]; then
-    getpath="~/src"
+    getpath=~/src
 fi
+# git config and env vars return "~/src" as a literal string, so expand ~ manually
+getpath="${getpath/#\~/$HOME}"
 
 _log() {
     echo "\n$(tput bold)$*$(tput sgr0)\n"
@@ -56,12 +58,12 @@ _clean_dir() {
 }
 
 _usage() {
-    echo "Usage: ./dot.sh [COMMAND]
+    echo "Usage: dot [COMMAND]
 Commands:
   help              prints this dialog
-  clone             clones dotfiles to GETPATH (${getpath})
-  link              symlinks dotfiles
-  clean             removes stale dotfile symlinks
+  init              clones dotfiles to GETPATH (${getpath}) and symlinks dot.sh to ~/.local/bin
+  update            updates the dotfiles repository
+  link              symlinks dotfiles and removes stale symlinks
 
   install           installs all packages
   install-defaults  installs macos defaults
@@ -72,11 +74,11 @@ Commands:
 "
 }
 
-_clone() {
+_init() {
     _require git
-    local target="$getpath/github.com/arbourd/dotfiles"
+    local target="${${getpath%/}/#\~/$HOME}/github.com/arbourd/dotfiles"
 
-    _log "Cloning dotfiles to $target"
+    _log "Initializing dotfiles to $target"
 
     if [ -d "$target" ]; then
         echo "Directory already exists. Pulling latest changes..."
@@ -86,7 +88,24 @@ _clone() {
         git clone https://github.com/arbourd/dotfiles.git "$target"
     fi
 
-    _log "$target"
+    _log "Symlinking dot.sh to ~/.local/bin/dot"
+    _ensure ~/.local/bin/
+    ln -vsf "$target/dot.sh" ~/.local/bin/dot
+}
+
+_update() {
+    _require git
+
+    local before after
+    before=$(git -C "$DIR" rev-parse --short HEAD)
+    git -C "$DIR" pull --quiet
+    after=$(git -C "$DIR" rev-parse --short HEAD)
+
+    if [ "$before" = "$after" ]; then
+        echo "dotfiles $after (up to date)"
+    else
+        echo "dotfiles updated $before -> $after"
+    fi
 }
 
 _link() {
@@ -127,6 +146,8 @@ _link() {
 
     _log "Symlinking agent dotfiles"
     _link_agents
+
+    _clean
 }
 
 _link_agents() {
@@ -218,8 +239,11 @@ _install() {
 }
 
 case $1 in
-    clone)
-        _clone
+    init)
+        _init
+        ;;
+    update)
+        _update
         ;;
     link)
         _link
@@ -238,9 +262,6 @@ case $1 in
         ;;
     install-vim)
         _install_vim
-        ;;
-    clean)
-        _clean
         ;;
     help)
         _usage
