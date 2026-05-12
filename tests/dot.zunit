@@ -266,6 +266,19 @@
     assert "$(readlink "$HOME/.local/bin/dot")" same_as "$target/dot"
 }
 
+@test 'dot help prints usage and exits 0' {
+    run zsh -c "./dot help"
+    assert $state equals 0
+    assert "$output" contains "Usage: dot [COMMAND]"
+}
+
+@test 'dot version prints sha and exits 0' {
+    local expected=$(git -C . rev-parse --short HEAD)
+    run zsh -c "./dot version"
+    assert $state equals 0
+    assert "$output" same_as "$expected"
+}
+
 @test 'dot with no arguments exits 1 with error and usage on stderr' {
     run zsh -c "./dot 1>/dev/null"
     assert $state equals 1

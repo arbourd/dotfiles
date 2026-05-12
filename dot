@@ -3,10 +3,12 @@ set -euo pipefail
 
 DIR="${0:A:h}"
 
+# _log prints a bold message to stdout.
 _log() {
     echo "\n$(tput bold)$*$(tput sgr0)\n"
 }
 
+# _require exits with an error if the given command is not installed.
 _require() {
     if ! command -v "$1" &> /dev/null; then
         echo "Error: '$1' is required but not installed." >&2
@@ -14,6 +16,8 @@ _require() {
     fi
 }
 
+# _ensure creates a file or directory at the given path with an optional permission mode.
+# Paths ending in / are created as directories; all others are created as files.
 _ensure() {
     local target=$1 mode=${2:-}
 
@@ -27,6 +31,7 @@ _ensure() {
     if [[ -n "$mode" ]]; then chmod "$mode" "$target"; fi
 }
 
+# _resolve_getpath returns the dotfiles root path from GETPATH, git config, or the default ~/src.
 _resolve_getpath() {
     local getpath="${GETPATH:-}"
     if [ -z "$getpath" ] && command -v git &>/dev/null; then
@@ -38,6 +43,7 @@ _resolve_getpath() {
     echo "$getpath"
 }
 
+# _remove_stale_link removes a symlink if it points to a missing target within the given prefix.
 _remove_stale_link() {
     local link=$1 prefix=$2 target
     [ -L "$link" ] || return 0
@@ -49,6 +55,7 @@ _remove_stale_link() {
     unlink "$link"
 }
 
+# _clean_dir removes stale symlinks in the given directories that resolve within the given prefix.
 _clean_dir() {
     local prefix=$1 dir link; shift
     for dir in "$@"; do
@@ -58,13 +65,50 @@ _clean_dir() {
     done
 }
 
+# _link_agents symlinks agent skills and personas into all supported AI tool directories.
+_link_agents() {
+    local skill
+    _ensure ~/.claude/skills/
+    _ensure ~/.agents/skills/
+
+    for skill in "$DIR/agents/skills"/*(/N); do
+        ln -vsf "$skill" ~/.claude/skills/
+        ln -vsf "$skill" ~/.agents/skills/
+    done
+
+    local persona
+    _ensure ~/.claude/agents/
+    _ensure ~/.gemini/agents/
+    _ensure ~/.config/opencode/agents/
+    _ensure ~/.copilot/agents/
+    _ensure ~/.pi/agent/prompts/
+
+    for persona in "$DIR/agents/personas"/*.md(N); do
+        ln -vsf "$persona" ~/.claude/agents/
+        ln -vsf "$persona" ~/.gemini/agents/
+        ln -vsf "$persona" ~/.config/opencode/agents/
+        ln -vsf "$persona" ~/.pi/agent/prompts/
+        ln -vsf "$persona" ~/.copilot/agents/"${persona:t:r}.agent.md"
+    done
+}
+
+# _clean removes stale dotfile and agent symlinks from home directories.
+_clean() {
+    _log "Cleaning stale dotfile symlinks"
+    _clean_dir "$DIR/" ~ ~/.config/fish ~/.config/fish/completions ~/.config/ghostty ~/.config/git ~/.config/zed ~/.gnupg ~/.local/share/bash-completion/completions ~/.ssh ~/.vim ~/.zsh/completions
+
+    _log "Cleaning stale agent dotfile symlinks"
+    _clean_dir "$DIR/agents/" ~/.claude/skills ~/.agents/skills ~/.claude/agents ~/.gemini/agents ~/.config/opencode/agents ~/.copilot/agents ~/.pi/agent/prompts
+}
+
+# _usage prints usage information to stdout.
 _usage() {
     local getpath=$(_resolve_getpath)
 
     echo "Usage: dot [COMMAND]
 Commands:
   help              prints this dialog
-  init              clones dotfiles to GETPATH (${getpath}) and symlinks dot to ~/.local/bin
+  init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
   install           installs all packages
   install-defaults  installs macos defaults
   install-brew      installs homebrew packages
@@ -72,9 +116,18 @@ Commands:
   install-vim       installs vim packages
   link              symlinks dotfiles and removes stale symlinks
   update            updates the dotfiles repository
+  version           prints the current commit sha
 "
 }
 
+# _version prints the current commit SHA of the dotfiles repository.
+_version() {
+    _require git
+
+    git -C "$DIR" rev-parse --short HEAD
+}
+
+# _init clones the dotfiles repository to GETPATH and symlinks dot to ~/.local/bin.
 _init() {
     _require git
 
@@ -97,6 +150,7 @@ _init() {
     ln -vsf "$target/dot" ~/.local/bin/dot
 }
 
+# _update pulls the latest dotfiles changes and reports the old and new commit SHA.
 _update() {
     _require git
 
@@ -112,6 +166,7 @@ _update() {
     fi
 }
 
+# _link symlinks all dotfiles into home and removes stale symlinks.
 _link() {
     _log "Symlinking dotfiles"
 
@@ -162,45 +217,13 @@ _link() {
     _clean
 }
 
-_link_agents() {
-    local skill
-    _ensure ~/.claude/skills/
-    _ensure ~/.agents/skills/
-
-    for skill in "$DIR/agents/skills"/*(/N); do
-        ln -vsf "$skill" ~/.claude/skills/
-        ln -vsf "$skill" ~/.agents/skills/
-    done
-
-    local persona
-    _ensure ~/.claude/agents/
-    _ensure ~/.gemini/agents/
-    _ensure ~/.config/opencode/agents/
-    _ensure ~/.copilot/agents/
-    _ensure ~/.pi/agent/prompts/
-
-    for persona in "$DIR/agents/personas"/*.md(N); do
-        ln -vsf "$persona" ~/.claude/agents/
-        ln -vsf "$persona" ~/.gemini/agents/
-        ln -vsf "$persona" ~/.config/opencode/agents/
-        ln -vsf "$persona" ~/.pi/agent/prompts/
-        ln -vsf "$persona" ~/.copilot/agents/"${persona:t:r}.agent.md"
-    done
-}
-
-_clean() {
-    _log "Cleaning stale dotfile symlinks"
-    _clean_dir "$DIR/" ~ ~/.config/fish ~/.config/fish/completions ~/.config/ghostty ~/.config/git ~/.config/zed ~/.gnupg ~/.local/share/bash-completion/completions ~/.ssh ~/.vim ~/.zsh/completions
-
-    _log "Cleaning stale agent dotfile symlinks"
-    _clean_dir "$DIR/agents/" ~/.claude/skills ~/.agents/skills ~/.claude/agents ~/.gemini/agents ~/.config/opencode/agents ~/.copilot/agents ~/.pi/agent/prompts
-}
-
+# _install_defaults applies macOS defaults settings.
 _install_defaults() {
     _log "Setting macOS defaults"
     "$DIR/.macOS"
 }
 
+# _install_brew installs Homebrew if missing and installs packages from the Brewfile.
 _install_brew() {
     _require curl
 
@@ -213,6 +236,7 @@ _install_brew() {
     HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file "$DIR/Brewfile"
 }
 
+# _install_fisher installs Fisher and updates all fish plugins.
 _install_fisher() {
     _require brew
     _require curl
@@ -229,6 +253,7 @@ _install_fisher() {
     fish -c "git checkout \"$DIR/sh/fish_plugins\" && fisher update"
 }
 
+# _install_vim installs vim-plug and updates all Vim plugins.
 _install_vim() {
     _require vim
     _require curl
@@ -243,6 +268,7 @@ _install_vim() {
     echo | echo | vim +PlugUpdate +PlugClean! +qall &>/dev/null
 }
 
+# _install runs all install steps in order: brew, defaults, fisher, and vim.
 _install() {
     _install_brew
     _install_defaults
@@ -251,11 +277,12 @@ _install() {
 }
 
 case ${1:-} in
+    help)
+        _usage
+        exit 0
+        ;;
     init)
         _init
-        ;;
-    update)
-        _update
         ;;
     link)
         _link
@@ -275,9 +302,11 @@ case ${1:-} in
     install-vim)
         _install_vim
         ;;
-    help)
-        _usage
-        exit 0
+    update)
+        _update
+        ;;
+    version)
+        _version
         ;;
     "")
         echo "error: command required" >&2

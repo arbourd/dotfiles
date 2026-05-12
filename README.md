@@ -13,16 +13,17 @@ Automated environment as code.
   1. Run `dot`
 
       ```console
-      $ dot
+      $ dot help
       Usage: dot [COMMAND]
       Commands:
         help              prints this dialog
         init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
-        link              symlinks dotfiles and removes stale symlinks
         install           installs all packages
         install-defaults  installs macos defaults
         install-brew      installs homebrew packages
         install-fisher    installs fisher packages
         install-vim       installs vim packages
+        link              symlinks dotfiles and removes stale symlinks
         update            updates the dotfiles repository
+        version           prints the current commit sha
       ```
