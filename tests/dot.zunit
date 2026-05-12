@@ -265,3 +265,17 @@
     assert "$HOME/.local/bin/dot" is_link
     assert "$(readlink "$HOME/.local/bin/dot")" same_as "$target/dot"
 }
+
+@test 'dot with no arguments exits 1 with error and usage on stderr' {
+    run zsh -c "./dot 1>/dev/null"
+    assert $state equals 1
+    assert "$output" contains "error: command required"
+    assert "$output" contains "Usage: dot [COMMAND]"
+}
+
+@test 'dot with unknown command exits 1 with error and usage on stderr' {
+    run zsh -c "./dot unknown 1>/dev/null"
+    assert $state equals 1
+    assert "$output" contains 'error: unknown command: "unknown"'
+    assert "$output" contains "Usage: dot [COMMAND]"
+}

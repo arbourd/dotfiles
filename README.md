@@ -18,12 +18,11 @@ Automated environment as code.
       Commands:
         help              prints this dialog
         init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
-        update            updates the dotfiles repository
         link              symlinks dotfiles and removes stale symlinks
-
         install           installs all packages
         install-defaults  installs macos defaults
         install-brew      installs homebrew packages
         install-fisher    installs fisher packages
         install-vim       installs vim packages
+        update            updates the dotfiles repository
       ```

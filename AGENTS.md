@@ -9,13 +9,13 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 | Command             | What it does                                                                    |
 |---------------------|---------------------------------------------------------------------------------|
 | `init`              | Clones this repo to `~/src/github.com/arbourd/dotfiles` and symlinks `dot` to `~/.local/bin/dot` |
-| `update`            | Pulls latest changes and reports the version and whether it was updated         |
 | `link`              | Symlinks all dotfiles into `~` and removes stale symlinks                       |
 | `install`           | Runs brew + defaults + fisher + vim in order                                    |
 | `install-brew`      | Installs/updates Homebrew packages from Brewfile                                |
 | `install-defaults`  | Applies macOS `defaults write` settings                                         |
 | `install-fisher`    | Installs/updates Fisher and fish plugins                                        |
 | `install-vim`       | Installs/updates vim-plug and Vim plugins                                       |
+| `update`            | Pulls latest changes and reports the version and whether it was updated         |
 
 On a new machine, run commands in this order: `init` → `link` → `install`. `link` must run before `install` because the install steps (fisher, vim) depend on config files already being in place at their expected locations.
 

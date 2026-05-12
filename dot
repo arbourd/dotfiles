@@ -65,15 +65,13 @@ _usage() {
 Commands:
   help              prints this dialog
   init              clones dotfiles to GETPATH (${getpath}) and symlinks dot to ~/.local/bin
-  update            updates the dotfiles repository
-  link              symlinks dotfiles and removes stale symlinks
-
   install           installs all packages
   install-defaults  installs macos defaults
   install-brew      installs homebrew packages
   install-fisher    installs fisher packages
   install-vim       installs vim packages
-
+  link              symlinks dotfiles and removes stale symlinks
+  update            updates the dotfiles repository
 "
 }
 
@@ -252,7 +250,7 @@ _install() {
     _install_vim
 }
 
-case $1 in
+case ${1:-} in
     init)
         _init
         ;;
@@ -281,8 +279,14 @@ case $1 in
         _usage
         exit 0
         ;;
+    "")
+        echo "error: command required" >&2
+        _usage >&2
+        exit 1
+        ;;
     *)
-        _usage
-        exit 0
+        echo "error: unknown command: \"$1\"" >&2
+        _usage >&2
+        exit 1
         ;;
 esac
