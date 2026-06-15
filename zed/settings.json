@@ -7,6 +7,18 @@
 // custom settings, run the `open default settings` command
 // from the command palette or from `Zed` application menu.
 {
+  "languages": {
+    "JSONC": {
+      "prettier": {
+        "allowed": false
+      }
+    }
+  },
+  "edit_predictions": {
+    "provider": "zed"
+  },
+  "disable_ai": true,
+  "proxy": "",
   "agent": {
     "dock": "left",
     "favorite_models": [],
@@ -38,7 +50,11 @@
     "dark": "One Dark Pro",
   },
   "base_keymap": "SublimeText",
-  "buffer_font_fallbacks": ["Menlo", "Monaco", "Courier New"],
+  "buffer_font_fallbacks": [
+    "Menlo",
+    "Monaco",
+    "Courier New"
+  ],
   "buffer_font_family": "Source Code Pro",
   "buffer_font_size": 15,
   "cli_default_open_behavior": "new_window",
