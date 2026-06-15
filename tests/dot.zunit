@@ -150,31 +150,38 @@
 }
 
 @test 'link-agents creates agent symlinks with renaming' {
-    mkdir -p "$FAKE_HOME/repo-mock/agents/skills/skill-a" \
-             "$FAKE_HOME/repo-mock/agents/skills/skill-b" \
-             "$FAKE_HOME/repo-mock/agents/personas"
-    touch "$FAKE_HOME/repo-mock/agents/skills/skill-a/SKILL.md" \
-          "$FAKE_HOME/repo-mock/agents/skills/skill-b/SKILL.md" \
+    mkdir -p "$FAKE_HOME/repo-mock/agents/claude" \
+             "$FAKE_HOME/repo-mock/agents/personas" \
+             "$FAKE_HOME/repo-mock/agents/skills/skill-a" \
+             "$FAKE_HOME/repo-mock/agents/skills/skill-b"
+    touch "$FAKE_HOME/repo-mock/agents/claude/statusline.sh" \
           "$FAKE_HOME/repo-mock/agents/personas/helper.md" \
-          "$FAKE_HOME/repo-mock/agents/personas/reviewer.md"
+          "$FAKE_HOME/repo-mock/agents/skills/skill-a/SKILL.md" \
+          "$FAKE_HOME/repo-mock/agents/skills/skill-b/SKILL.md"
 
     DIR="$FAKE_HOME/repo-mock"
     _link_agents > /dev/null
 
-    assert "$HOME/.claude/skills/skill-a" is_link
-    assert "$HOME/.agents/skills/skill-a" is_link
-    assert "$HOME/.claude/skills/skill-b" is_link
-    assert "$HOME/.agents/skills/skill-b" is_link
+    assert "$HOME/.claude/statusline.sh" is_link
+    assert "$(readlink "$HOME/.claude/statusline.sh")" same_as "$FAKE_HOME/repo-mock/agents/claude/statusline.sh"
 
     assert "$HOME/.claude/agents/helper.md" is_link
     assert "$(readlink "$HOME/.claude/agents/helper.md")" same_as "$FAKE_HOME/repo-mock/agents/personas/helper.md"
     assert "$HOME/.gemini/agents/helper.md" is_link
+    assert "$(readlink "$HOME/.gemini/agents/helper.md")" same_as "$FAKE_HOME/repo-mock/agents/personas/helper.md"
     assert "$HOME/.pi/agent/prompts/helper.md" is_link
-
+    assert "$(readlink "$HOME/.pi/agent/prompts/helper.md")" same_as "$FAKE_HOME/repo-mock/agents/personas/helper.md"
     assert "$HOME/.copilot/agents/helper.agent.md" is_link
     assert "$(readlink "$HOME/.copilot/agents/helper.agent.md")" same_as "$FAKE_HOME/repo-mock/agents/personas/helper.md"
-    assert "$HOME/.copilot/agents/reviewer.agent.md" is_link
-    assert "$(readlink "$HOME/.copilot/agents/reviewer.agent.md")" same_as "$FAKE_HOME/repo-mock/agents/personas/reviewer.md"
+
+    assert "$HOME/.claude/skills/skill-a" is_link
+    assert "$(readlink "$HOME/.claude/skills/skill-a")" same_as "$FAKE_HOME/repo-mock/agents/skills/skill-a"
+    assert "$HOME/.agents/skills/skill-a" is_link
+    assert "$(readlink "$HOME/.agents/skills/skill-a")" same_as "$FAKE_HOME/repo-mock/agents/skills/skill-a"
+    assert "$HOME/.claude/skills/skill-b" is_link
+    assert "$(readlink "$HOME/.claude/skills/skill-b")" same_as "$FAKE_HOME/repo-mock/agents/skills/skill-b"
+    assert "$HOME/.agents/skills/skill-b" is_link
+    assert "$(readlink "$HOME/.agents/skills/skill-b")" same_as "$FAKE_HOME/repo-mock/agents/skills/skill-b"
 }
 
 @test '_remove_stale_link guards and removal' {
@@ -215,11 +222,13 @@
 
     ln -sf "$DIR/agents/skills/nonexistent" "$HOME/.claude/skills/stale-skill"
     ln -sf /etc/hosts "$HOME/.claude/skills/external-skill"
+    ln -sf "$DIR/agents/claude/nonexistent" "$HOME/.claude/stale-claude-file"
 
     _clean > /dev/null
 
     assert "$(readlink "$HOME/.claude/skills/stale-skill" 2>/dev/null)" is_empty
     assert "$HOME/.claude/skills/external-skill" is_link
+    assert "$(readlink "$HOME/.claude/stale-claude-file" 2>/dev/null)" is_empty
 }
 
 @test 'handling paths with spaces' {

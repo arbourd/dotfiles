@@ -67,13 +67,10 @@ _clean_dir() {
 
 # _link_agents symlinks agent skills and personas into all supported AI tool directories.
 _link_agents() {
-    local skill
-    _ensure ~/.claude/skills/
-    _ensure ~/.agents/skills/
-
-    for skill in "$DIR/agents/skills"/*(/N); do
-        ln -vsf "$skill" ~/.claude/skills/
-        ln -vsf "$skill" ~/.agents/skills/
+    _ensure ~/.claude/
+    local claude
+    for claude in "$DIR/agents/claude"/*(N); do
+        ln -vsf "$claude" ~/.claude
     done
 
     local persona
@@ -90,6 +87,15 @@ _link_agents() {
         ln -vsf "$persona" ~/.pi/agent/prompts/
         ln -vsf "$persona" ~/.copilot/agents/"${persona:t:r}.agent.md"
     done
+
+    local skill
+    _ensure ~/.claude/skills/
+    _ensure ~/.agents/skills/
+
+    for skill in "$DIR/agents/skills"/*(/N); do
+        ln -vsf "$skill" ~/.claude/skills/
+        ln -vsf "$skill" ~/.agents/skills/
+    done
 }
 
 # _clean removes stale dotfile and agent symlinks from home directories.
@@ -98,7 +104,7 @@ _clean() {
     _clean_dir "$DIR/" ~ ~/.config/fish ~/.config/fish/completions ~/.config/ghostty ~/.config/git ~/.config/zed ~/.gnupg ~/.local/share/bash-completion/completions ~/.ssh ~/.vim ~/.zsh/completions
 
     _log "Cleaning stale agent dotfile symlinks"
-    _clean_dir "$DIR/agents/" ~/.claude/skills ~/.agents/skills ~/.claude/agents ~/.gemini/agents ~/.config/opencode/agents ~/.copilot/agents ~/.pi/agent/prompts
+    _clean_dir "$DIR/agents/" ~/.claude ~/.claude/skills ~/.agents/skills ~/.claude/agents ~/.gemini/agents ~/.config/opencode/agents ~/.copilot/agents ~/.pi/agent/prompts
 }
 
 # _usage prints usage information to stdout.
