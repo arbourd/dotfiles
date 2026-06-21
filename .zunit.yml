@@ -1,5 +1,0 @@
-tap: false
-time: false
-fail_fast: false
-directories:
-  tests: tests
