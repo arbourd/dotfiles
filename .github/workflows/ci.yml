@@ -1,7 +1,10 @@
 name: ci
 
 on:
+  pull_request:
   push:
+    branches:
+      - main
   workflow_dispatch:
 
 env:
@@ -14,9 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-
       - run: sudo apt-get install -y zsh bats
-
       - run: bats tests/dot.bats
 
   integration:
@@ -57,11 +58,15 @@ jobs:
           done
 
       - if: ${{ matrix.command == 'install-brew' }}
-        id: skip
-        name: Skip mas installs
+        name: Skip installs
         run: |
-          ids=$(cat Brewfile | grep -oE "[0-9]{9,}" | tr '\n' ' ')
-          echo $ids
-          echo "HOMEBREW_BUNDLE_MAS_SKIP=$ids" >> "$GITHUB_ENV"
+          # Container and Supacode both require MacOS 26 to install
+          echo "HOMEBREW_BUNDLE_BREW_SKIP=container" >> "$GITHUB_ENV"
+          echo "HOMEBREW_BUNDLE_CASK_SKIP=supacode" >> "$GITHUB_ENV"
+
+          # MAS installs do not work in CI
+          mas_ids=$(cat Brewfile | grep -oE "[0-9]{9,}" | tr '\n' ' ')
+          echo $mas_ids
+          echo "HOMEBREW_BUNDLE_MAS_SKIP=$mas_ids" >> "$GITHUB_ENV"
 
       - run: ./dot ${{ matrix.command }}
