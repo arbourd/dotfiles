@@ -65,13 +65,37 @@ _clean_dir() {
     done
 }
 
+# _merge_claude_settings merges the repo's portable Claude settings into ~/.claude/settings.json.
+# permissions.allow is unioned rather than overwritten.
+_merge_claude_settings() {
+    local repo_settings="$DIR/agents/claude/settings.json"
+    [[ -f "$repo_settings" ]] || return 0
+
+    _require jq
+    _ensure ~/.claude/settings.json
+    [[ -s ~/.claude/settings.json ]] || echo '{}' > ~/.claude/settings.json
+
+    local tmp=$(mktemp)
+    jq --argjson repo "$(cat "$repo_settings")" '
+        . as $live
+        | (. * $repo)
+        | .permissions.allow = ((($live.permissions.allow // []) + ($repo.permissions.allow // [])) | unique)
+    ' ~/.claude/settings.json > "$tmp"
+    mv "$tmp" ~/.claude/settings.json
+    chmod 600 ~/.claude/settings.json
+
+    echo "merged   $repo_settings -> $HOME/.claude/settings.json"
+}
+
 # _link_agents symlinks agent skills and personas into all supported AI tool directories.
 _link_agents() {
     _ensure ~/.claude/
     local claude
     for claude in "$DIR/agents/claude"/*(N); do
+        [[ "${claude:t}" == "settings.json" ]] && continue
         ln -vsf "$claude" ~/.claude
     done
+    _merge_claude_settings
 
     local persona
     _ensure ~/.claude/agents/

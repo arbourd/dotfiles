@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(rtk find *)",
+      "Bash(rtk git diff *)",
+      "Bash(rtk git log *)",
+      "Bash(rtk git status *)",
+      "Bash(rtk gh issue status *)",
+      "Bash(rtk gh issue view *)",
+      "Bash(rtk gh pr diff *)",
+      "Bash(rtk gh pr status *)",
+      "Bash(rtk gh pr view *)",
+      "Bash(rtk go build *)",
+      "Bash(rtk go mod tidy *)",
+      "Bash(rtk go test *)",
+      "Bash(rtk go vet *)",
+      "Bash(rtk grep *)",
+      "Bash(rtk ls *)",
+      "Bash(rtk read *)",
+      "Bash(rtk wc *)",
+      "WebFetch(domain:github.com)",
+      "WebSearch"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "zsh ~/.claude/statusline.sh",
+    "refreshInterval": 5000
+  },
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
+  },
+  "effortLevel": "high",
+  "spinnerTipsEnabled": false,
+  "feedbackSurveyRate": 0,
+  "theme": "dark"
+}

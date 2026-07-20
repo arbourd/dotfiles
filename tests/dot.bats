@@ -194,6 +194,68 @@ _perms() {
     [ "$(readlink "$FAKE_HOME/.agents/skills/skill-b")" = "$FAKE_HOME/repo-mock/agents/skills/skill-b" ]
 }
 
+@test 'link-agents merges claude settings.json instead of symlinking it' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
+    cat > "$FAKE_HOME/repo-mock/agents/claude/settings.json" <<'JSON'
+{
+  "permissions": { "allow": ["Bash(repo *)", "Bash(shared *)"] },
+  "theme": "dark",
+  "editor": { "theme": "repo-theme" },
+  "ignorePatterns": ["repo-pattern"]
+}
+JSON
+    cat > "$FAKE_HOME/.claude/settings.json" <<'JSON'
+{
+  "permissions": { "allow": ["Bash(live *)", "Bash(shared *)"] },
+  "hooks": { "SessionStart": [{ "matcher": "", "hooks": [] }] },
+  "editor": { "theme": "live-theme", "fontSize": 14 },
+  "ignorePatterns": ["live-pattern"]
+}
+JSON
+
+    zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _link_agents" > /dev/null
+
+    [ ! -L "$FAKE_HOME/.claude/settings.json" ]
+    [ -f "$FAKE_HOME/.claude/settings.json" ]
+
+    run jq -c '.permissions.allow | sort' "$FAKE_HOME/.claude/settings.json"
+    [ "$output" = '["Bash(live *)","Bash(repo *)","Bash(shared *)"]' ]
+
+    run jq -r '.theme' "$FAKE_HOME/.claude/settings.json"
+    [ "$output" = "dark" ]
+
+    run jq -e '.hooks.SessionStart' "$FAKE_HOME/.claude/settings.json"
+    [ "$status" -eq 0 ]
+
+    # nested objects deep-merge with the repo winning on conflicting keys
+    run jq -r '.editor.theme' "$FAKE_HOME/.claude/settings.json"
+    [ "$output" = "repo-theme" ]
+    run jq -r '.editor.fontSize' "$FAKE_HOME/.claude/settings.json"
+    [ "$output" = "14" ]
+
+    # non-permissions arrays are replaced wholesale by the repo's, not unioned
+    run jq -c '.ignorePatterns' "$FAKE_HOME/.claude/settings.json"
+    [ "$output" = '["repo-pattern"]' ]
+}
+
+@test 'merge-claude-settings creates settings.json when none exists' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/claude"
+    echo '{"effortLevel": "high"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.json"
+
+    zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_claude_settings" > /dev/null
+
+    run jq -r '.effortLevel' "$FAKE_HOME/.claude/settings.json"
+    [ "$output" = "high" ]
+}
+
+@test 'merge-claude-settings does nothing when repo has no settings.json' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/claude"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_claude_settings"
+    [ "$status" -eq 0 ]
+    [ ! -e "$FAKE_HOME/.claude/settings.json" ]
+}
+
 @test '_remove_stale_link guards and removal' {
     touch "$FAKE_HOME/real-file"
     zsh -c "source '$FAKE_HOME/setup.zsh'; _remove_stale_link '$FAKE_HOME/real-file' '$DOTFILES/'"
