@@ -20,6 +20,7 @@
       "Bash(rtk read *)",
       "Bash(rtk wc *)",
       "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.github.com)",
       "WebSearch"
     ]
   },

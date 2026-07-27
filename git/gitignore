@@ -4,10 +4,13 @@
 .gemini
 .opencode
 .pi
+.superpowers
+docs/superpowers
+
 
 # Binaries
 *.class
-*.com
+# *.com
 *.dll
 *.dylib
 *.exe

@@ -33,9 +33,10 @@ git         # global git config, attributes, and gitignore
 gpg         # GPG agent and key config
 iterm       # iTerm 2 config (archived — do not modify or delete)
 sh          # shell config: fish (primary), bash, and zsh fallback
+ssh         # SSH client config
 vim         # vimrc and vim-plug plugin list
 zed         # Zed editor settings and keybindings
-tests       # zunit test suite for dotfiles
+tests       # bats test suite for dotfiles
 ```
 
 ## AI Agents & Skills
@@ -55,6 +56,8 @@ Individual symlinks are used to allow personal, non-repo agents and skills to co
 | Pi           | `~/.agents/skills/<name>/SKILL.md` | `~/.pi/agent/prompts/*.md`       |
 | Copilot      | `~/.agents/skills/<name>/SKILL.md` | `~/.copilot/agents/*.agent.md`   |
 
+`agents/claude/settings.json` is not symlinked directly — it's merged into `~/.claude/settings.json` via `jq` (`permissions.allow` is unioned, not overwritten), so a live machine's local settings additions survive `dot link`.
+
 ## Shell
 
 Primary shell is **fish** (`/opt/homebrew/bin/fish`). `sh/.shrc` is a POSIX-compatible fallback used for bash and zsh. `dot` is zsh to maintain compatibility with macOS.
@@ -73,11 +76,11 @@ When a `dot` command is added, renamed, or removed, update all five of these in 
 2. `README.md` — usage block in Installation
 3. `AGENTS.md` — command table and repo layout comment
 4. `.github/workflows/ci.yml` — `matrix.command` list
-5. `tests/dot.zunit` — add or remove the corresponding test(s)
+5. `tests/dot.bats` — add or remove the corresponding test(s)
 
 ## CI
 
-GitHub Actions (`.github/workflows/ci.yml`) runs each `dot` command as a matrix job on `macos-latest`, plus a separate job that runs the zunit test suite on `ubuntu-latest`. MAS installs are skipped in CI via `HOMEBREW_BUNDLE_MAS_SKIP`. Dependabot keeps Actions up to date daily.
+GitHub Actions (`.github/workflows/ci.yml`) runs each `dot` command as a matrix job on `macos-latest`, plus a separate job that runs the bats test suite on `ubuntu-latest`. MAS installs are skipped in CI via `HOMEBREW_BUNDLE_MAS_SKIP`. Dependabot keeps Actions up to date daily.
 
 ## Adding a new dotfile
 
