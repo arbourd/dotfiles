@@ -165,7 +165,8 @@ _perms() {
              "$FAKE_HOME/repo-mock/agents/personas" \
              "$FAKE_HOME/repo-mock/agents/skills/skill-a" \
              "$FAKE_HOME/repo-mock/agents/skills/skill-b"
-    touch "$FAKE_HOME/repo-mock/agents/claude/statusline.sh" \
+    touch "$FAKE_HOME/repo-mock/agents/AGENTS.md" \
+          "$FAKE_HOME/repo-mock/agents/claude/statusline.sh" \
           "$FAKE_HOME/repo-mock/agents/personas/helper.md" \
           "$FAKE_HOME/repo-mock/agents/skills/skill-a/SKILL.md" \
           "$FAKE_HOME/repo-mock/agents/skills/skill-b/SKILL.md"
@@ -181,8 +182,6 @@ _perms() {
     [ "$(readlink "$FAKE_HOME/.gemini/agents/helper.md")" = "$FAKE_HOME/repo-mock/agents/personas/helper.md" ]
     [ -L "$FAKE_HOME/.pi/agent/prompts/helper.md" ]
     [ "$(readlink "$FAKE_HOME/.pi/agent/prompts/helper.md")" = "$FAKE_HOME/repo-mock/agents/personas/helper.md" ]
-    [ -L "$FAKE_HOME/.copilot/agents/helper.agent.md" ]
-    [ "$(readlink "$FAKE_HOME/.copilot/agents/helper.agent.md")" = "$FAKE_HOME/repo-mock/agents/personas/helper.md" ]
 
     [ -L "$FAKE_HOME/.claude/skills/skill-a" ]
     [ "$(readlink "$FAKE_HOME/.claude/skills/skill-a")" = "$FAKE_HOME/repo-mock/agents/skills/skill-a" ]
@@ -192,6 +191,15 @@ _perms() {
     [ "$(readlink "$FAKE_HOME/.claude/skills/skill-b")" = "$FAKE_HOME/repo-mock/agents/skills/skill-b" ]
     [ -L "$FAKE_HOME/.agents/skills/skill-b" ]
     [ "$(readlink "$FAKE_HOME/.agents/skills/skill-b")" = "$FAKE_HOME/repo-mock/agents/skills/skill-b" ]
+
+    [ -L "$FAKE_HOME/.claude/AGENTS.md" ]
+    [ "$(readlink "$FAKE_HOME/.claude/AGENTS.md")" = "$FAKE_HOME/repo-mock/agents/AGENTS.md" ]
+    [ -L "$FAKE_HOME/.gemini/GEMINI.md" ]
+    [ "$(readlink "$FAKE_HOME/.gemini/GEMINI.md")" = "$FAKE_HOME/repo-mock/agents/AGENTS.md" ]
+    [ -L "$FAKE_HOME/.codex/AGENTS.md" ]
+    [ "$(readlink "$FAKE_HOME/.codex/AGENTS.md")" = "$FAKE_HOME/repo-mock/agents/AGENTS.md" ]
+    [ -L "$FAKE_HOME/.pi/agent/AGENTS.md" ]
+    [ "$(readlink "$FAKE_HOME/.pi/agent/AGENTS.md")" = "$FAKE_HOME/repo-mock/agents/AGENTS.md" ]
 }
 
 @test 'link-agents merges claude settings.json instead of symlinking it' {

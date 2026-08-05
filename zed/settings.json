@@ -31,9 +31,6 @@
     "gemini": {
       "type": "registry",
     },
-    "github-copilot-cli": {
-      "type": "registry",
-    },
     "opencode": {
       "type": "registry",
     },
