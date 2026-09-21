@@ -118,8 +118,7 @@ _link_agents() {
         ln -vsf "$skill" ~/.agents/skills
     done
 
-    # global instructions, shared across every tool. ~/.claude/CLAUDE.md is skipped here:
-    # it's owned by the rtk installer and imports @AGENTS.md itself.
+    # global instructions, shared across every tool.
     _ensure ~/.codex/
     ln -vsf "$DIR/agents/AGENTS.md" ~/.claude/AGENTS.md
     ln -vsf "$DIR/agents/AGENTS.md" ~/.gemini/GEMINI.md
