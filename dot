@@ -310,6 +310,10 @@ _install() {
     _install_vim
 }
 
+# Only dispatch when executed. ZSH_EVAL_CONTEXT contains ":file" when sourced,
+# which lets tests source this file to reach the functions above.
+[[ "$ZSH_EVAL_CONTEXT" == *:file* ]] && return 0
+
 case ${1:-} in
     help)
         _usage

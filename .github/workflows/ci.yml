@@ -32,12 +32,13 @@ jobs:
         command:
           - help
           - init
-          - update
-          - link
           - install-brew
           - install-defaults
           - install-fisher
           - install-vim
+          - link
+          - update
+          - version
 
     steps:
       - uses: actions/checkout@v7

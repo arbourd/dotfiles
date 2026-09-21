@@ -9,7 +9,7 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 | Command             | What it does                                                                    |
 |---------------------|---------------------------------------------------------------------------------|
 | `help`              | Prints the usage dialog                                                         |
-| `init`              | Clones this repo to `~/src/github.com/arbourd/dotfiles` and symlinks `dot` to `~/.local/bin/dot` |
+| `init`              | Clones this repo to `$GETPATH/github.com/arbourd/dotfiles` and symlinks `dot` to `~/.local/bin/dot` |
 | `link`              | Symlinks all dotfiles into `~` and removes stale symlinks                       |
 | `install`           | Runs brew + defaults + fisher + vim in order                                    |
 | `install-brew`      | Installs/updates Homebrew packages from Brewfile                                |
@@ -92,7 +92,7 @@ When a `dot` command is added, renamed, or removed, update all five of these in 
 
 ## CI
 
-GitHub Actions (`.github/workflows/ci.yml`) runs each `dot` command as a matrix job on `macos-latest`, plus a separate job that runs the bats test suite on `ubuntu-latest`. MAS installs are skipped in CI via `HOMEBREW_BUNDLE_MAS_SKIP`. Dependabot keeps Actions up to date daily.
+GitHub Actions (`.github/workflows/ci.yml`) runs every `dot` command except `install` as a matrix job on `macos-latest` plus a separate job that runs the bats suite on `ubuntu-latest`. Dependabot keeps Actions up to date daily.
 
 ## Adding a new dotfile
 

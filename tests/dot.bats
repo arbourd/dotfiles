@@ -4,10 +4,8 @@ setup() {
     DOTFILES="$(cd "$BATS_TEST_DIRNAME/.." && pwd)"
     FAKE_HOME="$(mktemp -d)"
 
-    sed '/^case /,$d' "$DOTFILES/dot" > "$FAKE_HOME/dot"
-
     cat > "$FAKE_HOME/setup.zsh" <<SETUP
-source '${FAKE_HOME}/dot'
+source '${DOTFILES}/dot'
 _log() { :; }
 unset GETPATH
 HOME='${FAKE_HOME}'
