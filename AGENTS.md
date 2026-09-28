@@ -31,7 +31,6 @@ agents      # global AI agent instructions, persona, and skill definitions
 ghostty     # Ghostty terminal emulator config
 git         # global git config, attributes, and gitignore
 gpg         # GPG agent and key config
-iterm       # iTerm 2 config (archived — do not modify or delete)
 sh          # shell config: fish (primary), bash, and zsh fallback
 ssh         # SSH client config
 vim         # vimrc and vim-plug plugin list
