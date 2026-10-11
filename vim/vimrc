@@ -1,27 +1,21 @@
 " vim-plug init
 call plug#begin('~/.vim/plugged')
 
-Plug 'altercation/vim-colors-solarized'
-Plug 'fatih/vim-go'
+Plug 'lifepillar/vim-solarized8'
 Plug 'mg979/vim-visual-multi', {'branch': 'master'}
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 
 call plug#end()
 
-" Clean on Vim quit
-au VimLeave * :!clear
-" Use the Solarized Dark theme
+" Use the Solarized Dark theme (silent: plugin is absent until PlugInstall runs)
 set background=dark
-colorscheme solarized
-" Set $SHELL to POSIX type so vim-go and shell commands work correctly
+silent! colorscheme solarized8
+" Use a POSIX shell so shell commands work correctly (login shell is fish)
 set shell=/bin/zsh
 " Respect modeline in files
 set modeline
 set modelines=4
-" Enable per-directory .vimrc files and disable unsafe commands in them
-set exrc
-set secure
 " Enable line numbers
 set number
 " Enable syntax highlighting
@@ -30,6 +24,24 @@ syntax on
 set cursorline
 " Make tabs as wide as two spaces
 set tabstop=2
+" Indent by the tab width
+set shiftwidth=0
+" Switch buffers without saving
+set hidden
+" Persist undo history across sessions
+set undofile
+set undodir=~/.vim/undo//
+if !isdirectory(expand('~/.vim/undo'))
+  call mkdir(expand('~/.vim/undo'), 'p', 0700)
+endif
+" Share the macOS clipboard
+set clipboard=unnamed
+" Keep context lines around the cursor
+set scrolloff=5
+" Case-sensitive search when the pattern has capitals
+set smartcase
+" Faster cursor-hold events
+set updatetime=300
 " Show “invisible” characters
 set lcs=tab:▸\ ,trail:·,eol:¬,nbsp:_
 set list
@@ -61,6 +73,21 @@ set showcmd
 let g:airline_powerline_fonts = 1
 " Map opt+delete
 inoremap <M-BS> <C-w>
+" Terminals that send opt+backspace as ESC DEL (no Ghostty keybind)
+inoremap <Esc><Char-127> <C-w>
+inoremap <Esc><C-h> <C-w>
+" opt+left/right: word motion (ESC b/f, or modified-arrow sequences)
+inoremap <Esc>b <C-Left>
+inoremap <Esc>f <C-Right>
+inoremap <Esc>[1;3D <C-Left>
+inoremap <Esc>[1;3C <C-Right>
+" cmd+left/right: line start/end (Ctrl-A/E, or Home/End sequences)
+inoremap <C-a> <Home>
+inoremap <C-e> <End>
+inoremap <Esc>[1~ <Home>
+inoremap <Esc>[4~ <End>
+" Keep <Esc> snappy despite the ESC-prefixed mappings above
+set timeoutlen=300 ttimeout ttimeoutlen=50
 
 " Make bg transparent (inherit parent)
 hi Normal ctermbg=none
