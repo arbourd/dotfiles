@@ -17,7 +17,7 @@
   "edit_predictions": {
     "provider": "zed"
   },
-  "disable_ai": true,
+  "disable_ai": false,
   "proxy": "",
   "agent": {
     "dock": "left",
@@ -26,6 +26,9 @@
   },
   "agent_servers": {
     "claude-acp": {
+      "default_config_options": {
+        "mode": "auto"
+      },
       "type": "registry",
     },
     "gemini": {
