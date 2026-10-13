@@ -149,6 +149,8 @@ _perms() {
     [ "$(readlink "$FAKE_HOME/.ssh/config")" = "$DOTFILES/ssh/config" ]
     [ -L "$FAKE_HOME/.vim/vimrc" ]
     [ "$(readlink "$FAKE_HOME/.vim/vimrc")" = "$DOTFILES/vim/vimrc" ]
+    [ -L "$FAKE_HOME/.orca/keybindings.json" ]
+    [ "$(readlink "$FAKE_HOME/.orca/keybindings.json")" = "$DOTFILES/orca/keybindings.json" ]
     [ -L "$FAKE_HOME/.config/zed/settings.json" ]
     [ "$(readlink "$FAKE_HOME/.config/zed/settings.json")" = "$DOTFILES/zed/settings.json" ]
 
