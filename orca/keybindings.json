@@ -5,6 +5,9 @@
     "darwin": {
       "tab.selectByIndex": [
         "Mod+1"
+      ],
+      "workspace.selectByIndex": [
+        "Ctrl+1"
       ]
     },
     "linux": {},
