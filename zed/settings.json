@@ -7,20 +7,44 @@
 // custom settings, run the `open default settings` command
 // from the command palette or from `Zed` application menu.
 {
+  // Appearance
+  "theme": {
+    "mode": "dark",
+    "light": "One Light",
+    "dark": "One Dark Pro",
+  },
+  "icon_theme": "Zed (Default)",
+  "ui_font_size": 15,
+  "buffer_font_family": "Source Code Pro",
+  "buffer_font_fallbacks": ["Menlo", "Monaco", "Courier New"],
+  "buffer_font_size": 15,
+  "colorize_brackets": false,
+
+  // Editor
+  "base_keymap": "SublimeText",
+  "cli_default_open_behavior": "new_window",
+  "ensure_final_newline_on_save": true,
+  "project_panel": {
+    "dock": "right",
+  },
+
+  // Languages
   "languages": {
     "JSONC": {
       "prettier": {
-        "allowed": false
-      }
-    }
+        "allowed": false,
+      },
+    },
   },
+
+  // AI
+  "disable_ai": false,
+  "show_edit_predictions": false,
   "edit_predictions": {
     "mode": "subtle",
     "allow_data_collection": "no",
-    "provider": "zed"
+    "provider": "zed",
   },
-  "disable_ai": false,
-  "proxy": "",
   "agent": {
     "dock": "left",
     "favorite_models": [],
@@ -28,10 +52,10 @@
   },
   "agent_servers": {
     "claude-acp": {
-      "default_config_options": {
-        "mode": "auto"
-      },
       "type": "registry",
+      "default_config_options": {
+        "mode": "auto",
+      },
     },
     "gemini": {
       "type": "registry",
@@ -43,28 +67,9 @@
       "type": "registry",
     },
   },
-  "project_panel": {
-    "dock": "right",
-  },
-  "theme": {
-    "mode": "dark",
-    "light": "One Light",
-    "dark": "One Dark Pro",
-  },
-  "base_keymap": "SublimeText",
-  "buffer_font_fallbacks": [
-    "Menlo",
-    "Monaco",
-    "Courier New"
-  ],
-  "buffer_font_family": "Source Code Pro",
-  "buffer_font_size": 15,
-  "cli_default_open_behavior": "new_window",
-  "colorize_brackets": false,
-  "ensure_final_newline_on_save": true,
-  "icon_theme": "Zed (Default)",
-  "show_edit_predictions": false,
-  "ui_font_size": 15,
+
+  // Network & privacy
+  "proxy": "",
   "telemetry": {
     "diagnostics": false,
     "metrics": false,
