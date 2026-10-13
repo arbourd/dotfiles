@@ -15,6 +15,8 @@
     }
   },
   "edit_predictions": {
+    "mode": "subtle",
+    "allow_data_collection": "no",
     "provider": "zed"
   },
   "disable_ai": false,
@@ -61,7 +63,7 @@
   "colorize_brackets": false,
   "ensure_final_newline_on_save": true,
   "icon_theme": "Zed (Default)",
-  "show_edit_predictions": true,
+  "show_edit_predictions": false,
   "ui_font_size": 15,
   "telemetry": {
     "diagnostics": false,
