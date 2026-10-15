@@ -228,6 +228,7 @@ _tty() {
 
     [ "$(readlink "$FAKE_HOME/.zshrc")" = "$DOTFILES/sh/.shrc" ]
     [ "$(readlink "$FAKE_HOME/.claude/AGENTS.md")" = "$DOTFILES/agents/AGENTS.md" ]
+    [ "$(readlink "$FAKE_HOME/.claude/CLAUDE.md")" = "$DOTFILES/agents/claude/CLAUDE.md" ]
     [ "$(cat "$FAKE_HOME/.config/fish/private.fish")" = "secret" ]
     [ "$(cat "$FAKE_HOME/.config/git/private")" = "secret" ]
     [ ! -e "$FAKE_HOME/.claude/skills/skills" ]
@@ -239,6 +240,7 @@ _tty() {
              "$FAKE_HOME/repo-mock/agents/skills/skill-a" \
              "$FAKE_HOME/repo-mock/agents/skills/skill-b"
     touch "$FAKE_HOME/repo-mock/agents/AGENTS.md" \
+          "$FAKE_HOME/repo-mock/agents/claude/CLAUDE.md" \
           "$FAKE_HOME/repo-mock/agents/claude/statusline.sh" \
           "$FAKE_HOME/repo-mock/agents/personas/helper.md" \
           "$FAKE_HOME/repo-mock/agents/skills/skill-a/SKILL.md" \
@@ -249,6 +251,8 @@ _tty() {
 
     [ -L "$FAKE_HOME/.claude/statusline.sh" ]
     [ "$(readlink "$FAKE_HOME/.claude/statusline.sh")" = "$FAKE_HOME/repo-mock/agents/claude/statusline.sh" ]
+    [ -L "$FAKE_HOME/.claude/CLAUDE.md" ]
+    [ "$(readlink "$FAKE_HOME/.claude/CLAUDE.md")" = "$FAKE_HOME/repo-mock/agents/claude/CLAUDE.md" ]
 
     [ -L "$FAKE_HOME/.claude/agents/helper.md" ]
     [ "$(readlink "$FAKE_HOME/.claude/agents/helper.md")" = "$FAKE_HOME/repo-mock/agents/personas/helper.md" ]

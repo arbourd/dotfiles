@@ -67,7 +67,7 @@ Antigravity replaced Gemini CLI (retired 2026-06-18) but still reads `~/.gemini/
 
 ## Orca
 
-`orca/settings.json` is merged into Orca's SQLite profile db via `json_patch` (`null` deletes a key). Skipped while Orca is running, since it overwrites settings on quit.
+`orca/settings.json` is merged into Orca's SQLite profile db via `json_patch` (`null` deletes a key). Skipped while Orca is running (it overwrites settings on quit) or when `dot link` runs inside Orca's terminal.
 
 ## Shell
 
@@ -97,7 +97,7 @@ When a `dot` command is added, renamed, or removed, update all six of these in t
 2. `README.md` — usage block in Installation
 3. `AGENTS.md` — command table and repo layout comment
 4. `.github/workflows/ci.yml` — `matrix.command` list
-5. `tests/dot.bats` — add or remove the corresponding test(s); the command-sync test fails until all six places match
+5. `tests/dot.bats` — add or remove the corresponding test(s); the command-sync test only checks `dot`, completions, and CI, so README and AGENTS.md drift silently
 6. `sh/completions/` — `dot.fish`, `dot.bash`, and `_dot` command lists
 
 ## Adding a new dotfile
