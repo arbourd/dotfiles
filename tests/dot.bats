@@ -430,3 +430,72 @@ _orca_db() {
     [ "$status" -eq 1 ]
     [[ "$output" == *"'sqlite3' is required"* ]]
 }
+
+@test '_status prints plain kind and detail when not a tty' {
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _status merged 'a -> b'"
+    [ "$status" -eq 0 ]
+    [ "$output" = "merged   a -> b" ]
+}
+
+@test '_status shortens home and dotfiles paths' {
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _status linked '$FAKE_HOME/.zshrc → $DOTFILES/sh/.shrc'"
+    [ "$output" = "linked   ~/.zshrc → sh/.shrc" ]
+}
+
+@test '_err writes plain message to stderr when not a tty' {
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _err boom 2>&1 >/dev/null"
+    [ "$output" = "boom" ]
+}
+
+@test 'NO_COLOR disables styling even when gum is installed' {
+    mkdir "$FAKE_HOME/bin"
+    printf '#!/bin/sh\necho gum-was-called\n' > "$FAKE_HOME/bin/gum"
+    chmod +x "$FAKE_HOME/bin/gum"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; NO_COLOR=1; _spin title true"
+    [ "$status" -eq 0 ]
+    [ "$output" = "title" ]
+}
+
+@test '_spin falls back to running the command without gum' {
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _spin title echo ran"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"title"* ]]
+    [[ "$output" == *"ran"* ]]
+}
+
+@test '_spin propagates command failure' {
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _spin title false"
+    [ "$status" -ne 0 ]
+}
+
+@test '_symlink creates the link and reports it' {
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _symlink '$DOTFILES/sh/.shrc' '$FAKE_HOME/.zshrc'"
+    [ "$status" -eq 0 ]
+    [ "$(readlink "$FAKE_HOME/.zshrc")" = "$DOTFILES/sh/.shrc" ]
+    [ "$output" = "linked   ~/.zshrc → sh/.shrc" ]
+}
+
+@test '_symlink reports the link inside an existing directory target' {
+    mkdir "$FAKE_HOME/skills"
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _symlink '$DOTFILES/agents/skills' '$FAKE_HOME/skills'"
+    [ -L "$FAKE_HOME/skills/skills" ]
+    [[ "$output" == *"~/skills/skills"* ]]
+}
+
+@test 'install-fisher restores fish_plugins from the dotfiles repo, not the cwd' {
+    mkdir "$FAKE_HOME/bin" "$FAKE_HOME/cwd"
+    for cmd in brew curl; do
+        printf '#!/bin/sh\n' > "$FAKE_HOME/bin/$cmd"
+    done
+    printf '#!/bin/sh\necho "$2" >> "%s/fish_args"\n' "$FAKE_HOME" > "$FAKE_HOME/bin/fish"
+    chmod +x "$FAKE_HOME/bin/"*
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; cd '$FAKE_HOME/cwd'; _install_fisher"
+    [ "$status" -eq 0 ]
+    grep -qF "git -C \"$DOTFILES\" checkout sh/fish_plugins && fisher update" "$FAKE_HOME/fish_args"
+
+    # the recorded git command works from a directory that is not a repo
+    cd "$FAKE_HOME/cwd"
+    git -C "$DOTFILES" checkout sh/fish_plugins
+}

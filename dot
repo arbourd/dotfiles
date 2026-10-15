@@ -3,17 +3,97 @@ set -euo pipefail
 
 DIR="${0:A:h}"
 
+# _has_color [fd]
+# Succeeds when fd (default 1) is a terminal and NO_COLOR is unset.
+_has_color() {
+    [[ -t ${1:-1} && -z "${NO_COLOR:-}" ]]
+}
+
+# _has_gum
+# Succeeds when styled output via gum is available. gum is optional: it is not
+# installed until the Brewfile runs, so every helper has a plain fallback.
+_has_gum() {
+    _has_color && command -v gum &> /dev/null
+}
+
+# _tilde <string>
+# Replaces the home directory with ~ and the dotfiles directory with a relative path.
+_tilde() {
+    local s=${1//$DIR\//}
+    echo "${s//$HOME/~}"
+}
+
 # _log <message...>
-# Prints a bold message to stdout.
+# Prints a section header to stdout.
 _log() {
-    echo "\n$(tput bold)$*$(tput sgr0)\n"
+    if _has_gum; then
+        echo
+        gum style --foreground 67 --bold "▍ $*"
+        echo
+    else
+        echo "\n$(tput bold)$*$(tput sgr0)\n"
+    fi
+}
+
+# _status <kind> <detail...>
+# Prints a one-line status: marker, kind, then a dimmed detail.
+# kind is one of linked, merged, updated, ok, removed, skipped.
+_status() {
+    local kind=$1 marker color detail; shift
+    detail=$(_tilde "$*")
+
+    case $kind in
+        linked|merged|updated|ok) marker="✓" color=108 ;;
+        removed)                  marker="–" color=67 ;;
+        skipped)                  marker="!" color=179 ;;
+        *)                        marker="•" color=244 ;;
+    esac
+
+    if _has_color; then
+        printf '\e[38;5;%sm%s\e[0m %-8s \e[38;5;244m%s\e[0m\n' "$color" "$marker" "$kind" "$detail"
+    else
+        printf '%-8s %s\n' "$kind" "$detail"
+    fi
+}
+
+# _err <message...>
+# Prints an error to stderr.
+_err() {
+    if _has_color 2; then
+        printf '\e[38;5;167m✗\e[0m %s\n' "$*" >&2
+    else
+        echo "$*" >&2
+    fi
+}
+
+# _spin <title> <command...>
+# Runs an external command behind a spinner, showing its output only on failure.
+# Falls back to printing the title and running the command directly.
+_spin() {
+    local title=$1; shift
+    if _has_gum; then
+        gum spin --spinner dot --title "$title" --show-error -- "$@"
+        _status ok "$title"
+    else
+        echo "$title"
+        "$@"
+    fi
+}
+
+# _symlink <source> <link>
+# Symlinks source to link, replacing any existing link, and reports it.
+_symlink() {
+    local src=$1 link=$2
+    ln -sf "$src" "$link"
+    [[ -d "$link" && ! -L "$link" ]] && link="$link/${src:t}"
+    _status linked "$link → $src"
 }
 
 # _require <command>
 # Exits with an error if command is not installed.
 _require() {
     if ! command -v "$1" &> /dev/null; then
-        echo "Error: '$1' is required but not installed." >&2
+        _err "Error: '$1' is required but not installed."
         exit 1
     fi
 }
@@ -55,8 +135,8 @@ _remove_stale_link() {
     target=$(readlink "$link")
     [[ "$target" == "$prefix"* && ! -e "$target" ]] || return 0
 
-    echo "$link"
     unlink "$link"
+    _status removed "$link"
 }
 
 # _clean_dir <prefix> <dir...>
@@ -82,7 +162,7 @@ _merge_claude_settings() {
     mv "$tmp" ~/.claude/settings.json
     chmod 600 ~/.claude/settings.json
 
-    echo "merged   $DIR/agents/claude/settings.json -> $HOME/.claude/settings.json"
+    _status merged "$DIR/agents/claude/settings.json → $HOME/.claude/settings.json"
 }
 
 # _merge_orca_settings
@@ -91,19 +171,19 @@ _merge_orca_settings() {
     local db="$HOME/Library/Application Support/orca/profiles/local-default/profile-state.db"
 
     if [[ ! -f "$db" ]]; then
-        echo "skipped  orca settings: $db not found"
+        _status skipped "orca settings: $db not found"
         return 0
     fi
 
     _require sqlite3
 
     if [[ "${TERM_PROGRAM:-}" == Orca ]]; then
-        echo "skipped  orca settings: run from a terminal outside Orca"
+        _status skipped "orca settings: run from a terminal outside Orca"
         return 0
     fi
 
     if pgrep -x Orca >/dev/null; then
-        echo "skipped  orca settings: quit Orca and rerun"
+        _status skipped "orca settings: quit Orca and rerun"
         return 0
     fi
 
@@ -113,7 +193,7 @@ _merge_orca_settings() {
     hash=$(print -rn -- "$payload" | shasum -a 256 | cut -d' ' -f1)
     sqlite3 "$db" "UPDATE profile_state_documents SET payload = $new, content_hash = '$hash' WHERE domain='settings'"
 
-    echo "merged   orca settings -> $db"
+    _status merged "orca settings → $db"
 }
 
 # _link_agents
@@ -123,7 +203,7 @@ _link_agents() {
     local claude
     for claude in "$DIR/agents/claude"/*(N); do
         [[ "${claude:t}" == "settings.json" ]] && continue
-        ln -vsf "$claude" ~/.claude
+        _symlink "$claude" ~/.claude
     done
     _merge_claude_settings
 
@@ -134,10 +214,10 @@ _link_agents() {
     _ensure ~/.pi/agent/prompts/
 
     for persona in "$DIR/agents/personas"/*.md(N); do
-        ln -vsf "$persona" ~/.claude/agents
-        ln -vsf "$persona" ~/.gemini/agents
-        ln -vsf "$persona" ~/.config/opencode/agents
-        ln -vsf "$persona" ~/.pi/agent/prompts
+        _symlink "$persona" ~/.claude/agents
+        _symlink "$persona" ~/.gemini/agents
+        _symlink "$persona" ~/.config/opencode/agents
+        _symlink "$persona" ~/.pi/agent/prompts
     done
 
     local skill
@@ -145,16 +225,16 @@ _link_agents() {
     _ensure ~/.agents/skills/
 
     for skill in "$DIR/agents/skills"/*(/N); do
-        ln -vsf "$skill" ~/.claude/skills
-        ln -vsf "$skill" ~/.agents/skills
+        _symlink "$skill" ~/.claude/skills
+        _symlink "$skill" ~/.agents/skills
     done
 
     # global instructions, shared across every tool.
     _ensure ~/.codex/
-    ln -vsf "$DIR/agents/AGENTS.md" ~/.claude/AGENTS.md
-    ln -vsf "$DIR/agents/AGENTS.md" ~/.gemini/GEMINI.md
-    ln -vsf "$DIR/agents/AGENTS.md" ~/.codex/AGENTS.md
-    ln -vsf "$DIR/agents/AGENTS.md" ~/.pi/agent/AGENTS.md
+    _symlink "$DIR/agents/AGENTS.md" ~/.claude/AGENTS.md
+    _symlink "$DIR/agents/AGENTS.md" ~/.gemini/GEMINI.md
+    _symlink "$DIR/agents/AGENTS.md" ~/.codex/AGENTS.md
+    _symlink "$DIR/agents/AGENTS.md" ~/.pi/agent/AGENTS.md
 }
 
 # _clean
@@ -207,7 +287,7 @@ _init() {
     _log "Initializing dotfiles to $target"
 
     if [ -d "$target" ]; then
-        echo "Directory already exists. Pulling latest changes..."
+        _status ok "$target already exists, pulling"
         git -C "$target" pull
     else
         _ensure "${target:h}/"
@@ -216,7 +296,7 @@ _init() {
 
     _log "Symlinking dot to $HOME/.local/bin/dot"
     _ensure ~/.local/bin/
-    ln -vsf "$target/dot" ~/.local/bin/dot
+    _symlink "$target/dot" ~/.local/bin/dot
 }
 
 # _update
@@ -230,9 +310,9 @@ _update() {
     after=$(git -C "$DIR" rev-parse --short HEAD)
 
     if [ "$before" = "$after" ]; then
-        echo "dotfiles $after (up to date)"
+        _status ok "dotfiles $after (up to date)"
     else
-        echo "dotfiles updated $before -> $after"
+        _status updated "dotfiles $before → $after"
     fi
 }
 
@@ -243,49 +323,49 @@ _link() {
 
     # bash, fish and zsh
     _ensure ~/.config/fish/private.fish
-    ln -vsf "$DIR/sh/.shrc" ~/.bash_profile
-    ln -vsf "$DIR/sh/.shrc" ~/.bashrc
-    ln -vsf "$DIR/sh/.shrc" ~/.zshrc
-    ln -vsf "$DIR/sh/config.fish" ~/.config/fish/config.fish
-    ln -vsf "$DIR/sh/fish_plugins" ~/.config/fish/fish_plugins
+    _symlink "$DIR/sh/.shrc" ~/.bash_profile
+    _symlink "$DIR/sh/.shrc" ~/.bashrc
+    _symlink "$DIR/sh/.shrc" ~/.zshrc
+    _symlink "$DIR/sh/config.fish" ~/.config/fish/config.fish
+    _symlink "$DIR/sh/fish_plugins" ~/.config/fish/fish_plugins
 
     # completions
     _ensure ~/.config/fish/completions/
-    ln -vsf "$DIR/sh/completions/dot.fish" ~/.config/fish/completions/dot.fish
+    _symlink "$DIR/sh/completions/dot.fish" ~/.config/fish/completions/dot.fish
     _ensure ~/.local/share/bash-completion/completions/
-    ln -vsf "$DIR/sh/completions/dot.bash" ~/.local/share/bash-completion/completions/dot
+    _symlink "$DIR/sh/completions/dot.bash" ~/.local/share/bash-completion/completions/dot
     _ensure ~/.zsh/completions/
-    ln -vsf "$DIR/sh/completions/_dot" ~/.zsh/completions/_dot
+    _symlink "$DIR/sh/completions/_dot" ~/.zsh/completions/_dot
 
     # ghostty
     _ensure ~/.config/ghostty/
-    ln -vsf "$DIR/ghostty/config" ~/.config/ghostty/config
+    _symlink "$DIR/ghostty/config" ~/.config/ghostty/config
 
     # git
     _ensure ~/.config/git/private
-    ln -vsf "$DIR/git/config" ~/.config/git/config
-    ln -vsf "$DIR/git/gitignore" ~/.config/git/gitignore
+    _symlink "$DIR/git/config" ~/.config/git/config
+    _symlink "$DIR/git/gitignore" ~/.config/git/gitignore
 
     # gpg
     _ensure ~/.gnupg/ 700
-    ln -vsf "$DIR/gpg/gpg-agent.conf" ~/.gnupg/gpg-agent.conf
+    _symlink "$DIR/gpg/gpg-agent.conf" ~/.gnupg/gpg-agent.conf
 
     # orca
     _ensure ~/.orca/
-    ln -vsf "$DIR/orca/keybindings.json" ~/.orca/keybindings.json
+    _symlink "$DIR/orca/keybindings.json" ~/.orca/keybindings.json
     _merge_orca_settings
 
     # ssh
     _ensure ~/.ssh/
-    ln -vsf "$DIR/ssh/config" ~/.ssh/config
+    _symlink "$DIR/ssh/config" ~/.ssh/config
 
     # vim
     _ensure ~/.vim/
-    ln -vsf "$DIR/vim/vimrc" ~/.vim/vimrc
+    _symlink "$DIR/vim/vimrc" ~/.vim/vimrc
 
     # zed
     _ensure ~/.config/zed/
-    ln -vsf "$DIR/zed/settings.json" ~/.config/zed/settings.json
+    _symlink "$DIR/zed/settings.json" ~/.config/zed/settings.json
 
     _log "Symlinking agent dotfiles"
     _link_agents
@@ -329,7 +409,7 @@ _install_fisher() {
     _log "Updating and installing fisher plugins"
     _ensure ~/.config/fish/functions/
     fish -c "curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
-    fish -c "git checkout \"$DIR/sh/fish_plugins\" && fisher update"
+    fish -c "git -C \"$DIR\" checkout sh/fish_plugins && fisher update"
 }
 
 # _install_vim
@@ -340,12 +420,12 @@ _install_vim() {
 
     _log "Updating vim-plug"
     _ensure ~/.vim/autoload/
-    curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+    curl -fsSLo ~/.vim/autoload/plug.vim --create-dirs \
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
     _log "Updating Vim plugins"
     # pipe two newlines to dismiss vim-plug prompts without a tty
-    echo | echo | vim +PlugUpdate +PlugClean! +qall &>/dev/null
+    _spin "vim plugins" zsh -c 'echo | echo | vim +PlugUpdate +PlugClean! +qall &>/dev/null'
 }
 
 # _install
@@ -394,12 +474,12 @@ case ${1:-} in
         _version
         ;;
     "")
-        echo "error: command required" >&2
+        _err "error: command required"
         _usage >&2
         exit 1
         ;;
     *)
-        echo "error: unknown command: \"$1\"" >&2
+        _err "error: unknown command: \"$1\""
         _usage >&2
         exit 1
         ;;
