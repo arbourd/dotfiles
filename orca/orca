@@ -1,0 +1,17 @@
+#!/usr/bin/env zsh
+# Orca CLI launcher, ported from Orca.app/Contents/Resources/bin/orca.
+# The app path is fixed because this script is symlinked from dotfiles, not the app bundle.
+
+set -euo pipefail
+
+contents=/Applications/Orca.app/Contents
+if [[ ! -x "$contents/MacOS/Orca" ]]; then
+    echo "Orca.app not found in /Applications" >&2
+    exit 1
+fi
+
+export ORCA_NODE_OPTIONS="${NODE_OPTIONS-}"
+export ORCA_NODE_REPL_EXTERNAL_MODULE="${NODE_REPL_EXTERNAL_MODULE-}"
+unset NODE_OPTIONS NODE_REPL_EXTERNAL_MODULE
+
+ELECTRON_RUN_AS_NODE=1 exec "$contents/MacOS/Orca" "$contents/Resources/app.asar.unpacked/out/cli/index.js" "$@"

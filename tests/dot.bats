@@ -209,6 +209,8 @@ _tty() {
     [ "$(readlink "$FAKE_HOME/.vim/vimrc")" = "$DOTFILES/vim/vimrc" ]
     [ -L "$FAKE_HOME/.orca/keybindings.json" ]
     [ "$(readlink "$FAKE_HOME/.orca/keybindings.json")" = "$DOTFILES/orca/keybindings.json" ]
+    [ -L "$FAKE_HOME/.local/bin/orca" ]
+    [ "$(readlink "$FAKE_HOME/.local/bin/orca")" = "$DOTFILES/orca/orca" ]
     [ -L "$FAKE_HOME/.config/zed/settings.json" ]
     [ "$(readlink "$FAKE_HOME/.config/zed/settings.json")" = "$DOTFILES/zed/settings.json" ]
 
@@ -385,7 +387,7 @@ JSON
 
 @test 'clean covers every directory it lists' {
     local d
-    local -a dotdirs=("$FAKE_HOME" .config/fish .config/fish/completions .config/ghostty .config/git .config/zed .gnupg .local/share/bash-completion/completions .orca .ssh .vim .zsh/completions)
+    local -a dotdirs=("$FAKE_HOME" .config/fish .config/fish/completions .config/ghostty .config/git .config/zed .gnupg .local/bin .local/share/bash-completion/completions .orca .ssh .vim .zsh/completions)
     local -a agentdirs=(.claude .claude/skills .agents/skills .claude/agents .gemini .gemini/agents .config/opencode/agents .pi/agent .pi/agent/prompts .codex)
 
     for d in "${dotdirs[@]}"; do

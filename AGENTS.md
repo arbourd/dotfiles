@@ -34,7 +34,7 @@ agents      # global AI agent instructions, persona, and skill definitions
 ghostty     # Ghostty terminal emulator config
 git         # global git config and gitignore
 gpg         # GPG agent config
-orca        # Orca keybindings (symlinked) and settings (merged into Orca's db)
+orca        # Orca CLI launcher and keybindings (symlinked) and settings (merged into Orca's db)
 sh          # shell config: fish (primary), bash, and zsh fallback
 ssh         # SSH client config
 vim         # vimrc and vim-plug plugin list
