@@ -6,18 +6,18 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 
 `dot` (zsh) is the single entry point for all setup tasks:
 
-| Command             | What it does                                                                    |
-|---------------------|---------------------------------------------------------------------------------|
-| `help`              | Prints the usage dialog                                                         |
-| `init`              | Clones this repo to `$GETPATH/github.com/arbourd/dotfiles` and symlinks `dot` to `~/.local/bin/dot` |
-| `link`              | Symlinks all dotfiles into `~` and removes stale symlinks                       |
-| `install`           | Runs brew + defaults + fisher + vim in order                                    |
-| `install-brew`      | Installs/updates Homebrew packages from Brewfile                                |
-| `install-defaults`  | Applies macOS `defaults write` settings                                         |
-| `install-fisher`    | Installs/updates Fisher and fish plugins                                        |
-| `install-vim`       | Installs/updates vim-plug and Vim plugins                                       |
-| `update`            | Pulls latest changes; prints the short SHA (or old → new) as a GitHub link      |
-| `version`           | Prints the current commit SHA of the dotfiles repository                        |
+| Command             | What it does                                                          |
+|---------------------|-----------------------------------------------------------------------|
+| `help`              | Usage                                                                 |
+| `init`              | Clones to `$GETPATH/github.com/arbourd/dotfiles`, symlinks `dot` into `~/.local/bin` |
+| `link`              | Symlinks dotfiles into `~`, removes stale symlinks                    |
+| `install`           | brew + defaults + fisher + vim, in order                              |
+| `install-brew`      | Homebrew packages from Brewfile                                       |
+| `install-defaults`  | macOS `defaults write` settings                                       |
+| `install-fisher`    | Fisher and fish plugins                                               |
+| `install-vim`       | vim-plug and Vim plugins                                              |
+| `update`            | Pulls; prints short SHA (or old → new) as a GitHub link               |
+| `version`           | Current commit SHA                                                    |
 
 On a new machine, run commands in this order: `init` → `link` → `install`. `link` must run before `install` because the install steps (fisher, vim) depend on config files already being in place at their expected locations.
 
@@ -77,7 +77,7 @@ Private/sensitive env vars go in `~/.config/fish/private.fish` (not tracked; cre
 
 ## Homebrew
 
-Packages are in `Brewfile`. Run with `HOMEBREW_BUNDLE_NO_LOCK=1` — no `Brewfile.lock.json` is generated or committed.
+Packages are in `Brewfile`. Run with `HOMEBREW_BUNDLE_NO_LOCK=1`; the bundle is lock-free intentionally, so never add a `Brewfile.lock.json`.
 
 ## Testing
 
@@ -87,6 +87,8 @@ Run the bats suite locally after any `dot` script change:
 bats tests/dot.bats
 ```
 
+The suite needs `zsh`, `jq`, `sqlite3`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, completions, and CI matrix drift apart, or if `agents/claude/settings.json` gains a `hooks` key.
+
 ## Adding or removing a command
 
 When a `dot` command is added, renamed, or removed, update all six of these in the same change:
@@ -95,27 +97,20 @@ When a `dot` command is added, renamed, or removed, update all six of these in t
 2. `README.md` — usage block in Installation
 3. `AGENTS.md` — command table and repo layout comment
 4. `.github/workflows/ci.yml` — `matrix.command` list
-5. `tests/dot.bats` — add or remove the corresponding test(s)
+5. `tests/dot.bats` — add or remove the corresponding test(s); the command-sync test fails until all six places match
 6. `sh/completions/` — `dot.fish`, `dot.bash`, and `_dot` command lists
-
-## CI
-
-GitHub Actions (`.github/workflows/ci.yml`) runs every `dot` command except `install` as a matrix job on `macos-latest` plus a separate job that runs the bats suite on `ubuntu-latest`. Dependabot keeps Actions up to date daily.
 
 ## Adding a new dotfile
 
 1. Add the config file under an appropriately named directory.
 2. Add an `_ensure` call for its target directory in `_link` if needed.
-3. Add an `ln -vsf` line in `_link` pointing it to its target path.
-4. If the target directory is new, add it to the `_clean_dir` list in `_clean`.
+3. Add a `_symlink` call in `_link` pointing it to its target path.
+4. If the target directory is new, add it to the `_clean_dir` list in `_clean` and to the directory list in the `clean covers every directory it lists` test.
 5. If it requires a new package, add it to `Brewfile`.
 
 For agents, skills, or personas, edit `_link_agents` instead of `_link`.
 
 ## What not to change
 
-- Do not add a `Brewfile.lock.json`; the bundle runs lock-free intentionally.
 - Do not add a `hooks` key to `agents/claude/settings.json`; `_merge_claude_settings` replaces arrays
   wholesale, silently deleting any hooks installed locally in `~/.claude/settings.json`.
-- Do not commit `~/.config/fish/private.fish` or `~/.config/git/private`; these are machine-local secrets.
-- Do not skip GPG signing on commits (`--no-gpg-sign`).

@@ -25,6 +25,23 @@ _perms() {
     fi
 }
 
+# _tty <command...> runs a command with stdout attached to a pty.
+_tty() {
+    command -v script > /dev/null || skip "script is not installed"
+    if [[ "$(uname)" == "Darwin" ]]; then
+        script -q /dev/null "$@"
+    else
+        script -qec "$(printf '%q ' "$@")" /dev/null
+    fi
+}
+
+@test '_ensure leaves existing files untouched' {
+    mkdir -p "$FAKE_HOME/cfg"
+    echo secret > "$FAKE_HOME/cfg/private"
+    zsh -c "source '$FAKE_HOME/setup.zsh'; _ensure '$FAKE_HOME/cfg/private'"
+    [ "$(cat "$FAKE_HOME/cfg/private")" = "secret" ]
+}
+
 @test '_ensure creates directories, files, and permissions' {
     zsh -c "source '$FAKE_HOME/setup.zsh'; _ensure '$FAKE_HOME/test-dir/'"
     [ -d "$FAKE_HOME/test-dir" ]
@@ -92,8 +109,49 @@ _perms() {
     "
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"abc1234"* ]]
-    [[ "$output" == *"up to date"* ]]
+    [[ "$output" == *"pulling dotfiles"* ]]
+    [[ "$output" == *"dotfiles abc1234 (up to date)"* ]]
+}
+
+@test 'update passes -v to git pull with --verbose' {
+    run zsh -c "
+        source '$FAKE_HOME/setup.zsh'
+        VERBOSE=1
+        git() {
+            if [[ \"\$*\" == *'rev-parse --short HEAD'* ]]; then echo 'abc1234'; return 0; fi
+            if [[ \"\$*\" == *'pull -v'* ]]; then echo pulled-verbose; return 0; fi
+            echo \"unexpected git \$*\"; return 1
+        }
+        _update
+    "
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"pulled-verbose"* ]]
+}
+
+@test 'update links the compare url on a tty' {
+    local flag="$FAKE_HOME/git_pull_flag"
+
+    run _tty zsh -c "
+        source '$FAKE_HOME/setup.zsh'
+        flag='$flag'
+        _spin() { shift; \"\$@\"; }
+        git() {
+            if [[ \"\$*\" == *'pull --quiet'* ]]; then touch \"\$flag\"; return 0; fi
+            if [[ \"\$*\" == *'remote get-url origin'* ]]; then echo 'git@github.com:arbourd/dotfiles.git'; return 0; fi
+            if [[ \"\$*\" == *'rev-parse --short HEAD'* ]]; then
+                if [[ -e \"\$flag\" ]]; then echo 'def5678'; else echo 'abc1234'; fi
+                return 0
+            fi
+            command git \"\$@\"
+        }
+        _update
+    "
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"https://github.com/arbourd/dotfiles/compare/abc1234...def5678"* ]]
+    [[ "$output" == *"abc1234 → def5678"* ]]
+    [[ "$output" == *"updated"* ]]
 }
 
 @test 'update reports old and new hashes when HEAD changes' {
@@ -114,8 +172,8 @@ _perms() {
     "
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"abc1234"* ]]
-    [[ "$output" == *"def5678"* ]]
+    [[ "$output" == *"updated"* ]]
+    [[ "$output" == *"dotfiles abc1234 → def5678"* ]]
 }
 
 @test 'link creates dotfile symlinks' {
@@ -160,6 +218,21 @@ _perms() {
     [ -f "$FAKE_HOME/.config/git/private" ]
 }
 
+@test 'link is idempotent and preserves private files' {
+    zsh -c "source '$FAKE_HOME/setup.zsh'; _link" > /dev/null
+    echo secret > "$FAKE_HOME/.config/fish/private.fish"
+    echo secret > "$FAKE_HOME/.config/git/private"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _link"
+    [ "$status" -eq 0 ]
+
+    [ "$(readlink "$FAKE_HOME/.zshrc")" = "$DOTFILES/sh/.shrc" ]
+    [ "$(readlink "$FAKE_HOME/.claude/AGENTS.md")" = "$DOTFILES/agents/AGENTS.md" ]
+    [ "$(cat "$FAKE_HOME/.config/fish/private.fish")" = "secret" ]
+    [ "$(cat "$FAKE_HOME/.config/git/private")" = "secret" ]
+    [ ! -e "$FAKE_HOME/.claude/skills/skills" ]
+}
+
 @test 'link-agents creates agent symlinks with renaming' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude" \
              "$FAKE_HOME/repo-mock/agents/personas" \
@@ -183,6 +256,8 @@ _perms() {
     [ "$(readlink "$FAKE_HOME/.gemini/agents/helper.md")" = "$FAKE_HOME/repo-mock/agents/personas/helper.md" ]
     [ -L "$FAKE_HOME/.pi/agent/prompts/helper.md" ]
     [ "$(readlink "$FAKE_HOME/.pi/agent/prompts/helper.md")" = "$FAKE_HOME/repo-mock/agents/personas/helper.md" ]
+    [ -L "$FAKE_HOME/.config/opencode/agents/helper.md" ]
+    [ "$(readlink "$FAKE_HOME/.config/opencode/agents/helper.md")" = "$FAKE_HOME/repo-mock/agents/personas/helper.md" ]
 
     [ -L "$FAKE_HOME/.claude/skills/skill-a" ]
     [ "$(readlink "$FAKE_HOME/.claude/skills/skill-a")" = "$FAKE_HOME/repo-mock/agents/skills/skill-a" ]
@@ -252,6 +327,24 @@ JSON
     [ "$output" = "high" ]
 }
 
+@test 'merge-claude-settings handles an empty settings.json and sets 0600' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
+    echo '{"effortLevel": "high"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.json"
+    : > "$FAKE_HOME/.claude/settings.json"
+    chmod 644 "$FAKE_HOME/.claude/settings.json"
+
+    zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_claude_settings" > /dev/null
+
+    run jq -r '.effortLevel' "$FAKE_HOME/.claude/settings.json"
+    [ "$output" = "high" ]
+    [ "$(_perms "$FAKE_HOME/.claude/settings.json")" = "-rw-------" ]
+}
+
+@test 'repo claude settings.json has no hooks key' {
+    run jq -e 'has("hooks") | not' "$DOTFILES/agents/claude/settings.json"
+    [ "$status" -eq 0 ]
+}
+
 @test '_remove_stale_link guards and removal' {
     touch "$FAKE_HOME/real-file"
     zsh -c "source '$FAKE_HOME/setup.zsh'; _remove_stale_link '$FAKE_HOME/real-file' '$DOTFILES/'"
@@ -265,9 +358,59 @@ JSON
     zsh -c "source '$FAKE_HOME/setup.zsh'; _remove_stale_link '$FAKE_HOME/external-link' '$DOTFILES/'"
     [ -L "$FAKE_HOME/external-link" ]
 
+    ln -sf "/nonexistent-outside-prefix" "$FAKE_HOME/dangling-external"
+    zsh -c "source '$FAKE_HOME/setup.zsh'; _remove_stale_link '$FAKE_HOME/dangling-external' '$DOTFILES/'"
+    [ -L "$FAKE_HOME/dangling-external" ]
+
     ln -sf "$DOTFILES/nonexistent" "$FAKE_HOME/stale-link"
     zsh -c "source '$FAKE_HOME/setup.zsh'; _remove_stale_link '$FAKE_HOME/stale-link' '$DOTFILES/'"
     [ -z "$(readlink "$FAKE_HOME/stale-link" 2>/dev/null)" ]
+}
+
+@test '_clean_dir reports removed links and none found' {
+    mkdir "$FAKE_HOME/d"
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _clean_dir '$DOTFILES/' '$FAKE_HOME/d'"
+    [[ "$output" == *"none found"* ]]
+
+    ln -sf "$DOTFILES/nonexistent" "$FAKE_HOME/d/stale"
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _clean_dir '$DOTFILES/' '$FAKE_HOME/d'"
+    [[ "$output" == *"removed"* ]]
+    [[ "$output" != *"none found"* ]]
+    [ ! -L "$FAKE_HOME/d/stale" ]
+}
+
+@test 'clean covers every directory it lists' {
+    local d
+    local -a dotdirs=("$FAKE_HOME" .config/fish .config/fish/completions .config/ghostty .config/git .config/zed .gnupg .local/share/bash-completion/completions .orca .ssh .vim .zsh/completions)
+    local -a agentdirs=(.claude .claude/skills .agents/skills .claude/agents .gemini .gemini/agents .config/opencode/agents .pi/agent .pi/agent/prompts .codex)
+
+    for d in "${dotdirs[@]}"; do
+        [[ "$d" == "$FAKE_HOME" ]] || d="$FAKE_HOME/$d"
+        mkdir -p "$d"
+        ln -sf "$DOTFILES/nonexistent" "$d/stale"
+        ln -sf "/nonexistent-outside-prefix" "$d/dangling-external"
+    done
+    for d in "${agentdirs[@]}"; do
+        d="$FAKE_HOME/$d"
+        mkdir -p "$d"
+        ln -sf "$DOTFILES/agents/nonexistent" "$d/stale"
+        ln -sf "/nonexistent-outside-prefix" "$d/dangling-external"
+    done
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _clean"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"removed"* ]]
+
+    for d in "${dotdirs[@]}"; do
+        [[ "$d" == "$FAKE_HOME" ]] || d="$FAKE_HOME/$d"
+        [ ! -L "$d/stale" ]
+        [ -L "$d/dangling-external" ]
+    done
+    for d in "${agentdirs[@]}"; do
+        d="$FAKE_HOME/$d"
+        [ ! -L "$d/stale" ]
+        [ -L "$d/dangling-external" ]
+    done
 }
 
 @test 'clean protects real files and unrelated symlinks' {
@@ -447,14 +590,36 @@ _orca_db() {
     [ "$output" = "boom" ]
 }
 
-@test 'NO_COLOR disables styling even when gum is installed' {
+@test 'gum is used on a tty' {
     mkdir "$FAKE_HOME/bin"
     printf '#!/bin/sh\necho gum-was-called\n' > "$FAKE_HOME/bin/gum"
     chmod +x "$FAKE_HOME/bin/gum"
 
-    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; NO_COLOR=1; _spin title true"
+    run _tty zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _spin title true"
     [ "$status" -eq 0 ]
-    [ "$output" = "ok       title" ]
+    [[ "$output" == *"gum-was-called"* ]]
+}
+
+@test '_spin propagates gum failure' {
+    mkdir "$FAKE_HOME/bin"
+    printf '#!/bin/sh\nexit 1\n' > "$FAKE_HOME/bin/gum"
+    chmod +x "$FAKE_HOME/bin/gum"
+
+    run _tty zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _spin title false"
+    [ "$status" -ne 0 ]
+    [[ "$output" != *"ok "*"title"* ]]
+}
+
+@test 'NO_COLOR disables styling even on a tty with gum installed' {
+    mkdir "$FAKE_HOME/bin"
+    printf '#!/bin/sh\necho gum-was-called\n' > "$FAKE_HOME/bin/gum"
+    chmod +x "$FAKE_HOME/bin/gum"
+
+    run _tty zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; NO_COLOR=1; _spin title true"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"ok       title"* ]]
+    [[ "$output" != *"gum-was-called"* ]]
+    [[ "$output" != *$'\e['* ]]
 }
 
 @test '_spin falls back to running the command without gum' {
@@ -502,25 +667,39 @@ _orca_db() {
 }
 
 @test 'install-fisher restores fish_plugins from the dotfiles repo, not the cwd' {
+    local repo="$FAKE_HOME/repo"
     mkdir "$FAKE_HOME/bin" "$FAKE_HOME/cwd"
+    mkdir -p "$repo/sh"
+    echo original > "$repo/sh/fish_plugins"
+    git init -q "$repo"
+    git -C "$repo" add sh/fish_plugins
+    git -C "$repo" -c user.name=t -c user.email=t@example.com -c commit.gpgsign=false commit -q -m init
+    echo modified > "$repo/sh/fish_plugins"
+
     for cmd in brew curl; do
         printf '#!/bin/sh\n' > "$FAKE_HOME/bin/$cmd"
     done
     printf '#!/bin/sh\necho "$2" >> "%s/fish_args"\n' "$FAKE_HOME" > "$FAKE_HOME/bin/fish"
     chmod +x "$FAKE_HOME/bin/"*
 
-    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; cd '$FAKE_HOME/cwd'; _install_fisher"
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; PATH='$FAKE_HOME/bin':\$PATH; cd '$FAKE_HOME/cwd'; _install_fisher"
     [ "$status" -eq 0 ]
-    grep -qF "git -C \"$DOTFILES\" checkout sh/fish_plugins && fisher update" "$FAKE_HOME/fish_args"
+    grep -qF "git -C \"$repo\" checkout sh/fish_plugins && fisher update" "$FAKE_HOME/fish_args"
 
     # the recorded git command works from a directory that is not a repo
     cd "$FAKE_HOME/cwd"
-    git -C "$DOTFILES" checkout sh/fish_plugins
+    git -C "$repo" checkout sh/fish_plugins
+    [ "$(cat "$repo/sh/fish_plugins")" = "original" ]
 }
 
 @test '_hyperlink sets plain text when not a tty' {
     run zsh -c "source '$FAKE_HOME/setup.zsh'; _hyperlink https://example.com/x text; print -r -- \"\$REPLY\""
     [ "$output" = "text" ]
+}
+
+@test '_hyperlink emits an OSC 8 sequence on a tty' {
+    run _tty zsh -c "source '$FAKE_HOME/setup.zsh'; _hyperlink https://example.com/x text; print -r -- \"\$REPLY\""
+    [[ "$output" == *$'\e]8;;https://example.com/x\e\\text\e]8;;\e\\'* ]]
 }
 
 @test '_hyperlink sets plain text when url is empty' {
@@ -545,7 +724,98 @@ _orca_db() {
     run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
     [ "$output" = "https://github.com/arbourd/dotfiles" ]
 
+    git -C "$repo" remote set-url origin ssh://git@github.com/arbourd/dotfiles.git
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
+    [ "$output" = "https://github.com/arbourd/dotfiles" ]
+
+    git -C "$repo" remote set-url origin https://github.com/arbourd/dotfiles
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
+    [ "$output" = "https://github.com/arbourd/dotfiles" ]
+
     git -C "$repo" remote set-url origin https://example.com/x/y.git
     run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
     [ -z "$output" ]
+}
+
+@test '_repo_url prints nothing without an origin remote' {
+    local repo="$FAKE_HOME/repo"
+    git init -q "$repo"
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
+    [ "$status" -eq 0 ]
+    [ -z "$output" ]
+}
+
+@test 'command lists stay in sync across dot, completions, and ci' {
+    local commands dispatch fish bash zshc ci
+    commands="$(cd "$DOTFILES" && ./dot help | awk '/^Commands:/{f=1;next} /^Options:/{f=0} f{print $1}' | sort)"
+    [ -n "$commands" ]
+
+    dispatch="$(grep -oE '^    [a-z-]+\)' "$DOTFILES/dot" | tr -d ' )' | sort)"
+    [ "$dispatch" = "$commands" ]
+
+    fish="$(sed -n 's/^set -l commands //p' "$DOTFILES/sh/completions/dot.fish" | tr ' ' '\n' | sort)"
+    [ "$fish" = "$commands" ]
+
+    bash="$(sed -n 's/.*compgen -W "\([^"]*\)".*/\1/p' "$DOTFILES/sh/completions/dot.bash" | tr ' ' '\n' | sort)"
+    [ "$bash" = "$commands" ]
+
+    zshc="$(sed -n "s/^ *'\([a-z-]*\):.*/\1/p" "$DOTFILES/sh/completions/_dot" | sort)"
+    [ "$zshc" = "$commands" ]
+
+    ci="$(awk '/command:/{f=1;next} /steps:/{f=0} f && NF{print $2}' "$DOTFILES/.github/workflows/ci.yml" | sort)"
+    [ "$ci" = "$(echo "$commands" | grep -vx install)" ]
+}
+
+@test '_install runs brew, defaults, fisher, vim in order' {
+    run zsh -c "
+        source '$FAKE_HOME/setup.zsh'
+        _install_brew() { echo brew; }
+        _install_defaults() { echo defaults; }
+        _install_fisher() { echo fisher; }
+        _install_vim() { echo vim; }
+        _install
+    "
+    [ "$status" -eq 0 ]
+    [ "$output" = $'brew\ndefaults\nfisher\nvim' ]
+}
+
+@test '_install_defaults runs .macOS from the dotfiles dir' {
+    mkdir "$FAKE_HOME/repo-mock"
+    printf '#!/bin/sh\necho ran-macos\n' > "$FAKE_HOME/repo-mock/.macOS"
+    chmod +x "$FAKE_HOME/repo-mock/.macOS"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _install_defaults"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"ran-macos"* ]]
+}
+
+@test '_install_brew bundles the Brewfile without a lockfile' {
+    mkdir "$FAKE_HOME/bin"
+    printf '#!/bin/sh\necho "brew-called $HOMEBREW_BUNDLE_NO_LOCK $*"\n' > "$FAKE_HOME/bin/brew"
+    printf '#!/bin/sh\n' > "$FAKE_HOME/bin/curl"
+    chmod +x "$FAKE_HOME/bin/"*
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _install_brew"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"brew-called 1 bundle --file $DOTFILES/Brewfile"* ]]
+}
+
+@test '_install_vim hides vim output on success and shows it on failure' {
+    mkdir "$FAKE_HOME/bin"
+    printf '#!/bin/sh\n' > "$FAKE_HOME/bin/curl"
+    printf '#!/bin/sh\necho vim-output\n' > "$FAKE_HOME/bin/vim"
+    chmod +x "$FAKE_HOME/bin/"*
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _install_vim"
+    [ "$status" -eq 0 ]
+    [[ "$output" != *"vim-output"* ]]
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; VERBOSE=1; _install_vim"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"vim-output"* ]]
+
+    printf '#!/bin/sh\necho vim-boom\nexit 1\n' > "$FAKE_HOME/bin/vim"
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _install_vim"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"vim-boom"* ]]
 }
