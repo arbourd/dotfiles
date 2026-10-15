@@ -2,6 +2,7 @@
 set -euo pipefail
 
 DIR="${0:A:h}"
+VERBOSE=0
 
 # _has_color [fd]
 # Succeeds when fd (default 1) is a terminal and NO_COLOR is unset.
@@ -91,16 +92,16 @@ _err() {
 
 # _spin <title> <command...>
 # Runs an external command behind a spinner, showing its output only on failure.
-# Falls back to printing the title and running the command directly.
+# Without gum, or with --verbose, runs it directly. Reports ok afterwards either way.
 _spin() {
     local title=$1; shift
-    if _has_gum; then
+    if _has_gum && (( ! VERBOSE )); then
         gum spin --spinner dot --title "$title" --show-error -- "$@"
-        _status ok "$title"
     else
-        echo "$title"
         "$@"
+        if (( VERBOSE )); then echo; fi
     fi
+    _status ok "$title"
 }
 
 # _symlink <source> <link>
@@ -275,7 +276,7 @@ _clean() {
 _usage() {
     local getpath=$(_resolve_getpath)
 
-    echo "Usage: dot [COMMAND]
+    echo "Usage: dot [-v|--verbose] [COMMAND]
 Commands:
   help              prints this dialog
   init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
@@ -287,6 +288,8 @@ Commands:
   link              symlinks dotfiles and removes stale symlinks
   update            updates the dotfiles repository
   version           prints the current commit sha
+Options:
+  -v, --verbose     shows full output instead of spinners
 "
 }
 
@@ -311,10 +314,10 @@ _init() {
 
     if [ -d "$target" ]; then
         _status ok "$target already exists, pulling"
-        git -C "$target" pull
+        _spin "pulling dotfiles" git -C "$target" pull
     else
         _ensure "${target:h}/"
-        git clone https://github.com/arbourd/dotfiles.git "$target"
+        _spin "cloning dotfiles" git clone https://github.com/arbourd/dotfiles.git "$target"
     fi
 
     _log "Symlinking dot to $HOME/.local/bin/dot"
@@ -402,7 +405,7 @@ _link() {
 # _install_defaults
 # Applies macOS defaults settings.
 _install_defaults() {
-    _log "Setting macOS defaults"
+    _log "macOS defaults"
     "$DIR/.macOS"
 }
 
@@ -411,13 +414,13 @@ _install_defaults() {
 _install_brew() {
     _require curl
 
+    _log "Homebrew"
     if ! command -v brew &> /dev/null ; then
-        _log "Installing Homebrew"
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
+    _status ok "homebrew installed"
 
-    _log "Installing Homebrew packages"
-    HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file "$DIR/Brewfile"
+    _spin "homebrew packages" env HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file "$DIR/Brewfile"
 }
 
 # _install_fisher
@@ -427,15 +430,14 @@ _install_fisher() {
     _require curl
     _require git
 
+    _log "Fisher"
     if ! command -v fish &> /dev/null ; then
-        _log "Installing fish"
-        brew install fish
+        _spin "fish" brew install fish
     fi
 
-    _log "Updating and installing fisher plugins"
     _ensure ~/.config/fish/functions/
-    fish -c "curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
-    fish -c "git -C \"$DIR\" checkout sh/fish_plugins && fisher update"
+    _spin "fisher installed" fish -c "curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
+    _spin "fisher plugins" fish -c "git -C \"$DIR\" checkout sh/fish_plugins && fisher update"
 }
 
 # _install_vim
@@ -444,14 +446,14 @@ _install_vim() {
     _require vim
     _require curl
 
-    _log "Updating vim-plug"
+    _log "Vim"
     _ensure ~/.vim/autoload/
-    curl -fsSLo ~/.vim/autoload/plug.vim --create-dirs \
+    _spin "vim-plug" curl -fsSLo ~/.vim/autoload/plug.vim --create-dirs \
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
-    _log "Updating Vim plugins"
     # pipe two newlines to dismiss vim-plug prompts without a tty
-    _spin "vim plugins" zsh -c 'echo | echo | vim +PlugUpdate +PlugClean! +qall &>/dev/null'
+    # vim's output is only shown on failure or with --verbose
+    _spin "vim plugins" zsh -c 'log=$(mktemp); echo | echo | vim +PlugUpdate +PlugClean! +qall &>$log; rc=$?; (( rc || $1 )) && cat $log; rm -f $log; exit $rc' _ "$VERBOSE"
 }
 
 # _install
@@ -466,6 +468,15 @@ _install() {
 # Only dispatch when executed. ZSH_EVAL_CONTEXT contains ":file" when sourced,
 # which lets tests source this file to reach the functions above.
 [[ "$ZSH_EVAL_CONTEXT" == *:file* ]] && return 0
+
+args=()
+for arg in "$@"; do
+    case $arg in
+        -v|--verbose) VERBOSE=1 ;;
+        *) args+=("$arg") ;;
+    esac
+done
+set -- "${args[@]}"
 
 case ${1:-} in
     help)

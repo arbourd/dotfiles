@@ -21,6 +21,8 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 
 On a new machine, run commands in this order: `init` → `link` → `install`. `link` must run before `install` because the install steps (fisher, vim) depend on config files already being in place at their expected locations.
 
+Install steps hide noisy external commands behind a `gum` spinner via `_spin`. Pass `-v` or `--verbose` (anywhere on the line) to see full output. New install steps should wrap external commands in `_spin`.
+
 ## Repository layout
 
 ```
@@ -87,13 +89,14 @@ bats tests/dot.bats
 
 ## Adding or removing a command
 
-When a `dot` command is added, renamed, or removed, update all five of these in the same change:
+When a `dot` command is added, renamed, or removed, update all six of these in the same change:
 
 1. `dot` — `_usage()` and the `case` statement
 2. `README.md` — usage block in Installation
 3. `AGENTS.md` — command table and repo layout comment
 4. `.github/workflows/ci.yml` — `matrix.command` list
 5. `tests/dot.bats` — add or remove the corresponding test(s)
+6. `sh/completions/` — `dot.fish`, `dot.bash`, and `_dot` command lists
 
 ## CI
 

@@ -14,7 +14,7 @@ Automated environment as code.
 
       ```console
       $ dot help
-      Usage: dot [COMMAND]
+      Usage: dot [-v|--verbose] [COMMAND]
       Commands:
         help              prints this dialog
         init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
@@ -26,4 +26,6 @@ Automated environment as code.
         link              symlinks dotfiles and removes stale symlinks
         update            updates the dotfiles repository
         version           prints the current commit sha
+      Options:
+        -v, --verbose     shows full output instead of spinners
       ```

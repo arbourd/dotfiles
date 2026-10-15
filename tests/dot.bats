@@ -346,7 +346,7 @@ JSON
 @test 'dot help prints usage and exits 0' {
     run zsh -c "cd '$DOTFILES' && ./dot help"
     [ "$status" -eq 0 ]
-    [[ "$output" == *"Usage: dot [COMMAND]"* ]]
+    [[ "$output" == *"Usage: dot [-v|--verbose] [COMMAND]"* ]]
 }
 
 @test 'dot version prints sha and exits 0' {
@@ -361,14 +361,14 @@ JSON
     run zsh -c "cd '$DOTFILES' && ./dot 2>&1 >/dev/null"
     [ "$status" -eq 1 ]
     [[ "$output" == *"error: command required"* ]]
-    [[ "$output" == *"Usage: dot [COMMAND]"* ]]
+    [[ "$output" == *"Usage: dot [-v|--verbose] [COMMAND]"* ]]
 }
 
 @test 'dot with unknown command exits 1 with error and usage on stderr' {
     run zsh -c "cd '$DOTFILES' && ./dot unknown 2>&1 >/dev/null"
     [ "$status" -eq 1 ]
     [[ "$output" == *'error: unknown command: "unknown"'* ]]
-    [[ "$output" == *"Usage: dot [COMMAND]"* ]]
+    [[ "$output" == *"Usage: dot [-v|--verbose] [COMMAND]"* ]]
 }
 
 # _orca_db creates a minimal Orca db and stubs pgrep so Orca looks closed.
@@ -454,7 +454,7 @@ _orca_db() {
 
     run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; NO_COLOR=1; _spin title true"
     [ "$status" -eq 0 ]
-    [ "$output" = "title" ]
+    [ "$output" = "ok       title" ]
 }
 
 @test '_spin falls back to running the command without gum' {
@@ -467,6 +467,24 @@ _orca_db() {
 @test '_spin propagates command failure' {
     run zsh -c "source '$FAKE_HOME/setup.zsh'; _spin title false"
     [ "$status" -ne 0 ]
+}
+
+@test '_spin bypasses gum with --verbose' {
+    mkdir "$FAKE_HOME/bin"
+    printf '#!/bin/sh\necho gum-was-called\n' > "$FAKE_HOME/bin/gum"
+    chmod +x "$FAKE_HOME/bin/gum"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _has_gum() { true; }; VERBOSE=1; _spin title echo ran"
+    [[ "$output" == *"ran"* ]]
+    [[ "$output" != *"gum-was-called"* ]]
+}
+
+@test 'dot accepts -v and --verbose before or after the command' {
+    for args in "-v version" "version -v" "--verbose version" "version --verbose"; do
+        run zsh -c "cd '$DOTFILES' && ./dot $args"
+        [ "$status" -eq 0 ]
+        [ "$output" = "$(git -C "$DOTFILES" rev-parse --short HEAD)" ]
+    done
 }
 
 @test '_symlink creates the link and reports it' {
