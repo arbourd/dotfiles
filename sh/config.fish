@@ -9,6 +9,7 @@ set -x PATH $HOME/.local/bin $PATH
 set -x PATH $HOME/go/bin $PATH
 set -x PATH $HOME/.cargo/bin $PATH
 set -x PATH /opt/homebrew/opt/rustup/bin $PATH
+set -x DISABLE_TELEMETRY 1
 
 ## Initializations
 #
