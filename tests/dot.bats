@@ -7,7 +7,7 @@ setup() {
     cat > "$FAKE_HOME/setup.zsh" <<SETUP
 source '${DOTFILES}/dot'
 _log() { :; }
-unset GETPATH
+unset GETPATH TERM_PROGRAM
 HOME='${FAKE_HOME}'
 DIR='${DOTFILES}'
 SETUP
@@ -170,6 +170,7 @@ _perms() {
           "$FAKE_HOME/repo-mock/agents/personas/helper.md" \
           "$FAKE_HOME/repo-mock/agents/skills/skill-a/SKILL.md" \
           "$FAKE_HOME/repo-mock/agents/skills/skill-b/SKILL.md"
+    echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/settings.json"
 
     zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _link_agents" > /dev/null
 
@@ -206,7 +207,6 @@ _perms() {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
     cat > "$FAKE_HOME/repo-mock/agents/claude/settings.json" <<'JSON'
 {
-  "permissions": { "allow": ["Bash(repo *)", "Bash(shared *)"] },
   "theme": "dark",
   "editor": { "theme": "repo-theme" },
   "ignorePatterns": ["repo-pattern"]
@@ -214,7 +214,6 @@ _perms() {
 JSON
     cat > "$FAKE_HOME/.claude/settings.json" <<'JSON'
 {
-  "permissions": { "allow": ["Bash(live *)", "Bash(shared *)"] },
   "hooks": { "SessionStart": [{ "matcher": "", "hooks": [] }] },
   "editor": { "theme": "live-theme", "fontSize": 14 },
   "ignorePatterns": ["live-pattern"]
@@ -225,9 +224,6 @@ JSON
 
     [ ! -L "$FAKE_HOME/.claude/settings.json" ]
     [ -f "$FAKE_HOME/.claude/settings.json" ]
-
-    run jq -c '.permissions.allow | sort' "$FAKE_HOME/.claude/settings.json"
-    [ "$output" = '["Bash(live *)","Bash(repo *)","Bash(shared *)"]' ]
 
     run jq -r '.theme' "$FAKE_HOME/.claude/settings.json"
     [ "$output" = "dark" ]
@@ -241,7 +237,7 @@ JSON
     run jq -r '.editor.fontSize' "$FAKE_HOME/.claude/settings.json"
     [ "$output" = "14" ]
 
-    # non-permissions arrays are replaced wholesale by the repo's, not unioned
+    # arrays are replaced wholesale by the repo's, not unioned
     run jq -c '.ignorePatterns' "$FAKE_HOME/.claude/settings.json"
     [ "$output" = '["repo-pattern"]' ]
 }
@@ -254,14 +250,6 @@ JSON
 
     run jq -r '.effortLevel' "$FAKE_HOME/.claude/settings.json"
     [ "$output" = "high" ]
-}
-
-@test 'merge-claude-settings does nothing when repo has no settings.json' {
-    mkdir -p "$FAKE_HOME/repo-mock/agents/claude"
-
-    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_claude_settings"
-    [ "$status" -eq 0 ]
-    [ ! -e "$FAKE_HOME/.claude/settings.json" ]
 }
 
 @test '_remove_stale_link guards and removal' {
@@ -313,8 +301,9 @@ JSON
 
 @test 'handling paths with spaces' {
     local space_repo="$FAKE_HOME/path with spaces"
-    mkdir -p "$space_repo/sh"
+    mkdir -p "$space_repo/sh" "$space_repo/agents/claude"
     touch "$space_repo/sh/.shrc"
+    echo '{}' > "$space_repo/agents/claude/settings.json"
 
     zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$space_repo'; _link" > /dev/null
 
@@ -380,4 +369,64 @@ JSON
     [ "$status" -eq 1 ]
     [[ "$output" == *'error: unknown command: "unknown"'* ]]
     [[ "$output" == *"Usage: dot [COMMAND]"* ]]
+}
+
+# _orca_db creates a minimal Orca db and stubs pgrep so Orca looks closed.
+_orca_db() {
+    ORCA_DB="$FAKE_HOME/Library/Application Support/orca/profiles/local-default/profile-state.db"
+    mkdir -p "${ORCA_DB%/*}"
+    sqlite3 "$ORCA_DB" "CREATE TABLE profile_state_documents (domain TEXT PRIMARY KEY, payload TEXT, content_hash TEXT);
+        INSERT INTO profile_state_documents VALUES ('settings', '{\"terminalScopeHistoryByWorktree\":true,\"other\":1}', 'stale');"
+
+    mkdir -p "$FAKE_HOME/bin"
+    printf '#!/bin/sh\nexit 1\n' > "$FAKE_HOME/bin/pgrep"
+    chmod +x "$FAKE_HOME/bin/pgrep"
+}
+
+@test '_merge_orca_settings applies values and updates content_hash' {
+    _orca_db
+
+    zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _merge_orca_settings" > /dev/null
+
+    [ "$(sqlite3 "$ORCA_DB" "SELECT json_extract(payload, '\$.terminalScopeHistoryByWorktree') FROM profile_state_documents WHERE domain='settings'")" = "0" ]
+    [ "$(sqlite3 "$ORCA_DB" "SELECT json_extract(payload, '\$.other') FROM profile_state_documents WHERE domain='settings'")" = "1" ]
+
+    local payload hash
+    payload=$(sqlite3 "$ORCA_DB" "SELECT payload FROM profile_state_documents WHERE domain='settings'")
+    hash=$(sqlite3 "$ORCA_DB" "SELECT content_hash FROM profile_state_documents WHERE domain='settings'")
+    [ "$(printf '%s' "$payload" | shasum -a 256 | cut -d' ' -f1)" = "$hash" ]
+}
+
+@test '_merge_orca_settings skips when Orca is running' {
+    _orca_db
+    printf '#!/bin/sh\nexit 0\n' > "$FAKE_HOME/bin/pgrep"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _merge_orca_settings"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"skipped"* ]]
+    [ "$(sqlite3 "$ORCA_DB" "SELECT content_hash FROM profile_state_documents WHERE domain='settings'")" = "stale" ]
+}
+
+@test '_merge_orca_settings skips when run inside Orca' {
+    _orca_db
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; TERM_PROGRAM=Orca; _merge_orca_settings"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"outside Orca"* ]]
+    [ "$(sqlite3 "$ORCA_DB" "SELECT content_hash FROM profile_state_documents WHERE domain='settings'")" = "stale" ]
+}
+
+@test '_merge_orca_settings skips when db is missing' {
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _merge_orca_settings"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"skipped"* ]]
+    [ ! -e "$FAKE_HOME/Library" ]
+}
+
+@test '_merge_orca_settings fails when sqlite3 is missing' {
+    _orca_db
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin'; _merge_orca_settings 2>&1"
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"'sqlite3' is required"* ]]
 }

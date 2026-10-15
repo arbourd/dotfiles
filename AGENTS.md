@@ -29,13 +29,13 @@ dot         # entry point — init/update/link/install subcommands
 Brewfile    # Homebrew formulae, casks, and Mac App Store apps
 agents      # global AI agent instructions, persona, and skill definitions
 ghostty     # Ghostty terminal emulator config
-git         # global git config, attributes, and gitignore
-gpg         # GPG agent and key config
-orca        # Orca editor config
+git         # global git config and gitignore
+gpg         # GPG agent config
+orca        # Orca keybindings (symlinked) and settings (merged into Orca's db)
 sh          # shell config: fish (primary), bash, and zsh fallback
 ssh         # SSH client config
 vim         # vimrc and vim-plug plugin list
-zed         # Zed editor settings and keybindings
+zed         # Zed editor settings
 tests       # bats test suite for dotfiles
 ```
 
@@ -60,7 +60,11 @@ Individual symlinks are used to allow personal, non-repo agents and skills to co
 
 Antigravity replaced Gemini CLI (retired 2026-06-18) but still reads `~/.gemini/`. Its skills/persona paths above are carried over from the old CLI, unverified — treat as best-effort.
 
-`agents/claude/settings.json` is not symlinked directly — it's merged into `~/.claude/settings.json` via `jq` (`permissions.allow` is unioned, not overwritten), so a live machine's local settings additions survive `dot link`.
+`agents/claude/settings.json` is not symlinked directly — it's merged into `~/.claude/settings.json` via `jq` (deep merge, repo wins on conflicts), so a live machine's local settings additions survive `dot link`.
+
+## Orca
+
+`orca/settings.json` is merged into Orca's SQLite profile db via `json_patch` (`null` deletes a key). Skipped while Orca is running, since it overwrites settings on quit.
 
 ## Shell
 
@@ -99,13 +103,13 @@ GitHub Actions (`.github/workflows/ci.yml`) runs every `dot` command except `ins
 1. Add the config file under an appropriately named directory.
 2. Add an `_ensure` call for its target directory in `_link` if needed.
 3. Add an `ln -vsf` line in `_link` pointing it to its target path.
-4. If it requires a new package, add it to `Brewfile`.
+4. If the target directory is new, add it to the `_clean_dir` list in `_clean`.
+5. If it requires a new package, add it to `Brewfile`.
 
 ## What not to change
 
 - Do not add a `Brewfile.lock.json`; the bundle runs lock-free intentionally.
-- Do not add a `hooks` key to `agents/claude/settings.json`; the merge in `_merge_claude_settings`
-  replaces arrays wholesale (only `permissions.allow` is unioned), which would silently delete
-  any hooks a machine has installed locally into `~/.claude/settings.json`.
+- Do not add a `hooks` key to `agents/claude/settings.json`; `_merge_claude_settings` replaces arrays
+  wholesale, silently deleting any hooks installed locally in `~/.claude/settings.json`.
 - Do not commit `~/.config/fish/private.fish` or `~/.config/git/private`; these are machine-local secrets.
 - Do not skip GPG signing on commits (`--no-gpg-sign`).

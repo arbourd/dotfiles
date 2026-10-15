@@ -1,7 +1,4 @@
 {
-  "permissions": {
-    "allow": ["WebSearch"]
-  },
   "statusLine": {
     "type": "command",
     "command": "zsh ~/.claude/statusline.sh",
@@ -12,7 +9,7 @@
     "rust-analyzer-lsp@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true
   },
-  "effortLevel": "high",
+  "effortLevel": "medium",
   "spinnerTipsEnabled": false,
   "feedbackSurveyRate": 0,
   "theme": "dark"

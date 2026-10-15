@@ -3,12 +3,14 @@ set -euo pipefail
 
 DIR="${0:A:h}"
 
-# _log prints a bold message to stdout.
+# _log <message...>
+# Prints a bold message to stdout.
 _log() {
     echo "\n$(tput bold)$*$(tput sgr0)\n"
 }
 
-# _require exits with an error if the given command is not installed.
+# _require <command>
+# Exits with an error if command is not installed.
 _require() {
     if ! command -v "$1" &> /dev/null; then
         echo "Error: '$1' is required but not installed." >&2
@@ -16,7 +18,8 @@ _require() {
     fi
 }
 
-# _ensure creates a file (or a directory, if the path ends in /) with an optional permission mode.
+# _ensure <path> [mode]
+# Creates a file (or a directory, if path ends in /) with an optional permission mode.
 _ensure() {
     local target=$1 mode=${2:-}
 
@@ -30,7 +33,8 @@ _ensure() {
     if [[ -n "$mode" ]]; then chmod "$mode" "$target"; fi
 }
 
-# _resolve_getpath returns the dotfiles root path from GETPATH, git config, or the default ~/src.
+# _resolve_getpath
+# Returns the dotfiles root path from GETPATH, git config, or the default ~/src.
 _resolve_getpath() {
     local getpath="${GETPATH:-}"
     if [ -z "$getpath" ] && command -v git &>/dev/null; then
@@ -42,7 +46,8 @@ _resolve_getpath() {
     echo "$getpath"
 }
 
-# _remove_stale_link removes a symlink if it points to a missing target within the given prefix.
+# _remove_stale_link <link> <prefix>
+# Removes link if it points to a missing target within prefix.
 _remove_stale_link() {
     local link=$1 prefix=$2 target
     [ -L "$link" ] || return 0
@@ -54,7 +59,8 @@ _remove_stale_link() {
     unlink "$link"
 }
 
-# _clean_dir removes stale symlinks in the given directories that resolve within the given prefix.
+# _clean_dir <prefix> <dir...>
+# Removes stale symlinks in each dir that resolve within prefix.
 _clean_dir() {
     local prefix=$1 dir link; shift
     for dir in "$@"; do
@@ -64,29 +70,54 @@ _clean_dir() {
     done
 }
 
-# _merge_claude_settings merges the repo's Claude settings into ~/.claude/settings.json,
-# unioning permissions.allow instead of overwriting it.
+# _merge_claude_settings
+# Merges agents/claude/settings.json into ~/.claude/settings.json.
 _merge_claude_settings() {
-    local repo_settings="$DIR/agents/claude/settings.json"
-    [[ -f "$repo_settings" ]] || return 0
-
     _require jq
     _ensure ~/.claude/settings.json
     [[ -s ~/.claude/settings.json ]] || echo '{}' > ~/.claude/settings.json
 
     local tmp=$(mktemp)
-    jq --argjson repo "$(cat "$repo_settings")" '
-        . as $live
-        | (. * $repo)
-        | .permissions.allow = ((($live.permissions.allow // []) + ($repo.permissions.allow // [])) | unique)
-    ' ~/.claude/settings.json > "$tmp"
+    jq -s '.[0] * .[1]' ~/.claude/settings.json "$DIR/agents/claude/settings.json" > "$tmp"
     mv "$tmp" ~/.claude/settings.json
     chmod 600 ~/.claude/settings.json
 
-    echo "merged   $repo_settings -> $HOME/.claude/settings.json"
+    echo "merged   $DIR/agents/claude/settings.json -> $HOME/.claude/settings.json"
 }
 
-# _link_agents symlinks agent skills, personas, and global instructions into all supported AI tool directories.
+# _merge_orca_settings
+# Merges orca/settings.json into Orca's profile db and updates its content_hash.
+_merge_orca_settings() {
+    local db="$HOME/Library/Application Support/orca/profiles/local-default/profile-state.db"
+
+    if [[ ! -f "$db" ]]; then
+        echo "skipped  orca settings: $db not found"
+        return 0
+    fi
+
+    _require sqlite3
+
+    if [[ "${TERM_PROGRAM:-}" == Orca ]]; then
+        echo "skipped  orca settings: run from a terminal outside Orca"
+        return 0
+    fi
+
+    if pgrep -x Orca >/dev/null; then
+        echo "skipped  orca settings: quit Orca and rerun"
+        return 0
+    fi
+
+    # RFC 7396 merge patch: nested objects merge, null deletes a key.
+    local new="json_patch(payload, json(readfile('$DIR/orca/settings.json')))" payload hash
+    payload=$(sqlite3 "$db" "SELECT $new FROM profile_state_documents WHERE domain='settings'")
+    hash=$(print -rn -- "$payload" | shasum -a 256 | cut -d' ' -f1)
+    sqlite3 "$db" "UPDATE profile_state_documents SET payload = $new, content_hash = '$hash' WHERE domain='settings'"
+
+    echo "merged   orca settings -> $db"
+}
+
+# _link_agents
+# Symlinks agent skills, personas, and global instructions into all supported AI tool directories.
 _link_agents() {
     _ensure ~/.claude/
     local claude
@@ -126,7 +157,8 @@ _link_agents() {
     ln -vsf "$DIR/agents/AGENTS.md" ~/.pi/agent/AGENTS.md
 }
 
-# _clean removes stale dotfile and agent symlinks from home directories.
+# _clean
+# Removes stale dotfile and agent symlinks from home directories.
 _clean() {
     _log "Cleaning stale dotfile symlinks"
     _clean_dir "$DIR/" ~ ~/.config/fish ~/.config/fish/completions ~/.config/ghostty ~/.config/git ~/.config/zed ~/.gnupg ~/.local/share/bash-completion/completions ~/.orca ~/.ssh ~/.vim ~/.zsh/completions
@@ -135,7 +167,8 @@ _clean() {
     _clean_dir "$DIR/agents/" ~/.claude ~/.claude/skills ~/.agents/skills ~/.claude/agents ~/.gemini ~/.gemini/agents ~/.config/opencode/agents ~/.pi/agent ~/.pi/agent/prompts ~/.codex
 }
 
-# _usage prints usage information to stdout.
+# _usage
+# Prints usage information to stdout.
 _usage() {
     local getpath=$(_resolve_getpath)
 
@@ -154,14 +187,16 @@ Commands:
 "
 }
 
-# _version prints the current commit SHA of the dotfiles repository.
+# _version
+# Prints the current commit SHA of the dotfiles repository.
 _version() {
     _require git
 
     git -C "$DIR" rev-parse --short HEAD
 }
 
-# _init clones the dotfiles repository to GETPATH and symlinks dot to ~/.local/bin.
+# _init
+# Clones the dotfiles repository to GETPATH and symlinks dot to ~/.local/bin.
 _init() {
     _require git
 
@@ -184,7 +219,8 @@ _init() {
     ln -vsf "$target/dot" ~/.local/bin/dot
 }
 
-# _update pulls the latest dotfiles changes and reports the old and new commit SHA.
+# _update
+# Pulls the latest dotfiles changes and reports the old and new commit SHA.
 _update() {
     _require git
 
@@ -200,7 +236,8 @@ _update() {
     fi
 }
 
-# _link symlinks all dotfiles into home and removes stale symlinks.
+# _link
+# Symlinks all dotfiles into home and removes stale symlinks.
 _link() {
     _log "Symlinking dotfiles"
 
@@ -236,6 +273,7 @@ _link() {
     # orca
     _ensure ~/.orca/
     ln -vsf "$DIR/orca/keybindings.json" ~/.orca/keybindings.json
+    _merge_orca_settings
 
     # ssh
     _ensure ~/.ssh/
@@ -255,13 +293,15 @@ _link() {
     _clean
 }
 
-# _install_defaults applies macOS defaults settings.
+# _install_defaults
+# Applies macOS defaults settings.
 _install_defaults() {
     _log "Setting macOS defaults"
     "$DIR/.macOS"
 }
 
-# _install_brew installs Homebrew if missing and installs packages from the Brewfile.
+# _install_brew
+# Installs Homebrew if missing and installs packages from the Brewfile.
 _install_brew() {
     _require curl
 
@@ -274,7 +314,8 @@ _install_brew() {
     HOMEBREW_BUNDLE_NO_LOCK=1 brew bundle --file "$DIR/Brewfile"
 }
 
-# _install_fisher installs Fisher and updates all fish plugins.
+# _install_fisher
+# Installs Fisher and updates all fish plugins.
 _install_fisher() {
     _require brew
     _require curl
@@ -291,7 +332,8 @@ _install_fisher() {
     fish -c "git checkout \"$DIR/sh/fish_plugins\" && fisher update"
 }
 
-# _install_vim installs vim-plug and updates all Vim plugins.
+# _install_vim
+# Installs vim-plug and updates all Vim plugins.
 _install_vim() {
     _require vim
     _require curl
@@ -306,7 +348,8 @@ _install_vim() {
     echo | echo | vim +PlugUpdate +PlugClean! +qall &>/dev/null
 }
 
-# _install runs all install steps in order: brew, defaults, fisher, and vim.
+# _install
+# Runs all install steps in order: brew, defaults, fisher, and vim.
 _install() {
     _install_brew
     _install_defaults
