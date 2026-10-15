@@ -16,7 +16,7 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 | `install-defaults`  | Applies macOS `defaults write` settings                                         |
 | `install-fisher`    | Installs/updates Fisher and fish plugins                                        |
 | `install-vim`       | Installs/updates vim-plug and Vim plugins                                       |
-| `update`            | Pulls latest changes and reports the version and whether it was updated         |
+| `update`            | Pulls latest changes; prints the short SHA (or old → new) as a GitHub link      |
 | `version`           | Prints the current commit SHA of the dotfiles repository                        |
 
 On a new machine, run commands in this order: `init` → `link` → `install`. `link` must run before `install` because the install steps (fisher, vim) depend on config files already being in place at their expected locations.
@@ -27,6 +27,7 @@ On a new machine, run commands in this order: `init` → `link` → `install`. `
 dot         # entry point — init/update/link/install subcommands
 .macOS      # zsh script that applies macOS defaults write settings
 Brewfile    # Homebrew formulae, casks, and Mac App Store apps
+.github     # CI workflow and Dependabot config
 agents      # global AI agent instructions, persona, and skill definitions
 ghostty     # Ghostty terminal emulator config
 git         # global git config and gitignore
@@ -50,13 +51,13 @@ AI configuration is managed via `agents/` and symlinked to tool-specific global 
 
 Individual symlinks are used to allow personal, non-repo agents and skills to coexist in the target directories.
 
-| Tool        | Skills                             | Personas / agents                | Global instructions |
-| ----------- | ----------------------------------- | --------------------------------- | ----------------------- |
+| Tool        | Skills                             | Personas / agents                | Global instructions     |
+| ----------- | ---------------------------------- | -------------------------------- | ----------------------- |
 | Claude Code | `~/.claude/skills/<name>/SKILL.md` | `~/.claude/agents/*.md`          | `~/.claude/AGENTS.md`   |
 | Antigravity | `~/.agents/skills/<name>/SKILL.md` | `~/.gemini/agents/*.md`          | `~/.gemini/GEMINI.md`   |
-| OpenCode    | `~/.agents/skills/<name>/SKILL.md` | `~/.config/opencode/agents/*.md` | —                        |
+| OpenCode    | `~/.agents/skills/<name>/SKILL.md` | `~/.config/opencode/agents/*.md` | —                       |
 | Pi          | `~/.agents/skills/<name>/SKILL.md` | `~/.pi/agent/prompts/*.md`       | `~/.pi/agent/AGENTS.md` |
-| Codex       | —                                    | —                                  | `~/.codex/AGENTS.md`    |
+| Codex       | —                                  | —                                | `~/.codex/AGENTS.md`    |
 
 Antigravity replaced Gemini CLI (retired 2026-06-18) but still reads `~/.gemini/`. Its skills/persona paths above are carried over from the old CLI, unverified — treat as best-effort.
 
@@ -105,6 +106,8 @@ GitHub Actions (`.github/workflows/ci.yml`) runs every `dot` command except `ins
 3. Add an `ln -vsf` line in `_link` pointing it to its target path.
 4. If the target directory is new, add it to the `_clean_dir` list in `_clean`.
 5. If it requires a new package, add it to `Brewfile`.
+
+For agents, skills, or personas, edit `_link_agents` instead of `_link`.
 
 ## What not to change
 

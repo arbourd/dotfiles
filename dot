@@ -20,7 +20,7 @@ _has_gum() {
 # Replaces the home directory with ~ and the dotfiles directory with a relative path.
 _tilde() {
     local s=${1//$DIR\//}
-    echo "${s//$HOME/~}"
+    print -r -- "${s//$HOME/~}"
 }
 
 # _log <message...>
@@ -54,6 +54,29 @@ _status() {
     else
         printf '%-8s %s\n' "$kind" "$detail"
     fi
+}
+
+# _hyperlink <url> <text>
+# Sets REPLY to a clickable link (plain text without a tty or url).
+_hyperlink() {
+    local url=$1 text=$2
+    if [[ -n "$url" ]] && _has_color; then
+        REPLY=$'\e]8;;'"$url"$'\e\\'"$text"$'\e]8;;\e\\'
+    else
+        REPLY=$text
+    fi
+}
+
+# _repo_url
+# Prints origin's GitHub URL, if any.
+_repo_url() {
+    local url
+    url=$(git -C "$DIR" remote get-url origin 2>/dev/null) || return 0
+    url=${url%.git}
+    url=${url/#git@github.com:/https://github.com/}
+    url=${url/#ssh:\/\/git@github.com\//https://github.com/}
+    [[ "$url" == https://github.com/* ]] && echo "$url"
+    return 0
 }
 
 # _err <message...>
@@ -304,15 +327,18 @@ _init() {
 _update() {
     _require git
 
-    local before after
+    local before after repo
     before=$(git -C "$DIR" rev-parse --short HEAD)
     git -C "$DIR" pull --quiet
     after=$(git -C "$DIR" rev-parse --short HEAD)
+    repo=$(_repo_url)
 
     if [ "$before" = "$after" ]; then
-        _status ok "dotfiles $after (up to date)"
+        _hyperlink "${repo:+$repo/commit/$after}" "$after"
+        _status ok "dotfiles $REPLY (up to date)"
     else
-        _status updated "dotfiles $before → $after"
+        _hyperlink "${repo:+$repo/compare/$before...$after}" "$before → $after"
+        _status updated "dotfiles $REPLY"
     fi
 }
 

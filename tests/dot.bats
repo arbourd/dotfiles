@@ -499,3 +499,35 @@ _orca_db() {
     cd "$FAKE_HOME/cwd"
     git -C "$DOTFILES" checkout sh/fish_plugins
 }
+
+@test '_hyperlink sets plain text when not a tty' {
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _hyperlink https://example.com/x text; print -r -- \"\$REPLY\""
+    [ "$output" = "text" ]
+}
+
+@test '_hyperlink sets plain text when url is empty' {
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _hyperlink '' text; print -r -- \"\$REPLY\""
+    [ "$output" = "text" ]
+}
+
+@test '_tilde preserves backslashes' {
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _tilde 'a\\fb'"
+    [ "$output" = 'a\fb' ]
+}
+
+@test '_repo_url converts ssh and https remotes to a github https url' {
+    local repo="$FAKE_HOME/repo"
+    git init -q "$repo"
+
+    git -C "$repo" remote add origin git@github.com:arbourd/dotfiles.git
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
+    [ "$output" = "https://github.com/arbourd/dotfiles" ]
+
+    git -C "$repo" remote set-url origin https://github.com/arbourd/dotfiles.git
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
+    [ "$output" = "https://github.com/arbourd/dotfiles" ]
+
+    git -C "$repo" remote set-url origin https://example.com/x/y.git
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
+    [ -z "$output" ]
+}
