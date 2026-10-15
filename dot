@@ -166,12 +166,14 @@ _remove_stale_link() {
 # _clean_dir <prefix> <dir...>
 # Removes stale symlinks in each dir that resolve within prefix.
 _clean_dir() {
-    local prefix=$1 dir link; shift
+    local prefix=$1 dir link removed=0; shift
     for dir in "$@"; do
         for link in "$dir"/*(DN@); do
             _remove_stale_link "$link" "$prefix"
+            [ -L "$link" ] || removed=1
         done
     done
+    [[ $removed -eq 1 ]] || _status ok "none found"
 }
 
 # _merge_claude_settings
@@ -298,7 +300,12 @@ Options:
 _version() {
     _require git
 
-    git -C "$DIR" rev-parse --short HEAD
+    local sha repo
+    sha=$(git -C "$DIR" rev-parse --short HEAD)
+    repo=$(_repo_url)
+
+    _hyperlink "${repo:+$repo/commit/$sha}" "$sha"
+    echo "$REPLY"
 }
 
 # _init
@@ -310,17 +317,19 @@ _init() {
     local absolute_getpath="${getpath/#\~/$HOME}"
     local target="${absolute_getpath%/}/github.com/arbourd/dotfiles"
 
-    _log "Initializing dotfiles to $target"
+    local -a gitv=()
+    (( VERBOSE )) && gitv=(-v)
+
+    _log "Initializing dotfiles"
 
     if [ -d "$target" ]; then
         _status ok "$target already exists, pulling"
-        _spin "pulling dotfiles" git -C "$target" pull
+        _spin "pulling dotfiles" git -C "$target" pull "${gitv[@]}"
     else
         _ensure "${target:h}/"
-        _spin "cloning dotfiles" git clone https://github.com/arbourd/dotfiles.git "$target"
+        _spin "cloning dotfiles" git clone "${gitv[@]}" https://github.com/arbourd/dotfiles.git "$target"
     fi
 
-    _log "Symlinking dot to $HOME/.local/bin/dot"
     _ensure ~/.local/bin/
     _symlink "$target/dot" ~/.local/bin/dot
 }
@@ -332,7 +341,7 @@ _update() {
 
     local before after repo
     before=$(git -C "$DIR" rev-parse --short HEAD)
-    git -C "$DIR" pull --quiet
+    _spin "pulling dotfiles" git -C "$DIR" pull $( (( VERBOSE )) && echo -v || echo --quiet )
     after=$(git -C "$DIR" rev-parse --short HEAD)
     repo=$(_repo_url)
 
