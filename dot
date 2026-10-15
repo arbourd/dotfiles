@@ -38,7 +38,7 @@ _log() {
 
 # _status <kind> <detail...>
 # Prints a one-line status: marker, kind, then a dimmed detail.
-# kind is one of linked, merged, updated, ok, removed, skipped.
+# kind is one of linked, merged, updated, ok, removed, skipped, warn.
 _status() {
     local kind=$1 marker color detail; shift
     detail=$(_tilde "$*")
@@ -46,7 +46,7 @@ _status() {
     case $kind in
         linked|merged|updated|ok) marker="✓" color=108 ;;
         removed)                  marker="–" color=67 ;;
-        skipped)                  marker="!" color=179 ;;
+        skipped|warn)             marker="!" color=179 ;;
         *)                        marker="•" color=244 ;;
     esac
 
@@ -148,6 +148,15 @@ _resolve_getpath() {
         getpath="~/src"
     fi
     echo "$getpath"
+}
+
+# _warn_location
+# Warns when dot runs from a checkout other than the one `init` manages.
+_warn_location() {
+    local getpath=$(_resolve_getpath)
+    local expected="${getpath/#\~/$HOME}"
+    expected="${expected%/}/github.com/arbourd/dotfiles"
+    [[ "$DIR" == "${expected:A}" ]] || _status warn "running from $DIR, not $expected"
 }
 
 # _remove_stale_link <link> <prefix>
@@ -504,24 +513,31 @@ case ${1:-} in
         _init
         ;;
     link)
+        _warn_location
         _link
         ;;
     install)
+        _warn_location
         _install
         ;;
     install-brew)
+        _warn_location
         _install_brew
         ;;
     install-defaults)
+        _warn_location
         _install_defaults
         ;;
     install-fisher)
+        _warn_location
         _install_fisher
         ;;
     install-vim)
+        _warn_location
         _install_vim
         ;;
     update)
+        _warn_location
         _update
         ;;
     version)
