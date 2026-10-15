@@ -71,3 +71,10 @@ jobs:
           echo "HOMEBREW_BUNDLE_MAS_SKIP=$mas_ids" >> "$GITHUB_ENV"
 
       - run: ./dot ${{ matrix.command }}
+
+      - if: ${{ matrix.command == 'init' }}
+        name: Run dot from PATH
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          command -v dot
+          dot version
