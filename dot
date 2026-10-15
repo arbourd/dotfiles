@@ -267,7 +267,7 @@ _link_agents() {
 # Removes stale dotfile and agent symlinks from home directories.
 _clean() {
     _log "Cleaning stale dotfile symlinks"
-    _clean_dir "$DIR/" ~ ~/.config/fish ~/.config/fish/completions ~/.config/ghostty ~/.config/git ~/.config/zed ~/.gnupg ~/.local/share/bash-completion/completions ~/.orca ~/.ssh ~/.vim ~/.zsh/completions
+    _clean_dir "$DIR/" ~ ~/.config/fish ~/.config/fish/completions ~/.config/ghostty ~/.config/git ~/.config/zed ~/.gnupg ~/.local/bin ~/.local/share/bash-completion/completions ~/.orca ~/.ssh ~/.vim ~/.zsh/completions
 
     _log "Cleaning stale agent dotfile symlinks"
     _clean_dir "$DIR/agents/" ~/.claude ~/.claude/skills ~/.agents/skills ~/.claude/agents ~/.gemini ~/.gemini/agents ~/.config/opencode/agents ~/.pi/agent ~/.pi/agent/prompts ~/.codex
@@ -361,17 +361,21 @@ _link() {
 
     # bash, fish and zsh
     _ensure ~/.config/fish/private.fish
+
     _symlink "$DIR/sh/.shrc" ~/.bash_profile
     _symlink "$DIR/sh/.shrc" ~/.bashrc
     _symlink "$DIR/sh/.shrc" ~/.zshrc
+
     _symlink "$DIR/sh/config.fish" ~/.config/fish/config.fish
     _symlink "$DIR/sh/fish_plugins" ~/.config/fish/fish_plugins
 
     # completions
     _ensure ~/.config/fish/completions/
     _symlink "$DIR/sh/completions/dot.fish" ~/.config/fish/completions/dot.fish
+
     _ensure ~/.local/share/bash-completion/completions/
     _symlink "$DIR/sh/completions/dot.bash" ~/.local/share/bash-completion/completions/dot
+
     _ensure ~/.zsh/completions/
     _symlink "$DIR/sh/completions/_dot" ~/.zsh/completions/_dot
 
@@ -391,6 +395,10 @@ _link() {
     # orca
     _ensure ~/.orca/
     _symlink "$DIR/orca/keybindings.json" ~/.orca/keybindings.json
+
+    _ensure ~/.local/bin/
+    _symlink "$DIR/orca/orca" ~/.local/bin/orca
+
     _merge_orca_settings
 
     # ssh
