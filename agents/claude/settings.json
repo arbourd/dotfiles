@@ -1,16 +1,19 @@
 {
-  "statusLine": {
-    "type": "command",
-    "command": "zsh ~/.claude/statusline.sh",
-    "refreshInterval": 5000
-  },
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true
   },
-  "effortLevel": "medium",
-  "spinnerTipsEnabled": false,
+  "env": {
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "DISABLE_TELEMETRY": "1"
+  },
   "feedbackSurveyRate": 0,
+  "spinnerTipsEnabled": false,
+  "statusLine": {
+    "type": "command",
+    "command": "zsh ~/.claude/statusline.sh",
+    "refreshInterval": 5000
+  },
   "theme": "dark"
 }
