@@ -14,6 +14,12 @@ instructions go in that project's own `AGENTS.md`.
   conversation wins, but only for the thing they unblocked, not as blanket permission for
   the rest of the session.
 
+## Communication
+
+- Be quiet and brief. Plain prose, a few sentences, then stop.
+- No headers, bold, emoji, preamble, or closing summary.
+- Same restraint in commit messages, comments, and docs.
+
 ## Git
 
 - Never push, force-push, or run destructive ops (`reset --hard`, `clean -f`, branch
