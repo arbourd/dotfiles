@@ -34,7 +34,7 @@ agents      # global AI agent instructions, persona, and skill definitions
 ghostty     # Ghostty terminal emulator config
 git         # global git config and gitignore
 gpg         # GPG agent config
-orca        # Orca CLI launcher and keybindings (symlinked) and settings (merged into Orca's db)
+orca        # Orca CLI launcher and keybindings (symlinked), settings (merged into Orca's db), defaults.js (dumps Orca's defaults)
 sh          # shell config: fish (primary), bash, and zsh fallback
 ssh         # SSH client config
 vim         # vimrc and vim-plug plugin list
@@ -67,7 +67,14 @@ Antigravity replaced Gemini CLI (retired 2026-06-18) but still reads `~/.gemini/
 
 ## Orca
 
-`orca/settings.json` is merged into Orca's SQLite profile db via `json_patch` (`null` deletes a key). Skipped while Orca is running (it overwrites settings on quit) or when `dot link` runs inside Orca's terminal.
+`orca/settings.json` is merged into Orca's SQLite profile db via `json_patch` (RFC 7396: objects merge, `null` deletes a key, arrays replace wholesale). Skipped while Orca is running (it overwrites settings on quit) or when `dot link` runs inside Orca's terminal.
+
+Only put non-default values in `orca/settings.json`. `orca/defaults.js` prints Orca's built-in defaults to diff against:
+
+```bash
+npx @electron/asar extract /Applications/Orca.app/Contents/Resources/app.asar /tmp/orca-app
+node orca/defaults.js /tmp/orca-app
+```
 
 ## Shell
 

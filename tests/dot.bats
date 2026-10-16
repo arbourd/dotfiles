@@ -580,6 +580,20 @@ _orca_db() {
     [[ "$output" == *"'sqlite3' is required"* ]]
 }
 
+@test 'orca/settings.json is a valid JSON object' {
+    jq -e 'type == "object"' "$DOTFILES/orca/settings.json"
+}
+
+@test '_merge_orca_settings deletes keys the repo sets to null' {
+    _orca_db
+    sqlite3 "$ORCA_DB" "UPDATE profile_state_documents SET payload = '{\"agentDefaultArgs\":{\"claude\":\"--x\"},\"agentDefaultEnv\":{\"goose\":{}},\"other\":1}' WHERE domain='settings'"
+
+    zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _merge_orca_settings" > /dev/null
+
+    run sqlite3 "$ORCA_DB" "SELECT json_type(payload, '\$.agentDefaultArgs') IS NULL, json_type(payload, '\$.agentDefaultEnv') IS NULL, json_extract(payload, '\$.other') FROM profile_state_documents WHERE domain='settings'"
+    [ "$output" = "1|1|1" ]
+}
+
 @test '_status prints plain kind and detail when not a tty' {
     run zsh -c "source '$FAKE_HOME/setup.zsh'; _status merged 'a -> b'"
     [ "$status" -eq 0 ]
