@@ -1,12 +1,28 @@
 {
   "enabledPlugins": {
+    "agent-skills@addy-agent-skills": true,
+    "ponytail@ponytail": true,
+    "superpowers@claude-plugins-official": true,
     "gopls-lsp@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "env": {
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "DISABLE_TELEMETRY": "1"
+  },
+  "extraKnownMarketplaces": {
+    "addy-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "addyosmani/agent-skills"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    }
   },
   "feedbackSurveyRate": 0,
   "spinnerTipsEnabled": false,
