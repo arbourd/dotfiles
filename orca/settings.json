@@ -1,3 +1,57 @@
 {
-  "terminalScopeHistoryByWorktree": false
+  "agentDefaultArgs": null,
+  "agentDefaultEnv": null,
+  "defaultTuiAgent": "blank",
+  "experimentalNativeChat": true,
+  "floatingTerminalEnabled": false,
+  "floatingTerminalTriggerLocation": "status-bar",
+  "mobileEmulatorEnabled": false,
+  "notifications": {
+    "terminalBell": true
+  },
+  "openInApplications": [
+    {
+      "id": "zed",
+      "label": "Zed",
+      "command": "zed"
+    }
+  ],
+  "primarySelectionMiddleClickPaste": false,
+  "showMobileButton": false,
+  "terminalColorOverrides": {
+    "black": "#073642",
+    "red": "#dc322f",
+    "green": "#859900",
+    "yellow": "#b58900",
+    "blue": "#268bd2",
+    "magenta": "#d33682",
+    "cyan": "#2aa198",
+    "white": "#eee8d5",
+    "brightBlack": "#335e69",
+    "brightRed": "#cb4b16",
+    "brightGreen": "#586e75",
+    "brightYellow": "#657b83",
+    "brightBlue": "#839496",
+    "brightMagenta": "#6c71c4",
+    "brightCyan": "#93a1a1",
+    "brightWhite": "#fdf6e3",
+    "background": "#002b36",
+    "foreground": "#839496",
+    "cursor": "#839496",
+    "cursorAccent": "#073642",
+    "selectionBackground": "#073642",
+    "selectionForeground": "#93a1a1"
+  },
+  "terminalCursorStyle": "underline",
+  "terminalDefaultShell": "/opt/homebrew/bin/fish",
+  "terminalFontFamily": "Source Code Pro for Powerline",
+  "terminalScopeHistoryByWorktree": false,
+  "theme": "dark",
+  "worktreeVisibilityDefaults": {
+    "sourcePreferences": {
+      "builtIn": {
+        "claude": "show"
+      }
+    }
+  }
 }
