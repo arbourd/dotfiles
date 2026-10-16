@@ -1,10 +1,11 @@
 ---
+name: git-get
+description: Clone git repositories with `git get` instead of `git clone`, so they land at a predictable path under GETPATH (default ~/src). Use whenever the user asks to clone, check out, or fetch a repo by URL or `owner/repo` and gives no destination path, even if they say "git clone".
+---
 
 # git-get
 
-Use `git get` instead of `git clone` when cloning repositories. It clones to a deterministic path under `GETPATH` (default `~/src`) mirroring the host and repo path, e.g. `github.com/owner/repo` → `~/src/github.com/owner/repo`.
-
-## Usage
+`git get` clones to `$GETPATH/<host>/<owner>/<repo>` (default `GETPATH=~/src`), so every repo has one predictable location, e.g. `github.com/owner/repo` → `~/src/github.com/owner/repo`. Use it in place of `git clone` so repos don't end up scattered in the current directory.
 
 ```sh
 git get github.com/owner/repo
@@ -12,13 +13,6 @@ git get https://github.com/owner/repo.git
 git get git@github.com:owner/repo.git
 ```
 
-## When to use
+After cloning, work from the resulting path under `GETPATH`.
 
-- When the user asks to clone or check out a repo and no explicit destination path is given.
-
-## When NOT to use
-
-- When the user specifies an explicit clone destination (e.g. `git clone <url> /some/path`).
-- When `git get` is not available.
-
----
+Fall back to `git clone` when the user names an explicit destination (`git clone <url> /some/path`) or `git get` isn't installed.
