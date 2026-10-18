@@ -1,10 +1,11 @@
 {
   "enabledPlugins": {
     "agent-skills@addy-agent-skills": true,
-    "ponytail@ponytail": true,
-    "superpowers@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
     "gopls-lsp@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "ponytail@ponytail": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
   },
   "env": {
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
