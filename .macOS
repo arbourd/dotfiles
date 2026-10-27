@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+set -e
 
 ## Global
 #
@@ -109,5 +110,7 @@ defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
 ## Restart services
 #
 
+# Flush cached prefs first so the restarted processes read the new values
+killall cfprefsd
 killall ControlCenter
 killall Dock
