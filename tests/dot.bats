@@ -189,6 +189,10 @@ _tty() {
     [ "$(readlink "$FAKE_HOME/.config/fish/config.fish")" = "$DOTFILES/sh/config.fish" ]
     [ -L "$FAKE_HOME/.config/fish/fish_plugins" ]
     [ "$(readlink "$FAKE_HOME/.config/fish/fish_plugins")" = "$DOTFILES/sh/fish_plugins" ]
+    local fn
+    for fn in "$DOTFILES"/sh/functions/*.fish; do
+        [ "$(readlink "$FAKE_HOME/.config/fish/functions/${fn##*/}")" = "$fn" ]
+    done
     [ -L "$FAKE_HOME/.config/fish/completions/dot.fish" ]
     [ "$(readlink "$FAKE_HOME/.config/fish/completions/dot.fish")" = "$DOTFILES/sh/completions/dot.fish" ]
     [ -L "$FAKE_HOME/.local/share/bash-completion/completions/dot" ]
@@ -387,7 +391,7 @@ JSON
 
 @test 'clean covers every directory it lists' {
     local d
-    local -a dotdirs=("$FAKE_HOME" .config/fish .config/fish/completions .config/ghostty .config/git .config/zed .gnupg .local/bin .local/share/bash-completion/completions .orca .ssh .vim .zsh/completions)
+    local -a dotdirs=("$FAKE_HOME" .config/fish .config/fish/completions .config/fish/functions .config/ghostty .config/git .config/zed .gnupg .local/bin .local/share/bash-completion/completions .orca .ssh .vim .zsh/completions)
     local -a agentdirs=(.claude .claude/skills .agents/skills .claude/agents .gemini .gemini/agents .config/opencode/agents .pi/agent .pi/agent/prompts .codex)
 
     for d in "${dotdirs[@]}"; do

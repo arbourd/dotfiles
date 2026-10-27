@@ -276,7 +276,7 @@ _link_agents() {
 # Removes stale dotfile and agent symlinks from home directories.
 _clean() {
     _log "Cleaning stale dotfile symlinks"
-    _clean_dir "$DIR/" ~ ~/.config/fish ~/.config/fish/completions ~/.config/ghostty ~/.config/git ~/.config/zed ~/.gnupg ~/.local/bin ~/.local/share/bash-completion/completions ~/.orca ~/.ssh ~/.vim ~/.zsh/completions
+    _clean_dir "$DIR/" ~ ~/.config/fish ~/.config/fish/completions ~/.config/fish/functions ~/.config/ghostty ~/.config/git ~/.config/zed ~/.gnupg ~/.local/bin ~/.local/share/bash-completion/completions ~/.orca ~/.ssh ~/.vim ~/.zsh/completions
 
     _log "Cleaning stale agent dotfile symlinks"
     _clean_dir "$DIR/agents/" ~/.claude ~/.claude/skills ~/.agents/skills ~/.claude/agents ~/.gemini ~/.gemini/agents ~/.config/opencode/agents ~/.pi/agent ~/.pi/agent/prompts ~/.codex
@@ -377,6 +377,13 @@ _link() {
 
     _symlink "$DIR/sh/config.fish" ~/.config/fish/config.fish
     _symlink "$DIR/sh/fish_plugins" ~/.config/fish/fish_plugins
+
+    # fish functions
+    _ensure ~/.config/fish/functions/
+    local fn
+    for fn in "$DIR/sh/functions"/*.fish(N); do
+        _symlink "$fn" ~/.config/fish/functions
+    done
 
     # completions
     _ensure ~/.config/fish/completions/
