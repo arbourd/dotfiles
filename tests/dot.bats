@@ -584,8 +584,8 @@ _orca_db() {
     [[ "$output" == *"'sqlite3' is required"* ]]
 }
 
-@test 'orca/settings.json is a valid JSON object' {
-    jq -e 'type == "object"' "$DOTFILES/orca/settings.json"
+@test 'orca/settings.jsonc is a valid JSONC object' {
+    [ "$(sqlite3 :memory: "SELECT json_type(json(readfile('$DOTFILES/orca/settings.jsonc')))")" = object ]
 }
 
 @test '_merge_orca_settings deletes keys the repo sets to null' {

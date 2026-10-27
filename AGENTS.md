@@ -67,9 +67,9 @@ Antigravity replaced Gemini CLI (retired 2026-06-18) but still reads `~/.gemini/
 
 ## Orca
 
-`orca/settings.json` is merged into Orca's SQLite profile db via `json_patch` (RFC 7396: objects merge, `null` deletes a key, arrays replace wholesale). Skipped while Orca is running (it overwrites settings on quit) or when `dot link` runs inside Orca's terminal.
+`orca/settings.jsonc` is merged into Orca's SQLite profile db via `json_patch` (RFC 7396: objects merge, `null` deletes a key, arrays replace wholesale). Skipped while Orca is running (it overwrites settings on quit) or when `dot link` runs inside Orca's terminal.
 
-Only put non-default values in `orca/settings.json`. `orca/defaults.js` prints Orca's built-in defaults to diff against:
+Only put non-default values in `orca/settings.jsonc`. `orca/defaults.js` prints Orca's built-in defaults to diff against:
 
 ```bash
 npx @electron/asar extract /Applications/Orca.app/Contents/Resources/app.asar /tmp/orca-app

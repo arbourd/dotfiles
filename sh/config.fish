@@ -5,11 +5,14 @@ set fish_greeting ""
 #
 set -x SHELL /opt/homebrew/bin/fish
 set -x EDITOR vim
+
 set -x PATH $HOME/.local/bin $PATH
 set -x PATH $HOME/go/bin $PATH
 set -x PATH $HOME/.cargo/bin $PATH
 set -x PATH /opt/homebrew/opt/rustup/bin $PATH
+
 set -x DISABLE_TELEMETRY 1
+set -x DO_NOT_TRACK 1
 
 ## Initializations
 #
