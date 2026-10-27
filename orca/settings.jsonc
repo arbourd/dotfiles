@@ -1,14 +1,27 @@
 {
+  // null deletes the key, resetting it to Orca's default ({}).
   "agentDefaultArgs": null,
   "agentDefaultEnv": null,
+  // Default: "full-access".
+  "agentPermissionDefault": "auto",
+  // Default: null.
   "defaultTuiAgent": "blank",
+  // Default: false.
   "experimentalNativeChat": true,
+  // Default: true, "floating-button".
   "floatingTerminalEnabled": false,
   "floatingTerminalTriggerLocation": "status-bar",
+  // Default: true.
   "mobileEmulatorEnabled": false,
+  // Default: "automatic".
+  "mobilePairingConnectionMode": "local-only",
+  // Default: "full-access".
+  "nativeChatPermissionMode": "auto",
   "notifications": {
+    // Default: false.
     "terminalBell": true
   },
+  // Default: VS Code.
   "openInApplications": [
     {
       "id": "zed",
@@ -16,8 +29,13 @@
       "command": "zed"
     }
   ],
+  // Default: true.
   "primarySelectionMiddleClickPaste": false,
+  // Default: true.
   "showMobileButton": false,
+  // Default: "list".
+  "sourceControlViewMode": "tree",
+  // Solarized Dark; not set by default.
   "terminalColorOverrides": {
     "black": "#073642",
     "red": "#dc322f",
@@ -42,12 +60,20 @@
     "selectionBackground": "#073642",
     "selectionForeground": "#93a1a1"
   },
+  // Default: "block".
   "terminalCursorStyle": "underline",
+  // Default: "" (system shell).
   "terminalDefaultShell": "/opt/homebrew/bin/fish",
+  // Default: "SF Mono".
   "terminalFontFamily": "Source Code Pro for Powerline",
+  // Default: true.
   "terminalScopeHistoryByWorktree": false,
+  // Default: "Ghostty Default Style Dark".
+  "terminalThemeDark": "Solarized Dark",
+  // Default: "system".
   "theme": "dark",
   "worktreeVisibilityDefaults": {
+    // Not set by default.
     "sourcePreferences": {
       "builtIn": {
         "claude": "show"

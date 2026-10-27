@@ -1,11 +1,14 @@
 ## Exports
 #
 export EDITOR=vim
+
 export PATH=$HOME/.local/bin:$PATH
 export PATH=$HOME/go/bin:$PATH
 export PATH=$HOME/.cargo/bin:$PATH
 export PATH=/opt/homebrew/opt/rustup/bin:$PATH
+
 export DISABLE_TELEMETRY=1
+export DO_NOT_TRACK=1
 
 ## Initializations
 #
