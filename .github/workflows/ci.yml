@@ -46,10 +46,19 @@ jobs:
           # PRs check out a detached merge ref; `dot update` needs a branch to pull
           ref: ${{ github.head_ref || github.ref_name }}
 
-      - if: ${{ matrix.command == 'install-brew' }}
+      - if: ${{ matrix.command == 'install-brew' && github.event_name == 'pull_request' }}
+        id: brew
+        name: Skip brew if its inputs are unchanged
+        run: |
+          git fetch --depth=1 origin ${{ github.event.pull_request.base.sha }}
+          if git diff --quiet ${{ github.event.pull_request.base.sha }} HEAD -- Brewfile dot .github/workflows/ci.yml; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: ${{ matrix.command == 'install-brew' && steps.brew.outputs.skip != 'true' }}
         run: brew update
 
-      - if: ${{ matrix.command == 'install-brew' }}
+      - if: ${{ matrix.command == 'install-brew' && steps.brew.outputs.skip != 'true' }}
         name: Run brew uninstall go
         run: |
           versions=$(brew list | grep -E '^go$|^go@' || true)
@@ -61,7 +70,7 @@ jobs:
             brew uninstall $v
           done
 
-      - if: ${{ matrix.command == 'install-brew' }}
+      - if: ${{ matrix.command == 'install-brew' && steps.brew.outputs.skip != 'true' }}
         name: Skip installs
         run: |
           # Container and Supacode both require MacOS 26 to install
@@ -73,7 +82,8 @@ jobs:
           echo $mas_ids
           echo "HOMEBREW_BUNDLE_MAS_SKIP=$mas_ids" >> "$GITHUB_ENV"
 
-      - run: ./dot ${{ matrix.command }}
+      - if: ${{ !(matrix.command == 'install-brew' && steps.brew.outputs.skip == 'true') }}
+        run: ./dot ${{ matrix.command }}
 
       - if: ${{ matrix.command == 'init' }}
         name: Run dot from PATH
