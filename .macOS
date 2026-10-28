@@ -23,9 +23,6 @@ defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
 ## Input
 #
 
-# Disable dictation
-defaults write com.apple.HIToolbox AppleDictationAutoEnable -int 0
-
 # Disable emoji function key
 defaults write com.apple.HIToolbox AppleFnUsageType -int 0
 
@@ -35,7 +32,7 @@ defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 263 \
 /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
 
 # Disable mouse shake magnification
-defaults write ~/Library/Preferences/.GlobalPreferences CGDisableCursorLocationMagnification -bool true
+defaults write NSGlobalDomain CGDisableCursorLocationMagnification -bool true
 
 
 ## Menu bar
