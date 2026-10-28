@@ -28,7 +28,7 @@ defaults write com.apple.HIToolbox AppleFnUsageType -int 0
 
 # Disable "Ask Siri about active window" (Shift-Command-Space)
 defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 263 \
-  '<dict><key>enabled</key><false/><key>value</key><dict><key>type</key><string>standard</string><key>parameters</key><array><integer>32</integer><integer>49</integer><integer>1179648</integer></array></dict></dict>'
+  '{enabled = 0; value = {parameters = (32, 49, 1179648); type = standard;};}'
 /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
 
 # Disable mouse shake magnification
