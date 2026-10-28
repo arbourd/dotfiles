@@ -439,7 +439,7 @@ _link() {
 # Applies macOS defaults settings.
 _install_defaults() {
     _log "macOS defaults"
-    "$DIR/.macOS"
+    _spin "macos defaults" "$DIR/.macOS"
 }
 
 # _install_brew
