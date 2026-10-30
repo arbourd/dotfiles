@@ -76,6 +76,13 @@ npx @electron/asar extract /Applications/Orca.app/Contents/Resources/app.asar /t
 node orca/defaults.js /tmp/orca-app
 ```
 
+`agents/skills/orca-cli` and `agents/skills/orchestration` are exported from the Orca binary, not hand-written. Don't edit them; re-export after upgrading Orca:
+
+```bash
+orca skills get orca-cli > agents/skills/orca-cli/SKILL.md
+orca skills get orchestration > agents/skills/orchestration/SKILL.md
+```
+
 ## Shell
 
 Primary shell is **fish** (`/opt/homebrew/bin/fish`). `sh/.shrc` is a POSIX-compatible fallback used for bash and zsh. `dot` is zsh to maintain compatibility with macOS.
