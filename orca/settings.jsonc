@@ -6,8 +6,8 @@
   "agentPermissionDefault": "auto",
   // Default: null.
   "defaultTuiAgent": "blank",
-  // Default: false.
-  "experimentalNativeChat": true,
+  // null deletes the key, resetting it to Orca's default (false).
+  "experimentalNativeChat": null,
   // Default: true, "floating-button".
   "floatingTerminalEnabled": false,
   "floatingTerminalTriggerLocation": "status-bar",
