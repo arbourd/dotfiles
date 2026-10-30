@@ -33,6 +33,8 @@
   "primarySelectionMiddleClickPaste": false,
   // Default: true.
   "showMobileButton": false,
+  // Default: true.
+  "showMenuBarIcon": false,
   // Default: "list".
   "sourceControlViewMode": "tree",
   // Solarized Dark; not set by default.
