@@ -369,7 +369,7 @@ _link() {
     _log "Symlinking dotfiles"
 
     # bash, fish and zsh
-    _ensure ~/.config/fish/private.fish
+    _ensure ~/.config/fish/private.fish 600
 
     _symlink "$DIR/sh/.shrc" ~/.bash_profile
     _symlink "$DIR/sh/.shrc" ~/.bashrc
@@ -400,7 +400,7 @@ _link() {
     _symlink "$DIR/ghostty/config" ~/.config/ghostty/config
 
     # git
-    _ensure ~/.config/git/private
+    _ensure ~/.config/git/private 600
     _symlink "$DIR/git/config" ~/.config/git/config
     _symlink "$DIR/git/gitignore" ~/.config/git/gitignore
 

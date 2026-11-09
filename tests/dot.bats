@@ -221,7 +221,9 @@ _tty() {
     [ -d "$FAKE_HOME/.gnupg" ]
     [ "$(_perms "$FAKE_HOME/.gnupg")" = "drwx------" ]
     [ -f "$FAKE_HOME/.config/fish/private.fish" ]
+    [ "$(_perms "$FAKE_HOME/.config/fish/private.fish")" = "-rw-------" ]
     [ -f "$FAKE_HOME/.config/git/private" ]
+    [ "$(_perms "$FAKE_HOME/.config/git/private")" = "-rw-------" ]
 }
 
 @test 'link is idempotent and preserves private files' {
