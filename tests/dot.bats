@@ -552,6 +552,17 @@ _orca_db() {
     [ "$(printf '%s' "$payload" | shasum -a 256 | cut -d' ' -f1)" = "$hash" ]
 }
 
+@test '_merge_orca_settings handles a quote in the dotfiles path' {
+    _orca_db
+    local quoted="$FAKE_HOME/it's dotfiles"
+    mkdir -p "$quoted/orca"
+    cp "$DOTFILES/orca/settings.jsonc" "$quoted/orca/"
+
+    zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; DIR=\"\$1\"; _merge_orca_settings" _ "$quoted" > /dev/null
+
+    [ "$(sqlite3 "$ORCA_DB" "SELECT json_extract(payload, '\$.terminalScopeHistoryByWorktree') FROM profile_state_documents WHERE domain='settings'")" = "0" ]
+}
+
 @test '_merge_orca_settings skips when Orca is running' {
     _orca_db
     printf '#!/bin/sh\nexit 0\n' > "$FAKE_HOME/bin/pgrep"

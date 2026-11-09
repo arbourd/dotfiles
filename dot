@@ -223,7 +223,9 @@ _merge_orca_settings() {
     fi
 
     # RFC 7396 merge patch: nested objects merge, null deletes a key.
-    local new="json_patch(payload, json(readfile('$DIR/orca/settings.jsonc')))" payload hash
+    # Doubling ' escapes it inside the SQL string literal.
+    local file=${DIR//\'/\'\'}/orca/settings.jsonc
+    local new="json_patch(payload, json(readfile('$file')))" payload hash
     payload=$(sqlite3 "$db" "SELECT $new FROM profile_state_documents WHERE domain='settings'")
     hash=$(print -rn -- "$payload" | shasum -a 256 | cut -d' ' -f1)
     sqlite3 "$db" "UPDATE profile_state_documents SET payload = $new, content_hash = '$hash' WHERE domain='settings'"
