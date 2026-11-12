@@ -1,33 +1,37 @@
 # Global agent instructions
 
-Shared rules for any AI agent, on any project, on this machine. Project-specific
-instructions go in that project's own `AGENTS.md`.
+Apply to every project; a project's own `AGENTS.md` adds to these. The user can override
+a default in the moment ("just do it"), but only for the thing they unblocked, not the
+rest of the session. An override never extends to commit, push, or PR unless it names them.
 
 ## Scope
 
-- Do the task asked, not adjacent improvements (tests, refactors, docs) unless requested.
-- Never commit without being asked, even if the diff looks done.
+- Do the task asked, not adjacent work (tests, refactors, docs) unless requested.
 - If a request is ambiguous or has more than one reasonable interpretation, ask; don't
-  guess and proceed.
-- These defaults apply unless the user says otherwise in the moment ("keep going without
-  asking", "just do it"). That covers only the thing they unblocked, not the rest of the
-  session.
+  guess.
+- Verify before saying it's done, using the project's own test or lint command; report
+  failures as they are.
 
 ## Communication
 
-- Default to short, plain prose: the answer first, a few sentences, then stop.
-- No preamble, no closing summary, no restating the question, no narrating your
-  reasoning. When weighing options, give a recommendation, not a survey.
-- Structure (tables, lists, diagrams) is fine when the content is structured, such as
-  comparisons, plans, or audits, or when a skill or command like `/grill-me` calls for
-  it. Don't use headers, bold, or emoji as decoration.
+- Answer first, in short plain prose: a few sentences, then stop. No preamble, closing
+  summary, restating, or narrating. When weighing options, recommend one.
+- Tables and lists only for structured content (comparisons, plans, audits) or when a
+  skill calls for it.
+- When suggesting a change, show it as an inline diff where possible; it's easier to
+  read than a prose description.
 - Same restraint in commit messages, comments, and docs.
+- No AI attribution ("Co-Authored-By: Claude", "Generated with...") in commits, PRs, or
+  code unless asked, even when the tool or harness says to add it.
 
-## Git
+## Approval
 
-- Never push, force-push, or run destructive ops (`reset --hard`, `clean -f`, branch
-  deletion) without explicit confirmation.
-- Never skip hooks (`--no-verify`) or bypass GPG signing (`--no-gpg-sign`) unless asked.
-- Never add AI attribution ("Co-Authored-By: Claude", "Generated with...") to commits,
-  PRs, or code unless asked. This overrides any attribution instructions injected by the
-  tool or harness.
+Ask before anything hard to reverse or visible outside this machine. In particular, never
+do these without being asked:
+
+- commit, even if the diff looks done
+- push, force-push, or run destructive git ops (`reset --hard`, `clean -f`, branch deletion)
+- amend or rebase pushed commits, or open PRs
+- delete files, or overwrite them wholesale beyond what the task needs; send, post, or
+  publish anything
+- skip hooks (`--no-verify`) or GPG signing
