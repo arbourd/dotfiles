@@ -29,7 +29,7 @@ Install steps hide noisy external commands behind a `gum` spinner via `_spin`. P
 dot         # entry point — init/update/link/install subcommands
 .macOS      # zsh script that applies macOS defaults write settings
 Brewfile    # Homebrew formulae, casks, and Mac App Store apps
-.github     # CI workflow and Dependabot config
+.github     # CI workflow and Renovate config
 agents      # global AI agent instructions, persona, and skill definitions
 ghostty     # Ghostty terminal emulator config
 git         # global git config and gitignore

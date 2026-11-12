@@ -4,6 +4,9 @@ set -euo pipefail
 DIR="${0:A:h}"
 VERBOSE=0
 
+# renovate: datasource=github-tags depName=junegunn/vim-plug
+VIM_PLUG_VERSION=0.15.0
+
 # _has_color [fd]
 # Succeeds when fd (default 1) is a terminal and NO_COLOR is unset.
 _has_color() {
@@ -470,9 +473,17 @@ _install_fisher() {
         _spin "fish" brew install fish
     fi
 
+    if [[ ! -e ~/.config/fish/fish_plugins ]]; then
+        _err "Error: ~/.config/fish/fish_plugins not found; run 'dot link' first."
+        exit 1
+    fi
+
     _ensure ~/.config/fish/functions/
-    _spin "fisher installed" fish -c "curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
-    _spin "fisher plugins" fish -c "git -C \"$DIR\" checkout sh/fish_plugins && fisher update"
+    # fisher's version is pinned in fish_plugins; `fisher install` would conflict with an existing fisher
+    git -C "$DIR" checkout sh/fish_plugins
+    local version
+    version=${$(grep -o 'jorgebucaran/fisher@.*' "$DIR/sh/fish_plugins")#*@}
+    _spin "fisher plugins" fish -c "curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/$version/functions/fisher.fish | source && fisher update"
 }
 
 # _install_vim
@@ -482,9 +493,14 @@ _install_vim() {
     _require curl
 
     _log "Vim"
+    if [[ ! -e ~/.vim/vimrc ]]; then
+        _err "Error: ~/.vim/vimrc not found; run 'dot link' first."
+        exit 1
+    fi
+
     _ensure ~/.vim/autoload/
     _spin "vim-plug" curl -fsSLo ~/.vim/autoload/plug.vim --create-dirs \
-        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+        https://raw.githubusercontent.com/junegunn/vim-plug/$VIM_PLUG_VERSION/plug.vim
 
     # pipe two newlines to dismiss vim-plug prompts without a tty
     # vim's output is only shown on failure or with --verbose
