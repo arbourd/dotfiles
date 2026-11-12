@@ -85,6 +85,10 @@ jobs:
           echo $mas_ids
           echo "HOMEBREW_BUNDLE_MAS_SKIP=$mas_ids" >> "$GITHUB_ENV"
 
+      - if: ${{ matrix.command == 'install-fisher' || matrix.command == 'install-vim' }}
+        name: Run dot link
+        run: ./dot link
+
       - if: ${{ !(matrix.command == 'install-brew' && steps.brew.outputs.skip == 'true') }}
         run: ./dot ${{ matrix.command }}
 

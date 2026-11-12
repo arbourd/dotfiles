@@ -707,7 +707,7 @@ _orca_db() {
     local repo="$FAKE_HOME/repo"
     mkdir "$FAKE_HOME/bin" "$FAKE_HOME/cwd"
     mkdir -p "$repo/sh"
-    echo original > "$repo/sh/fish_plugins"
+    echo jorgebucaran/fisher@1.2.3 > "$repo/sh/fish_plugins"
     git init -q "$repo"
     git -C "$repo" add sh/fish_plugins
     git -C "$repo" -c user.name=t -c user.email=t@example.com -c commit.gpgsign=false commit -q -m init
@@ -718,15 +718,31 @@ _orca_db() {
     done
     printf '#!/bin/sh\necho "$2" >> "%s/fish_args"\n' "$FAKE_HOME" > "$FAKE_HOME/bin/fish"
     chmod +x "$FAKE_HOME/bin/"*
+    mkdir -p "$FAKE_HOME/.config/fish"
+    ln -s "$repo/sh/fish_plugins" "$FAKE_HOME/.config/fish/fish_plugins"
 
     run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; PATH='$FAKE_HOME/bin':\$PATH; cd '$FAKE_HOME/cwd'; _install_fisher"
     [ "$status" -eq 0 ]
-    grep -qF "git -C \"$repo\" checkout sh/fish_plugins && fisher update" "$FAKE_HOME/fish_args"
+    [ "$(cat "$repo/sh/fish_plugins")" = "jorgebucaran/fisher@1.2.3" ]
+    # uses the pinned fisher and never runs `fisher install`
+    grep -qF "jorgebucaran/fisher/1.2.3/functions/fisher.fish | source && fisher update" "$FAKE_HOME/fish_args"
+    ! grep -qF "fisher install" "$FAKE_HOME/fish_args"
+}
 
-    # the recorded git command works from a directory that is not a repo
-    cd "$FAKE_HOME/cwd"
-    git -C "$repo" checkout sh/fish_plugins
-    [ "$(cat "$repo/sh/fish_plugins")" = "original" ]
+@test 'install-fisher and install-vim fail before dot link' {
+    mkdir "$FAKE_HOME/bin"
+    for cmd in brew curl fish vim; do
+        printf '#!/bin/sh\n' > "$FAKE_HOME/bin/$cmd"
+    done
+    chmod +x "$FAKE_HOME/bin/"*
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _install_fisher"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"run 'dot link' first"* ]]
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _install_vim"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"run 'dot link' first"* ]]
 }
 
 @test '_hyperlink sets plain text when not a tty' {
@@ -842,6 +858,8 @@ _orca_db() {
     printf '#!/bin/sh\n' > "$FAKE_HOME/bin/curl"
     printf '#!/bin/sh\necho vim-output\n' > "$FAKE_HOME/bin/vim"
     chmod +x "$FAKE_HOME/bin/"*
+    mkdir "$FAKE_HOME/.vim"
+    touch "$FAKE_HOME/.vim/vimrc"
 
     run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _install_vim"
     [ "$status" -eq 0 ]
