@@ -49,7 +49,7 @@ AI configuration is managed via `agents/` and symlinked to tool-specific global 
 - `agents/AGENTS.md`: Shared global instructions, loaded by every tool on every project (e.g. "don't push without being asked"). Project-specific instructions still belong in that project's own `AGENTS.md`, not here.
 - `agents/personas`: Persona or subagent definitions.
 - `agents/skills`: Tool definitions and scripts.
-- `agents/claude`: Claude Code-only files, symlinked as-is into `~/.claude/`.
+- `agents/claude`: Claude Code-only files, symlinked into `~/.claude/` (except merged `settings.json`).
 
 Individual symlinks are used to allow personal, non-repo agents and skills to coexist in the target directories.
 
@@ -61,7 +61,7 @@ Individual symlinks are used to allow personal, non-repo agents and skills to co
 | Pi          | `~/.agents/skills/<name>/SKILL.md` | `~/.pi/agent/prompts/*.md`       | `~/.pi/agent/AGENTS.md` |
 | Codex       | —                                  | —                                | `~/.codex/AGENTS.md`    |
 
-Antigravity replaced Gemini CLI (retired 2026-06-18) but still reads `~/.gemini/`. Its skills/persona paths above are carried over from the old CLI, unverified — treat as best-effort.
+Antigravity paths are carried over from Gemini CLI and unverified.
 
 `agents/claude/settings.json` is not symlinked directly — it's merged into `~/.claude/settings.json` via `jq` (deep merge, repo wins on conflicts), so a live machine's local settings additions survive `dot link`.
 
@@ -69,12 +69,7 @@ Antigravity replaced Gemini CLI (retired 2026-06-18) but still reads `~/.gemini/
 
 `orca/settings.jsonc` is merged into Orca's SQLite profile db via `json_patch` (RFC 7396: objects merge, `null` deletes a key, arrays replace wholesale). Skipped while Orca is running (it overwrites settings on quit) or when `dot link` runs inside Orca's terminal.
 
-Only put non-default values in `orca/settings.jsonc`. `orca/defaults.js` prints Orca's built-in defaults to diff against:
-
-```bash
-npx @electron/asar extract /Applications/Orca.app/Contents/Resources/app.asar /tmp/orca-app
-node orca/defaults.js /tmp/orca-app
-```
+Only put non-default values in `orca/settings.jsonc`. To diff against Orca's built-in defaults, extract `app.asar` with `npx @electron/asar extract` and run `node orca/defaults.js <dir>`.
 
 `agents/skills/orca-cli` and `agents/skills/orchestration` are exported from the Orca binary, not hand-written. Don't edit them; re-export after upgrading Orca:
 
