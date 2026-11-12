@@ -71,7 +71,7 @@ Antigravity paths are carried over from Gemini CLI and unverified.
 
 Only put non-default values in `orca/settings.jsonc`. To diff against Orca's built-in defaults, extract `app.asar` with `npx @electron/asar extract` and run `node orca/defaults.js <dir>`.
 
-`agents/skills/orca-cli` and `agents/skills/orchestration` are exported from the Orca binary, not hand-written. Don't edit them; re-export after upgrading Orca:
+`agents/skills/orca-cli` and `agents/skills/orchestration` are exported from the Orca binary, not hand-written. Don't edit them; re-export after every Orca upgrade (`brew upgrade --cask arbourd/tap/orca`):
 
 ```bash
 orca skills get orca-cli > agents/skills/orca-cli/SKILL.md
