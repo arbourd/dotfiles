@@ -98,6 +98,8 @@ bats tests/dot.bats
 
 The suite needs `zsh`, `jq`, `sqlite3`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, completions, and CI matrix drift apart, or if `agents/claude/settings.json` gains a `hooks` key.
 
+Run `actionlint` after changing anything under `.github/workflows`.
+
 ## Adding or removing a command
 
 When a `dot` command is added, renamed, or removed, update all six of these in the same change:
