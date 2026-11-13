@@ -48,7 +48,7 @@ AI configuration is managed via `agents/` and symlinked to tool-specific global 
 
 - `agents/AGENTS.md`: Shared global instructions, loaded by every tool on every project (e.g. "don't push without being asked"). Project-specific instructions still belong in that project's own `AGENTS.md`, not here.
 - `agents/personas`: Persona or subagent definitions.
-- `agents/skills`: Tool definitions and scripts.
+- `agents/skills`: Skill definitions and scripts. `orca-cli` and `orchestration` are generated (see Orca).
 - `agents/claude`: Claude Code-only files, symlinked into `~/.claude/` (except merged `settings.json`).
 
 Individual symlinks are used to allow personal, non-repo agents and skills to coexist in the target directories.
@@ -69,18 +69,18 @@ Antigravity paths are carried over from Gemini CLI and unverified.
 
 `orca/settings.jsonc` is merged into Orca's SQLite profile db via `json_patch` (RFC 7396: objects merge, `null` deletes a key, arrays replace wholesale). Skipped while Orca is running (it overwrites settings on quit) or when `dot link` runs inside Orca's terminal.
 
-Only put non-default values in `orca/settings.jsonc`. To diff against Orca's built-in defaults, extract `app.asar` with `npx @electron/asar extract` and run `node orca/defaults.js <dir>`.
+Only put non-default values in `orca/settings.jsonc`.
 
 After every Orca upgrade, refresh `orca/settings.jsonc` against the new defaults:
 
-1. Extract into a fresh empty dir and dump the defaults (`orca/defaults.js` is the only script; keep it out of the extracted dir):
+1. Extract `app.asar` into a fresh empty dir and dump Orca's built-in defaults to `$d.json`:
    ```bash
    d=$(mktemp -d)
    npx @electron/asar extract /Applications/Orca.app/Contents/Resources/app.asar "$d"
    node orca/defaults.js "$d" > "$d.json"
    ```
-2. For each key in `settings.jsonc`, fix its `// Default: ...` comment if the default changed.
-3. Drop a key whose default now equals the value we set; set a removed or renamed key to `null` so the merge deletes it from the db.
+2. For each key in `settings.jsonc`, compare it with `$d.json` and fix its `// Default: ...` comment if the default changed.
+3. Drop a key whose default now equals the value we set. Set a removed or renamed key to `null` so the merge deletes it from the db.
 4. Check the defaults for new keys worth overriding, but only add ones the user wants.
 
 `agents/skills/orca-cli` and `agents/skills/orchestration` are exported from the Orca binary, not hand-written. Don't edit them; re-export after every Orca upgrade (`brew upgrade --cask arbourd/tap/orca`):
