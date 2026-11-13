@@ -1,6 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "enabledManagers": ["github-actions", "custom.regex"],
+  "extends": ["helpers:pinGitHubActionDigestsToSemver"],
+  "enabledManagers": ["custom.regex", "github-actions"],
   "customManagers": [
     {
       "customType": "regex",
@@ -16,5 +17,19 @@
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "jorgebucaran/fisher"
     }
-  ]
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["actions/*"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    }
+  ],
+  "platformAutomerge": false
 }
