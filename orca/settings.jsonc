@@ -4,10 +4,12 @@
   "agentDefaultEnv": null,
   // Default: "full-access".
   "agentPermissionDefault": "auto",
+  // Default: true.
+  "artifactSharingEnabled": false,
+  // Default: false.
+  "combinedDiffFileTreeVisibleByDefault": true,
   // Default: null.
   "defaultTuiAgent": "blank",
-  // null deletes the key, resetting it to Orca's default (false).
-  "experimentalNativeChat": null,
   // Default: true, "floating-button".
   "floatingTerminalEnabled": false,
   "floatingTerminalTriggerLocation": "status-bar",
@@ -17,6 +19,8 @@
   "mobilePairingConnectionMode": "local-only",
   // Default: "full-access".
   "nativeChatPermissionMode": "auto",
+  // Default: true.
+  "nativeChatResumeWorkOnRestart": false,
   "notifications": {
     // Default: false.
     "terminalBell": true

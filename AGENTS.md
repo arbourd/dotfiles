@@ -71,6 +71,18 @@ Antigravity paths are carried over from Gemini CLI and unverified.
 
 Only put non-default values in `orca/settings.jsonc`. To diff against Orca's built-in defaults, extract `app.asar` with `npx @electron/asar extract` and run `node orca/defaults.js <dir>`.
 
+After every Orca upgrade, refresh `orca/settings.jsonc` against the new defaults:
+
+1. Extract into a fresh empty dir and dump the defaults (`orca/defaults.js` is the only script; keep it out of the extracted dir):
+   ```bash
+   d=$(mktemp -d)
+   npx @electron/asar extract /Applications/Orca.app/Contents/Resources/app.asar "$d"
+   node orca/defaults.js "$d" > "$d.json"
+   ```
+2. For each key in `settings.jsonc`, fix its `// Default: ...` comment if the default changed.
+3. Drop a key whose default now equals the value we set; set a removed or renamed key to `null` so the merge deletes it from the db.
+4. Check the defaults for new keys worth overriding, but only add ones the user wants.
+
 `agents/skills/orca-cli` and `agents/skills/orchestration` are exported from the Orca binary, not hand-written. Don't edit them; re-export after every Orca upgrade (`brew upgrade --cask arbourd/tap/orca`):
 
 ```bash
