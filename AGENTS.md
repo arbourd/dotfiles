@@ -112,6 +112,12 @@ The suite needs `zsh`, `jq`, `sqlite3`, and `script` (tty tests run under a pty 
 
 Run `actionlint` after changing anything under `.github/workflows`.
 
+Validate `.github/renovate.json` after changing it:
+
+```bash
+npx --yes --package renovate -- renovate-config-validator --strict
+```
+
 ## Adding or removing a command
 
 When a `dot` command is added, renamed, or removed, update all six of these in the same change:
