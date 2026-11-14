@@ -230,6 +230,7 @@ _merge_orca_settings() {
     local file=${DIR//\'/\'\'}/orca/settings.jsonc
     local new="json_patch(payload, json(readfile('$file')))" payload hash
     payload=$(sqlite3 "$db" "SELECT $new FROM profile_state_documents WHERE domain='settings'")
+    [[ -n $payload ]] || { _err "Error: orca settings merge produced no payload (settings.jsonc missing, or no settings row)"; exit 1; }
     hash=$(print -rn -- "$payload" | shasum -a 256 | cut -d' ' -f1)
     sqlite3 "$db" "UPDATE profile_state_documents SET payload = $new, content_hash = '$hash' WHERE domain='settings'"
 
