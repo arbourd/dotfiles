@@ -87,7 +87,6 @@ cask 'google-gemini'
 cask 'httpie-desktop'
 cask 'kap'
 cask 'logi-options+'
-cask 'middleclick'
 cask 'monitorcontrol'
 cask 'monodraw'
 cask 'notion'
@@ -101,6 +100,7 @@ cask 'arbourd/tap/orca'
 cask 'tailscale-app'
 cask 'terraform-linters/tap/tflint', trusted: true
 cask 'utm'
+cask 'artginzburg/tap/wheelclick', trusted: true
 cask 'zed'
 
 cask 'font-source-code-pro'
