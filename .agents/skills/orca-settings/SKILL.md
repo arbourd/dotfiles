@@ -5,7 +5,7 @@ description: Use after upgrading Orca, or when asked to check, refresh, or audit
 
 # orca-settings
 
-`orca/settings.jsonc` is merged into Orca's SQLite profile db by `_merge_orca_settings` in `dot` (run by `dot link`). It holds only non-default values. Orca ships no defaults file; they live in its bundled JS, so `orca/compare.js` extracts them and diffs against `settings.jsonc` and the live db.
+`orca/settings.jsonc` is merged into Orca's SQLite profile db by `_merge_orca_settings` in `dot` (run by `dot merge`). It holds only non-default values. Orca ships no defaults file; they live in its bundled JS, so `orca/compare.js` extracts them and diffs against `settings.jsonc` and the live db.
 
 ## How the pieces fit
 
@@ -33,4 +33,4 @@ description: Use after upgrading Orca, or when asked to check, refresh, or audit
 
 4. **New default keys absent from the db:** show them to the user as a table (key, default), adding only the ones they want.
 
-5. Applying is the user's job: `dot link` skips the merge inside Orca's terminal and while Orca runs, so you can't do it. If you edited `settings.jsonc`, tell the user to quit Orca and run `dot link` from another terminal, then rerun `node orca/compare.js` to confirm no `db differs` flags remain.
+5. Applying is the user's job: `dot merge` skips the merge inside Orca's terminal and while Orca runs, so you can't do it. If you edited `settings.jsonc`, tell the user to quit Orca and run `dot merge orca` from another terminal, then rerun `node orca/compare.js` to confirm no `db differs` flags remain.

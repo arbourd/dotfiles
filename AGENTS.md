@@ -10,7 +10,8 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 |---------------------|-----------------------------------------------------------------------|
 | `help`              | Usage                                                                 |
 | `init`              | Clones to `$GETPATH/github.com/arbourd/dotfiles`, symlinks `dot` into `~/.local/bin` |
-| `link`              | Symlinks dotfiles into `~`, merges Claude and Codex config, removes stale symlinks |
+| `link`              | Symlinks dotfiles into `~` and removes stale symlinks |
+| `merge [target]`    | Merges Claude, Codex and Orca settings into their live configs (`claude`, `codex` or `orca` for one) |
 | `install`           | brew + defaults + fisher + vim, in order                              |
 | `install-brew`      | Homebrew packages from Brewfile                                       |
 | `install-defaults`  | macOS `defaults write` settings                                       |
@@ -19,14 +20,14 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 | `update`            | Pulls; prints short SHA (or old → new) as a GitHub link               |
 | `version`           | Current commit SHA                                                    |
 
-On a new machine, run commands in this order: `init` → `link` → `install`. `link` must run before `install` because the install steps (fisher, vim) depend on config files already being in place at their expected locations.
+On a new machine, run commands in this order: `init` → `link` → `merge` → `install`. `link` must run before `install` because the install steps (fisher, vim) depend on config files already being in place at their expected locations.
 
 Install steps hide noisy external commands behind a `gum` spinner via `_spin`. Pass `-v` or `--verbose` (anywhere on the line) to see full output. New install steps should wrap external commands in `_spin`.
 
 ## Repository layout
 
 ```
-dot         # entry point — init/update/link/install subcommands
+dot         # entry point — init/update/link/merge/install subcommands
 .macOS      # zsh script that applies macOS defaults write settings
 Brewfile    # Homebrew formulae, casks, and Mac App Store apps
 .github     # CI and skills-vendoring workflows, Renovate config
@@ -51,7 +52,7 @@ AI configuration is managed via `agents/` and symlinked to tool-specific global 
 - `agents/personas`: Persona or subagent definitions.
 - `agents/skills`: Skill definitions and scripts. Vendored from upstream repos (see Vendored skills).
 - `agents/claude`: Claude Code-only files, symlinked into `~/.claude/` (except merged `settings.json`).
-- `agents/codex/config.toml`: Codex plugin marketplaces and enabled plugins, merged into `~/.codex/config.toml` via `yq` (repo wins) because Codex writes machine paths and trust hashes there.
+- `agents/codex/config.toml`: Codex plugin marketplaces and enabled plugins, merged into `~/.codex/config.toml` by `dot merge` via `yq` (repo wins) because Codex writes machine paths and trust hashes there.
 
 `.agents/skills` holds skills for working on this repo only, separate from `agents/skills` (global, linked by `dot link`). `.claude/skills` is a symlink to it so Claude Code finds them; it is force-added because the global gitignore excludes `.claude`.
 
@@ -67,15 +68,15 @@ Individual symlinks are used to allow personal, non-repo agents and skills to co
 
 Antigravity paths are carried over from Gemini CLI and unverified.
 
-`agents/claude/settings.json` is not symlinked directly — it's merged into `~/.claude/settings.json` via `jq` (deep merge, repo wins on conflicts), so a live machine's local settings additions survive `dot link`.
+`agents/claude/settings.json` is not symlinked directly — it's merged into `~/.claude/settings.json` via `jq` by `dot merge` (deep merge, repo wins on conflicts), so a live machine's local settings additions survive `dot merge`.
 
 Plugin marketplaces in `agents/claude/settings.json` and `agents/codex/config.toml` are pinned with `ref`. Renovate's regexes need `"repo"` then `"ref"` (JSON), or `source = "https://github.com/<owner>/<repo>.git"` then `ref` (TOML); keep that key order and the `.git` suffix.
 
 ## Orca
 
-`orca/settings.jsonc` is merged into Orca's SQLite profile db by `dot link`, and holds only non-default values. After every Orca upgrade (`brew upgrade --cask arbourd/tap/orca`), or to check for settings drift, run the `orca-settings` skill. It has the merge, defaults, and comparison details.
+`orca/settings.jsonc` is merged into Orca's SQLite profile db by `dot merge`, and holds only non-default values. After every Orca upgrade (`brew upgrade --cask arbourd/tap/orca`), or to check for settings drift, run the `orca-settings` skill. It has the merge, defaults, and comparison details.
 
-`orca/compare.js` and `orca/defaults.js` are read-only and safe to run while Orca is open; only `dot link` writes to the db.
+`orca/compare.js` and `orca/defaults.js` are read-only and safe to run while Orca is open; only `dot merge` writes to the db.
 
 ## Vendored skills
 
