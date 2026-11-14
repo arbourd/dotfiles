@@ -17,7 +17,7 @@ _has_color() {
 # Succeeds when styled output via gum is available. gum is optional: it is not
 # installed until the Brewfile runs, so every helper has a plain fallback.
 _has_gum() {
-    _has_color && command -v gum &> /dev/null
+    _has_color && command -v gum &>/dev/null
 }
 
 # _tilde <string>
@@ -31,11 +31,11 @@ _tilde() {
 # Prints a section header to stdout.
 _log() {
     if _has_gum; then
-        echo
+        print
         gum style --foreground 67 --bold "▍ $*"
-        echo
+        print
     else
-        echo "\n$(tput bold)$*$(tput sgr0)\n"
+        print "\n$(tput bold)$*$(tput sgr0)\n"
     fi
 }
 
@@ -79,7 +79,7 @@ _repo_url() {
     url=${url%.git}
     url=${url/#git@github.com:/https://github.com/}
     url=${url/#ssh:\/\/git@github.com\//https://github.com/}
-    [[ "$url" == https://github.com/* ]] && echo "$url"
+    [[ "$url" == https://github.com/* ]] && print -r -- "$url"
     return 0
 }
 
@@ -89,7 +89,7 @@ _err() {
     if _has_color 2; then
         printf '\e[38;5;167m✗\e[0m %s\n' "$*" >&2
     else
-        echo "$*" >&2
+        print -r -- "$*" >&2
     fi
 }
 
@@ -102,7 +102,7 @@ _spin() {
         gum spin --spinner dot --title "$title" --show-error -- "$@"
     else
         "$@"
-        if (( VERBOSE )); then echo; fi
+        if (( VERBOSE )); then print; fi
     fi
     _status ok "$title"
 }
@@ -119,7 +119,7 @@ _symlink() {
 # _require <command>
 # Exits with an error if command is not installed.
 _require() {
-    if ! command -v "$1" &> /dev/null; then
+    if ! command -v "$1" &>/dev/null; then
         _err "Error: '$1' is required but not installed."
         exit 1
     fi
@@ -143,22 +143,22 @@ _ensure() {
 # _resolve_getpath
 # Returns the dotfiles root path from GETPATH, git config, or the default ~/src.
 _resolve_getpath() {
-    local getpath="${GETPATH:-}"
-    if [ -z "$getpath" ] && command -v git &>/dev/null; then
-        getpath=$(git config --global get.path || echo "")
-    fi
-    if [ -z "$getpath" ]; then
-        getpath="~/src"
-    fi
-    echo "$getpath"
+    local getpath=${GETPATH:-$(git config --global get.path 2>/dev/null || true)}
+    print -r -- "${getpath:-~/src}"
+}
+
+# _dotfiles_path
+# Prints the absolute path where `init` clones the dotfiles.
+_dotfiles_path() {
+    local getpath=$(_resolve_getpath)
+    getpath=${getpath/#\~/$HOME}
+    print -r -- "${getpath%/}/github.com/arbourd/dotfiles"
 }
 
 # _warn_location
 # Warns when dot runs from a checkout other than the one `init` manages.
 _warn_location() {
-    local getpath=$(_resolve_getpath)
-    local expected="${getpath/#\~/$HOME}"
-    expected="${expected%/}/github.com/arbourd/dotfiles"
+    local expected=$(_dotfiles_path)
     [[ "$DIR" == "${expected:A}" ]] || _status warn "running from $DIR, not $expected"
 }
 
@@ -166,7 +166,7 @@ _warn_location() {
 # Removes link if it points to a missing target within prefix.
 _remove_stale_link() {
     local link=$1 prefix=$2 target
-    [ -L "$link" ] || return 0
+    [[ -L "$link" ]] || return 0
 
     target=$(readlink "$link")
     [[ "$target" == "$prefix"* && ! -e "$target" ]] || return 0
@@ -182,10 +182,10 @@ _clean_dir() {
     for dir in "$@"; do
         for link in "$dir"/*(DN@); do
             _remove_stale_link "$link" "$prefix"
-            [ -L "$link" ] || removed=1
+            [[ -L "$link" ]] || removed=1
         done
     done
-    [[ $removed -eq 1 ]] || _status ok "none found"
+    (( removed )) || _status ok "none found"
 }
 
 # _merge_claude_settings
@@ -193,7 +193,7 @@ _clean_dir() {
 _merge_claude_settings() {
     _require jq
     _ensure ~/.claude/settings.json
-    [[ -s ~/.claude/settings.json ]] || echo '{}' > ~/.claude/settings.json
+    [[ -s ~/.claude/settings.json ]] || print -r -- '{}' > ~/.claude/settings.json
 
     local tmp=$(mktemp)
     jq -s '.[0] * .[1]' ~/.claude/settings.json "$DIR/agents/claude/settings.json" > "$tmp"
@@ -254,14 +254,13 @@ _merge_orca_settings() {
 # _link_agents
 # Symlinks agent skills, personas, and global instructions into all supported AI tool directories.
 _link_agents() {
+    local claude persona skill
     _ensure ~/.claude/
-    local claude
     for claude in "$DIR/agents/claude"/*(N); do
         [[ "${claude:t}" == "settings.json" ]] && continue
         _symlink "$claude" ~/.claude
     done
 
-    local persona
     _ensure ~/.claude/agents/
     _ensure ~/.gemini/agents/
     _ensure ~/.config/opencode/agents/
@@ -274,7 +273,6 @@ _link_agents() {
         _symlink "$persona" ~/.pi/agent/prompts
     done
 
-    local skill
     _ensure ~/.claude/skills/
     _ensure ~/.agents/skills/
 
@@ -291,29 +289,38 @@ _link_agents() {
     _symlink "$DIR/agents/AGENTS.md" ~/.pi/agent/AGENTS.md
 }
 
+# _run <install|merge> <step-function> [target...]
+# Calls the step function with each target in order, or all of the command's targets without one.
+_run() {
+    local cmd=$1 step=$2 target entry; shift 2
+    local -a targets=("$@")
+    # branch on the count, so an empty target is rejected rather than run-all
+    if (( $# )); then
+        _check_targets "$cmd" "$@"
+    else
+        for entry in ${(f)"$(_targets "$cmd")"}; do targets+=(${entry%%:*}); done
+    fi
+
+    for target in $targets; do
+        $step $target
+    done
+}
+
+# _merge_step <claude|codex|orca>
+_merge_step() {
+    case $1 in
+        claude) _merge_claude_settings ;;
+        codex) _merge_codex_config ;;
+        orca) _merge_orca_settings ;;
+        *) _err "error: no handler for merge target: \"$1\""; exit 1 ;;
+    esac
+}
+
 # _merge [claude|codex|orca]...
 # Merges repo settings into the given live tool configs, or all three without a target.
 _merge() {
-    # branch on the count, so an empty target is rejected rather than run-all
-    if (( ! $# )); then
-        _log "Merging settings"
-        _merge_claude_settings
-        _merge_codex_config
-        _merge_orca_settings
-        return
-    fi
-
-    _check_targets merge "$@"
-
-    local target
-    for target in "$@"; do
-        case $target in
-            claude) _merge_claude_settings ;;
-            codex) _merge_codex_config ;;
-            orca) _merge_orca_settings ;;
-            *) _err "error: no handler for merge target: \"$target\""; exit 1 ;;
-        esac
-    done
+    (( $# )) || _log "Merging settings"
+    _run merge _merge_step "$@"
 }
 
 # _clean
@@ -329,9 +336,7 @@ _clean() {
 # _usage
 # Prints usage information to stdout.
 _usage() {
-    local getpath=$(_resolve_getpath)
-
-    echo "Usage: dot [-v|--verbose] [COMMAND]
+    print -r -- "Usage: dot [-v|--verbose] [COMMAND]
 Commands:
   help              prints this dialog
   init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
@@ -372,7 +377,7 @@ _target_desc() {
     local entry
     for entry in ${(f)"$(_targets "$1")"}; do
         if [[ "${entry%%:*}" == "$2" ]]; then
-            echo "${entry#*:}"
+            print -r -- "${entry#*:}"
             return 0
         fi
     done
@@ -392,7 +397,7 @@ _unknown_target() {
 _check_targets() {
     local cmd=$1 target; shift
     for target in "$@"; do
-        _target_desc "$cmd" "$target" > /dev/null || _unknown_target "$cmd" "$target"
+        _target_desc "$cmd" "$target" >/dev/null || _unknown_target "$cmd" "$target"
     done
 }
 
@@ -401,8 +406,8 @@ _check_targets() {
 _usage_target() {
     local desc
     desc=$(_target_desc "$1" "$2") || _unknown_target "$1" "$2"
-    echo "Usage: dot $1 $2"
-    echo "$desc"
+    print -r -- "Usage: dot $1 $2"
+    print -r -- "$desc"
 }
 
 # _usage_cmd <install|merge> [target]
@@ -427,9 +432,9 @@ _usage_cmd() {
         (( ${#name} > width )) && width=${#name}
     done
 
-    echo "Usage: dot $cmd [TARGET]"
-    echo "$summary"
-    echo "Targets:"
+    print -r -- "Usage: dot $cmd [TARGET]"
+    print -r -- "$summary"
+    print -r -- "Targets:"
     for entry in $entries; do
         printf "  %-${width}s  %s\n" "${entry%%:*}" "${entry#*:}"
     done
@@ -445,7 +450,7 @@ _version() {
     repo=$(_repo_url)
 
     _hyperlink "${repo:+$repo/commit/$sha}" "$sha"
-    echo "$REPLY"
+    print -r -- "$REPLY"
 }
 
 # _init
@@ -453,16 +458,14 @@ _version() {
 _init() {
     _require git
 
-    local getpath=$(_resolve_getpath)
-    local absolute_getpath="${getpath/#\~/$HOME}"
-    local target="${absolute_getpath%/}/github.com/arbourd/dotfiles"
+    local target=$(_dotfiles_path)
 
     local -a gitv=()
     (( VERBOSE )) && gitv=(-v)
 
     _log "Initializing dotfiles"
 
-    if [ -d "$target" ]; then
+    if [[ -d "$target" ]]; then
         _status ok "$target already exists, pulling"
         _spin "pulling dotfiles" git -C "$target" pull "${gitv[@]}"
     else
@@ -481,11 +484,13 @@ _update() {
 
     local before after repo
     before=$(git -C "$DIR" rev-parse --short HEAD)
-    _spin "pulling dotfiles" git -C "$DIR" pull $( (( VERBOSE )) && echo -v || echo --quiet )
+    local -a pullv=(--quiet)
+    (( VERBOSE )) && pullv=(-v)
+    _spin "pulling dotfiles" git -C "$DIR" pull "${pullv[@]}"
     after=$(git -C "$DIR" rev-parse --short HEAD)
     repo=$(_repo_url)
 
-    if [ "$before" = "$after" ]; then
+    if [[ "$before" == "$after" ]]; then
         _hyperlink "${repo:+$repo/commit/$after}" "$after"
         _status ok "dotfiles $REPLY (up to date)"
     else
@@ -497,6 +502,7 @@ _update() {
 # _link
 # Symlinks all dotfiles into home and removes stale symlinks.
 _link() {
+    local fn
     _log "Symlinking dotfiles"
 
     # bash, fish and zsh
@@ -511,7 +517,6 @@ _link() {
 
     # fish functions
     _ensure ~/.config/fish/functions/
-    local fn
     for fn in "$DIR/sh/functions"/*.fish(N); do
         _symlink "$fn" ~/.config/fish/functions
     done
@@ -579,7 +584,7 @@ _install_brew() {
     _require curl
 
     _log "Homebrew"
-    if ! command -v brew &> /dev/null ; then
+    if ! command -v brew &>/dev/null; then
         # pinned to a Homebrew/install commit, which Renovate updates
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/6cb910c93f8194b1661a490278a488482399d380/install.sh)"
     fi
@@ -596,7 +601,7 @@ _install_fisher() {
     _require git
 
     _log "Fisher"
-    if ! command -v fish &> /dev/null ; then
+    if ! command -v fish &>/dev/null; then
         _spin "fish" brew install fish
     fi
 
@@ -634,30 +639,15 @@ _install_vim() {
     _spin "vim plugins" zsh -c 'log=$(mktemp); echo | echo | vim +PlugUpdate +PlugClean! +qall &>$log; rc=$?; (( rc || $1 )) && cat $log; rm -f $log; exit $rc' _ "$VERBOSE"
 }
 
+# _install_step <brew|defaults|fisher|vim>
+_install_step() {
+    "_install_$1"
+}
+
 # _install [brew|defaults|fisher|vim]...
 # Runs the given install steps in order, or all of them (brew, defaults, fisher, vim) without a target.
 _install() {
-    # branch on the count, so an empty target is rejected rather than run-all
-    if (( ! $# )); then
-        _install_brew
-        _install_defaults
-        _install_fisher
-        _install_vim
-        return
-    fi
-
-    _check_targets install "$@"
-
-    local target
-    for target in "$@"; do
-        case $target in
-            brew) _install_brew ;;
-            defaults) _install_defaults ;;
-            fisher) _install_fisher ;;
-            vim) _install_vim ;;
-            *) _err "error: no handler for install target: \"$target\""; exit 1 ;;
-        esac
-    done
+    _run install _install_step "$@"
 }
 
 # _help [command [target]]
