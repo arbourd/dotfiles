@@ -454,7 +454,8 @@ _install_brew() {
 
     _log "Homebrew"
     if ! command -v brew &> /dev/null ; then
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        # pinned to a Homebrew/install commit, which Renovate updates
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/6cb910c93f8194b1661a490278a488482399d380/install.sh)"
     fi
     _status ok "homebrew installed"
 
