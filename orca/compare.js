@@ -28,12 +28,12 @@ function loadLive() {
 }
 
 function loadOurs() {
-  // sqlite's json() parses the JSONC the same way `dot link` does.
-  const file = path.join(__dirname, 'settings.jsonc');
+  // sqlite's json() parses the JSONC the same way `dot merge` does.
+  const file = path.join(__dirname, 'settings.jsonc').replaceAll("'", "''"); // double ' inside the SQL string literal
   return JSON.parse(run('sqlite3', [':memory:', `SELECT json(readfile('${file}'))`]));
 }
 
-const isObject = (value) => value && typeof value === 'object' && !Array.isArray(value);
+const isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 
 const isEmpty = (value) => {
   if (value == null || value === '') return true;

@@ -52,8 +52,8 @@ function printDefaults(dir) {
   console.log(JSON.stringify(getDefaultSettings(os.homedir()), rejectStub, 2));
 }
 
-const givenDir = process.argv[2] || null; // '' means no dir
-const dir = givenDir ?? fs.mkdtempSync(path.join(os.tmpdir(), 'orca-asar-'));
+const givenDir = process.argv[2];
+const dir = givenDir || fs.mkdtempSync(path.join(os.tmpdir(), 'orca-asar-'));
 
 stubMissingModules();
 try {
