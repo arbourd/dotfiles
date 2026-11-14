@@ -68,6 +68,8 @@ Antigravity paths are carried over from Gemini CLI and unverified.
 
 `agents/claude/settings.json` is not symlinked directly — it's merged into `~/.claude/settings.json` via `jq` (deep merge, repo wins on conflicts), so a live machine's local settings additions survive `dot link`.
 
+Plugin marketplaces in `agents/claude/settings.json` are pinned with `ref`. Renovate's regex needs `"repo"` immediately followed by `"ref"`; keep that key order and spacing.
+
 ## Orca
 
 `orca/settings.jsonc` is merged into Orca's SQLite profile db by `dot link`, and holds only non-default values. After every Orca upgrade (`brew upgrade --cask arbourd/tap/orca`), or to check for settings drift, run the `orca-settings` skill. It has the merge, defaults, and comparison details.

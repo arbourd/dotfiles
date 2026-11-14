@@ -45,6 +45,12 @@
       "packageNameTemplate": "https://github.com/Homebrew/install",
       "currentValueTemplate": "main",
       "datasourceTemplate": "git-refs"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["agents/claude/settings.json"],
+      "matchStrings": ["\"repo\": \"(?<depName>[^\"]+)\",\\s*\"ref\": \"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "github-tags"
     }
   ],
   "packageRules": [
@@ -53,6 +59,11 @@
       "matchDepNames": ["Homebrew/install"],
       "schedule": ["* * 1 * *"],
       "updateNotScheduled": false
+    },
+    {
+      "matchFileNames": ["agents/claude/settings.json"],
+      "minimumReleaseAge": "7 days",
+      "automerge": false
     },
     {
       "matchManagers": ["github-actions"],
