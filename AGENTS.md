@@ -11,16 +11,14 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 | `help`              | Usage                                                                 |
 | `init`              | Clones to `$GETPATH/github.com/arbourd/dotfiles`, symlinks `dot` into `~/.local/bin` |
 | `link`              | Symlinks dotfiles into `~` and removes stale symlinks |
-| `merge [target]`    | Merges Claude, Codex and Orca settings into their live configs (`claude`, `codex` or `orca` for one) |
-| `install`           | brew + defaults + fisher + vim, in order                              |
-| `install-brew`      | Homebrew packages from Brewfile                                       |
-| `install-defaults`  | macOS `defaults write` settings                                       |
-| `install-fisher`    | Fisher and fish plugins                                               |
-| `install-vim`       | vim-plug and Vim plugins                                              |
+| `merge [target...]`   | Merges Claude, Codex and Orca settings into their live configs, or only the targets given, in order (`claude`, `codex`, `orca`) |
+| `install [target...]` | brew + defaults + fisher + vim, in order, or only the targets given (`brew`, `defaults`, `fisher`, `vim`) |
 | `update`            | Pulls; prints short SHA (or old → new) as a GitHub link               |
 | `version`           | Current commit SHA                                                    |
 
 On a new machine, run commands in this order: `init` → `link` → `merge` → `install`. `link` must run before `install` because the install steps (fisher, vim) depend on config files already being in place at their expected locations.
+
+`-h`/`--help` prints usage for the whole tool, a command or a target (`dot help install brew`). An unknown or empty target is rejected before any step runs.
 
 Install steps hide noisy external commands behind a `gum` spinner via `_spin`. Pass `-v` or `--verbose` (anywhere on the line) to see full output. New install steps should wrap external commands in `_spin`.
 
@@ -105,7 +103,7 @@ Run the bats suite locally after any `dot` script change:
 bats tests/dot.bats
 ```
 
-The suite needs `zsh`, `jq`, `yq`, `sqlite3`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, completions, and CI matrix drift apart, or if `agents/claude/settings.json` gains a `hooks` key, or a vendored skill isn't pinned to a commit in `agents/skills.json`, or a Codex marketplace lacks a `.git` GitHub source or a non-empty `ref`.
+The suite needs `zsh`, `jq`, `yq`, `sqlite3`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, `install`/`merge` targets, completions, and CI matrix drift apart, or if `agents/claude/settings.json` gains a `hooks` key, or a vendored skill isn't pinned to a commit in `agents/skills.json`, or a Codex marketplace lacks a `.git` GitHub source or a non-empty `ref`.
 
 Run `actionlint` after changing anything under `.github/workflows`.
 
@@ -124,7 +122,9 @@ When a `dot` command is added, renamed, or removed, update all six of these in t
 3. `AGENTS.md` — command table and repo layout comment
 4. `.github/workflows/ci.yml` — `matrix.command` list
 5. `tests/dot.bats` — add or remove the corresponding test(s); the command-sync test only checks `dot`, completions, and CI, so README and AGENTS.md drift silently
-6. `sh/completions/` — `dot.fish`, `dot.bash`, and `_dot` command lists
+6. `sh/completions/` — `dot.fish`, `dot.bash`, and `_dot` command lists (and `-h`/`-v` flags)
+
+When an `install` or `merge` target is added, renamed, or removed, update `_targets` and the `_install`/`_merge` case in `dot`, the target lists in `sh/completions/`, and (for `install`) the CI matrix; a bats test checks they agree.
 
 ## Adding a new dotfile
 

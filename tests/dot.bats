@@ -778,7 +778,7 @@ JSON
     [[ "$output" == *"~/skills/skills"* ]]
 }
 
-@test 'install-fisher restores fish_plugins from the dotfiles repo, not the cwd' {
+@test 'install fisher restores fish_plugins from the dotfiles repo, not the cwd' {
     local repo="$FAKE_HOME/repo"
     mkdir "$FAKE_HOME/bin" "$FAKE_HOME/cwd"
     mkdir -p "$repo/sh"
@@ -804,7 +804,7 @@ JSON
     ! grep -qF "fisher install" "$FAKE_HOME/fish_args"
 }
 
-@test 'install-fisher and install-vim fail before dot link' {
+@test 'install fisher and install vim fail before dot link' {
     mkdir "$FAKE_HOME/bin"
     for cmd in brew curl fish vim; do
         printf '#!/bin/sh\n' > "$FAKE_HOME/bin/$cmd"
@@ -888,8 +888,141 @@ JSON
     zshc="$(sed -n "s/^ *'\([a-z-]*\):.*/\1/p" "$DOTFILES/sh/completions/_dot" | sort)"
     [ "$zshc" = "$commands" ]
 
-    ci="$(awk '/command:/{f=1;next} /steps:/{f=0} f && NF{print $2}' "$DOTFILES/.github/workflows/ci.yml" | sort)"
-    [ "$ci" = "$(echo "$commands" | grep -vx install)" ]
+    ci="$(awk '/command:/{f=1;next} /steps:/{f=0} f && NF{print $2}' "$DOTFILES/.github/workflows/ci.yml" | sort -u)"
+    [ "$ci" = "$commands" ]
+}
+
+@test 'install and merge targets stay in sync across dot, completions, and ci' {
+    local cmd target targets fish bash zshc
+    for cmd in install merge; do
+        targets="$(cd "$DOTFILES" && ./dot $cmd --help | awk '/^Targets:/{f=1;next} f{print $1}' | sort)"
+        [ -n "$targets" ]
+
+        fish="$(sed -n "s/.*__fish_seen_subcommand_from $cmd; and not __fish_seen_subcommand_from \([a-z]*\)\".*/\1/p" "$DOTFILES/sh/completions/dot.fish" | sort)"
+        [ "$fish" = "$targets" ]
+
+        bash="$(sed -n "s/.*$cmd) COMPREPLY=.*compgen -W '\([^']*\)'.*/\1/p" "$DOTFILES/sh/completions/dot.bash" | tr ' ' '\n' | sort)"
+        [ "$bash" = "$targets" ]
+
+        zshc="$(sed -n "s/^ *$cmd) _values 'target' //p" "$DOTFILES/sh/completions/_dot" | grep -o "'[a-z]*\[" | tr -d "'[" | sort)"
+        [ "$zshc" = "$targets" ]
+
+        # every target has a handler in dot's own case
+        for target in $targets; do
+            [ -n "$(_steps $cmd $target)" ]
+        done
+    done
+
+    # ci runs each install target separately, and merge as one task
+    [ "$(cd "$DOTFILES" && ./dot install --help | awk '/^Targets:/{f=1;next} f{print "install " $1}' | sort)" = \
+      "$(awk '/command:/{f=1;next} /steps:/{f=0} f && $2=="install"{print $2, $3}' "$DOTFILES/.github/workflows/ci.yml" | sort)" ]
+    grep -qx '          - merge' "$DOTFILES/.github/workflows/ci.yml"
+}
+
+@test 'dot --help prints usage for commands and targets, and rejects unknown targets' {
+    run "$DOTFILES/dot" install --help
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Usage: dot install [TARGET]"* ]]
+    [[ "$output" == *"brew"*"defaults"*"fisher"*"vim"* ]]
+
+    run "$DOTFILES/dot" merge claude -h
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Usage: dot merge claude"* ]]
+
+    # repeating the flag, or combining it with `help`, still shows the command's usage
+    run "$DOTFILES/dot" help install --help
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Usage: dot install [TARGET]"* ]]
+
+    run "$DOTFILES/dot" install -h --help
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Usage: dot install [TARGET]"* ]]
+
+    run "$DOTFILES/dot" help ""
+    [ "$status" -eq 1 ]
+    [[ "$output" == *'unknown command: ""'* ]]
+
+    run "$DOTFILES/dot" --help
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Usage: dot [-v|--verbose] [COMMAND]"* ]]
+
+    run "$DOTFILES/dot" install nope --help
+    [ "$status" -eq 1 ]
+    [[ "$output" == *'unknown install target: "nope"'* ]]
+}
+
+@test 'dot rejects unknown and empty install/merge targets, and unknown commands with --help' {
+    run "$DOTFILES/dot" install nope
+    [ "$status" -eq 1 ]
+    [[ "$output" == *'unknown install target: "nope"'* ]]
+
+    # an empty target is unknown, not run-all
+    run "$DOTFILES/dot" install ""
+    [ "$status" -eq 1 ]
+    [[ "$output" == *'unknown install target: ""'* ]]
+
+    run "$DOTFILES/dot" merge ""
+    [ "$status" -eq 1 ]
+    [[ "$output" == *'unknown merge target: ""'* ]]
+
+    run "$DOTFILES/dot" bogus --help
+    [ "$status" -eq 1 ]
+    [[ "$output" == *'unknown command: "bogus"'* ]]
+
+    run "$DOTFILES/dot" help install
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Usage: dot install [TARGET]"* ]]
+}
+
+# _dot_stubbed <args...> runs dot's real dispatch with every install and merge step replaced by an echo.
+_dot_stubbed() {
+    local copy="$FAKE_HOME/dot-stubbed" fn
+    {
+        sed '/^# Only dispatch when executed/,$d' "$DOTFILES/dot"
+        for fn in _install_brew _install_defaults _install_fisher _install_vim _merge_claude_settings _merge_codex_config _merge_orca_settings; do
+            echo "$fn() { echo ${fn#_}; }"
+        done
+        sed -n '/^# Only dispatch when executed/,$p' "$DOTFILES/dot"
+    } > "$copy"
+    HOME="$FAKE_HOME" zsh "$copy" "$@"
+}
+
+# _steps <dot args...> prints the stubbed steps that ran, space-separated.
+_steps() {
+    _dot_stubbed "$@" 2>&1 | grep -E '^(install|merge)_' | tr '\n' ' '
+}
+
+@test 'dot install and merge run every step without a target, and the given ones with targets' {
+    [ "$(_steps install)" = "install_brew install_defaults install_fisher install_vim " ]
+    [ "$(_steps install vim)" = "install_vim " ]
+    [ "$(_steps install vim brew)" = "install_vim install_brew " ]
+
+    [ "$(_steps merge)" = "merge_claude_settings merge_codex_config merge_orca_settings " ]
+    [ "$(_steps merge codex)" = "merge_codex_config " ]
+    [ "$(_steps merge orca claude)" = "merge_orca_settings merge_claude_settings " ]
+
+    # an unknown target fails before any step runs
+    run _dot_stubbed install brew nope
+    [ "$status" -eq 1 ]
+    [[ "$output" == *'unknown install target: "nope"'* ]]
+    [ -z "$(_steps install brew nope)" ]
+
+    run _dot_stubbed merge codex nope
+    [ "$status" -eq 1 ]
+    [ -z "$(_steps merge codex nope)" ]
+}
+
+@test '_install runs a single target and rejects unknown ones' {
+    run zsh -c "
+        source '$FAKE_HOME/setup.zsh'
+        _install_brew() { echo brew; }
+        _install_vim() { echo vim; }
+        _install vim
+        _install nope 2>&1
+    "
+    [ "$status" -eq 1 ]
+    [[ "$output" == "vim"*'unknown install target: "nope"'* ]]
+    [[ "$output" != "brew"* ]]
 }
 
 @test '_install runs brew, defaults, fisher, vim in order' {

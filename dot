@@ -291,25 +291,29 @@ _link_agents() {
     _symlink "$DIR/agents/AGENTS.md" ~/.pi/agent/AGENTS.md
 }
 
-# _merge [claude|codex|orca]
-# Merges repo settings into live tool configs; runs all three without a target.
+# _merge [claude|codex|orca]...
+# Merges repo settings into the given live tool configs, or all three without a target.
 _merge() {
-    case ${1:-} in
-        "")
-            _log "Merging settings"
-            _merge_claude_settings
-            _merge_codex_config
-            _merge_orca_settings
-            ;;
-        claude) _merge_claude_settings ;;
-        codex) _merge_codex_config ;;
-        orca) _merge_orca_settings ;;
-        *)
-            _err "error: unknown merge target: \"$1\""
-            _usage >&2
-            exit 1
-            ;;
-    esac
+    # branch on the count, so an empty target is rejected rather than run-all
+    if (( ! $# )); then
+        _log "Merging settings"
+        _merge_claude_settings
+        _merge_codex_config
+        _merge_orca_settings
+        return
+    fi
+
+    _check_targets merge "$@"
+
+    local target
+    for target in "$@"; do
+        case $target in
+            claude) _merge_claude_settings ;;
+            codex) _merge_codex_config ;;
+            orca) _merge_orca_settings ;;
+            *) _err "error: no handler for merge target: \"$target\""; exit 1 ;;
+        esac
+    done
 }
 
 # _clean
@@ -331,18 +335,104 @@ _usage() {
 Commands:
   help              prints this dialog
   init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
-  install           installs all packages
-  install-defaults  installs macos defaults
-  install-brew      installs homebrew packages
-  install-fisher    installs fisher packages
-  install-vim       installs vim packages
+  install [TARGET]  installs all packages (or any of: brew|defaults|fisher|vim)
   link              symlinks dotfiles and removes stale symlinks
-  merge             merges settings into claude, codex and orca (or one: claude|codex|orca)
+  merge [TARGET]    merges settings into claude, codex and orca (or any of: claude|codex|orca)
   update            updates the dotfiles repository
   version           prints the current commit sha
 Options:
   -v, --verbose     shows full output instead of spinners
+  -h, --help        prints usage for a command or target (e.g. install brew)
 "
+}
+
+# _targets <install|merge>
+# Prints the command's targets as "target:description" lines.
+_targets() {
+    case $1 in
+        install)
+            print -l \
+                "brew:installs homebrew packages" \
+                "defaults:installs macos defaults" \
+                "fisher:installs fisher packages" \
+                "vim:installs vim packages"
+            ;;
+        merge)
+            print -l \
+                "claude:merges agents/claude/settings.json into ~/.claude/settings.json" \
+                "codex:merges agents/codex/config.toml into ~/.codex/config.toml" \
+                "orca:merges orca/settings.jsonc into Orca's profile db"
+            ;;
+    esac
+}
+
+# _target_desc <install|merge> <target>
+# Prints the target's description. Fails when the command has no such target.
+_target_desc() {
+    local entry
+    for entry in ${(f)"$(_targets "$1")"}; do
+        if [[ "${entry%%:*}" == "$2" ]]; then
+            echo "${entry#*:}"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# _unknown_target <install|merge> <target>
+# Reports an unknown target with the command's usage, and exits 1.
+_unknown_target() {
+    _err "error: unknown $1 target: \"$2\""
+    _usage_cmd "$1" >&2
+    exit 1
+}
+
+# _check_targets <install|merge> <target>...
+# Exits 1 on the first target that isn't one of the command's, before anything runs.
+_check_targets() {
+    local cmd=$1 target; shift
+    for target in "$@"; do
+        _target_desc "$cmd" "$target" > /dev/null || _unknown_target "$cmd" "$target"
+    done
+}
+
+# _usage_target <install|merge> <target>
+# Prints usage for one target. Exits 1 on an unknown target.
+_usage_target() {
+    local desc
+    desc=$(_target_desc "$1" "$2") || _unknown_target "$1" "$2"
+    echo "Usage: dot $1 $2"
+    echo "$desc"
+}
+
+# _usage_cmd <install|merge> [target]
+# Prints usage for a command and its targets, or for one target if given.
+_usage_cmd() {
+    local cmd=$1 summary entry name width=0
+
+    # a target was given, even if empty
+    if (( $# > 1 )); then
+        _usage_target "$cmd" "$2"
+        return
+    fi
+
+    case $cmd in
+        install) summary="installs all packages in order, or just the targets given" ;;
+        merge) summary="merges settings into claude, codex and orca, or just the targets given" ;;
+    esac
+
+    local -a entries=(${(f)"$(_targets "$cmd")"})
+    for entry in $entries; do
+        name=${entry%%:*}
+        (( ${#name} > width )) && width=${#name}
+    done
+
+    echo "Usage: dot $cmd [TARGET]"
+    echo "$summary"
+    echo "Targets:"
+    for entry in $entries; do
+        printf "  %-${width}s  %s\n" "${entry%%:*}" "${entry#*:}"
+    done
 }
 
 # _version
@@ -544,13 +634,49 @@ _install_vim() {
     _spin "vim plugins" zsh -c 'log=$(mktemp); echo | echo | vim +PlugUpdate +PlugClean! +qall &>$log; rc=$?; (( rc || $1 )) && cat $log; rm -f $log; exit $rc' _ "$VERBOSE"
 }
 
-# _install
-# Runs all install steps in order: brew, defaults, fisher, and vim.
+# _install [brew|defaults|fisher|vim]...
+# Runs the given install steps in order, or all of them (brew, defaults, fisher, vim) without a target.
 _install() {
-    _install_brew
-    _install_defaults
-    _install_fisher
-    _install_vim
+    # branch on the count, so an empty target is rejected rather than run-all
+    if (( ! $# )); then
+        _install_brew
+        _install_defaults
+        _install_fisher
+        _install_vim
+        return
+    fi
+
+    _check_targets install "$@"
+
+    local target
+    for target in "$@"; do
+        case $target in
+            brew) _install_brew ;;
+            defaults) _install_defaults ;;
+            fisher) _install_fisher ;;
+            vim) _install_vim ;;
+            *) _err "error: no handler for install target: \"$target\""; exit 1 ;;
+        esac
+    done
+}
+
+# _help [command [target]]
+# Prints usage for a command or target, like `dot <command> --help`.
+_help() {
+    if (( ! $# )); then
+        _usage
+        return
+    fi
+
+    case $1 in
+        install|merge) _usage_cmd "$@" ;;
+        help|init|link|update|version) _usage ;;
+        *)
+            _err "error: unknown command: \"$1\""
+            _usage >&2
+            exit 1
+            ;;
+    esac
 }
 
 # Only dispatch when executed. ZSH_EVAL_CONTEXT contains ":file" when sourced,
@@ -561,6 +687,8 @@ args=()
 for arg in "$@"; do
     case $arg in
         -v|--verbose) VERBOSE=1 ;;
+        # `dot X --help` is `dot help X`, once
+        -h|--help) [[ "${args[1]:-}" == help ]] || args=(help "${args[@]}") ;;
         *) args+=("$arg") ;;
     esac
 done
@@ -568,7 +696,7 @@ set -- "${args[@]}"
 
 case ${1:-} in
     help)
-        _usage
+        _help "${@:2}"
         exit 0
         ;;
     init)
@@ -580,27 +708,11 @@ case ${1:-} in
         ;;
     merge)
         _warn_location
-        _merge "${2:-}"
+        _merge "${@:2}"
         ;;
     install)
         _warn_location
-        _install
-        ;;
-    install-brew)
-        _warn_location
-        _install_brew
-        ;;
-    install-defaults)
-        _warn_location
-        _install_defaults
-        ;;
-    install-fisher)
-        _warn_location
-        _install_fisher
-        ;;
-    install-vim)
-        _warn_location
-        _install_vim
+        _install "${@:2}"
         ;;
     update)
         _warn_location
