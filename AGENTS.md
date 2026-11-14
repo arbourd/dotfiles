@@ -10,7 +10,7 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 |---------------------|-----------------------------------------------------------------------|
 | `help`              | Usage                                                                 |
 | `init`              | Clones to `$GETPATH/github.com/arbourd/dotfiles`, symlinks `dot` into `~/.local/bin` |
-| `link`              | Symlinks dotfiles into `~`, removes stale symlinks                    |
+| `link`              | Symlinks dotfiles into `~`, merges Claude and Codex config, removes stale symlinks |
 | `install`           | brew + defaults + fisher + vim, in order                              |
 | `install-brew`      | Homebrew packages from Brewfile                                       |
 | `install-defaults`  | macOS `defaults write` settings                                       |
@@ -51,6 +51,7 @@ AI configuration is managed via `agents/` and symlinked to tool-specific global 
 - `agents/personas`: Persona or subagent definitions.
 - `agents/skills`: Skill definitions and scripts. Vendored from upstream repos (see Vendored skills).
 - `agents/claude`: Claude Code-only files, symlinked into `~/.claude/` (except merged `settings.json`).
+- `agents/codex/config.toml`: Codex plugin marketplaces and enabled plugins, merged into `~/.codex/config.toml` via `yq` (repo wins) because Codex writes machine paths and trust hashes there.
 
 `.agents/skills` holds skills for working on this repo only, separate from `agents/skills` (global, linked by `dot link`). `.claude/skills` is a symlink to it so Claude Code finds them; it is force-added because the global gitignore excludes `.claude`.
 
@@ -68,7 +69,7 @@ Antigravity paths are carried over from Gemini CLI and unverified.
 
 `agents/claude/settings.json` is not symlinked directly — it's merged into `~/.claude/settings.json` via `jq` (deep merge, repo wins on conflicts), so a live machine's local settings additions survive `dot link`.
 
-Plugin marketplaces in `agents/claude/settings.json` are pinned with `ref`. Renovate's regex needs `"repo"` immediately followed by `"ref"`; keep that key order and spacing.
+Plugin marketplaces in `agents/claude/settings.json` and `agents/codex/config.toml` are pinned with `ref`. Renovate's regexes need `"repo"` then `"ref"` (JSON), or `source = "https://github.com/<owner>/<repo>.git"` then `ref` (TOML); keep that key order and the `.git` suffix.
 
 ## Orca
 
@@ -103,7 +104,7 @@ Run the bats suite locally after any `dot` script change:
 bats tests/dot.bats
 ```
 
-The suite needs `zsh`, `jq`, `sqlite3`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, completions, and CI matrix drift apart, or if `agents/claude/settings.json` gains a `hooks` key, or a vendored skill isn't pinned to a commit in `agents/skills.json`.
+The suite needs `zsh`, `jq`, `yq`, `sqlite3`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, completions, and CI matrix drift apart, or if `agents/claude/settings.json` gains a `hooks` key, or a vendored skill isn't pinned to a commit in `agents/skills.json`, or a Codex marketplace lacks a `.git` GitHub source or a non-empty `ref`.
 
 Run `actionlint` after changing anything under `.github/workflows`.
 

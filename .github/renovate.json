@@ -51,6 +51,12 @@
       "managerFilePatterns": ["agents/claude/settings.json"],
       "matchStrings": ["\"repo\": \"(?<depName>[^\"]+)\",\\s*\"ref\": \"(?<currentValue>[^\"]+)\""],
       "datasourceTemplate": "github-tags"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["agents/codex/config.toml"],
+      "matchStrings": ["source = \"https://github\\.com/(?<depName>[^\"]+)\\.git\"\\s*ref = \"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "github-tags"
     }
   ],
   "packageRules": [
@@ -61,9 +67,10 @@
       "updateNotScheduled": false
     },
     {
-      "matchFileNames": ["agents/claude/settings.json"],
+      "matchFileNames": ["agents/claude/settings.json", "agents/codex/config.toml"],
       "minimumReleaseAge": "7 days",
-      "automerge": false
+      "automerge": false,
+      "groupName": "agent plugins"
     },
     {
       "matchManagers": ["github-actions"],

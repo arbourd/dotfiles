@@ -203,6 +203,20 @@ _merge_claude_settings() {
     _status merged "$DIR/agents/claude/settings.json → $HOME/.claude/settings.json"
 }
 
+# _merge_codex_config
+# Merges agents/codex/config.toml into ~/.codex/config.toml.
+_merge_codex_config() {
+    _require yq
+    _ensure ~/.codex/config.toml
+
+    local tmp=$(mktemp)
+    yq -p toml -o toml eval-all '. as $i ireduce({}; . * $i)' ~/.codex/config.toml "$DIR/agents/codex/config.toml" > "$tmp"
+    mv "$tmp" ~/.codex/config.toml
+    chmod 600 ~/.codex/config.toml
+
+    _status merged "$DIR/agents/codex/config.toml → $HOME/.codex/config.toml"
+}
+
 # _merge_orca_settings
 # Merges orca/settings.jsonc into Orca's profile db and updates its content_hash.
 _merge_orca_settings() {
@@ -276,6 +290,8 @@ _link_agents() {
     _symlink "$DIR/agents/AGENTS.md" ~/.gemini/GEMINI.md
     _symlink "$DIR/agents/AGENTS.md" ~/.codex/AGENTS.md
     _symlink "$DIR/agents/AGENTS.md" ~/.pi/agent/AGENTS.md
+
+    _merge_codex_config
 }
 
 # _clean
