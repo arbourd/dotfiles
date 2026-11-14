@@ -1,0 +1,58 @@
+name: skills
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/skills.yml
+      - agents/vendor-skills
+      - agents/skills.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # PRs check out a detached merge ref; pushing the result needs the branch
+          ref: ${{ github.head_ref || github.ref_name }}
+      - run: sudo apt-get install -y zsh jq
+
+      - name: Vendor skills
+        run: agents/vendor-skills
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push the vendored skills to the Renovate PR
+        # Only Renovate's own same-repo branches, never a fork or a hand-made branch
+        if: >-
+          github.event.pull_request.user.login == 'renovate[bot]' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          startsWith(github.head_ref, 'renovate/')
+        run: |
+          git add agents/skills
+          git diff --cached --quiet && exit 0
+          git -c user.name='github-actions[bot]' -c user.email=41898282+github-actions[bot]@users.noreply.github.com \
+            commit -m "Update vendored skills"
+          git push
+
+      - name: Check skills match upstream
+        if: >-
+          github.event_name == 'workflow_dispatch' ||
+          (github.event.pull_request.user.login == 'renovate[bot]' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          startsWith(github.head_ref, 'renovate/'))
+        # -N so a vendored file that was never committed counts as a difference
+        run: |
+          git add -N agents/skills
+          git diff --exit-code

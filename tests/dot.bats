@@ -865,3 +865,13 @@ JSON
     [ "$status" -ne 0 ]
     [[ "$output" == *"vim-boom"* ]]
 }
+
+@test 'vendored skills are pinned and listed in skills.json' {
+    local src="$DOTFILES/agents/skills.json" n
+    # A commit pin is immutable; a branch or tag in its place would drift silently.
+    [ "$(jq '[.skills[].source | select(test("@[0-9a-f]{40}$") | not)] | length' "$src")" -eq 0 ]
+
+    for n in "$DOTFILES"/agents/skills/*/; do
+        jq -e --arg n "$(basename "$n")" '.skills[$n]' "$src" > /dev/null
+    done
+}

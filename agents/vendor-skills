@@ -1,0 +1,60 @@
+#!/usr/bin/env zsh
+# Vendors the skills in skills.json into skills/, fetching each SKILL.md at its pinned commit.
+#
+#   vendor-skills [name...]    all skills, or just the named ones
+#
+# A source is github.com/<owner>/<repo>/<path>@<commit>. One without a commit is
+# pinned to the repo's current HEAD first, which is how a new skill is added.
+# Renovate bumps the pins. Upstream wins: never hand-edit skills/*, running this overwrites them.
+set -euo pipefail
+
+DIR=${0:A:h}
+MANIFEST=$DIR/skills.json
+
+_die() { print -u2 -r -- "error: $*"; exit 1; }
+
+# _vendor <name> fetches one skill from its source, pinning the source first if needed.
+_vendor() {
+    local name=$1
+    local source
+    source=$(jq -r --arg name $name '.skills[$name].source // empty' $MANIFEST)
+    [[ -n $source ]] || _die "unknown skill: $name"
+
+    local -a parts=(${(s:/:)${source%%@*}})   # github.com <owner> <repo> <path...>
+    [[ $parts[1] == github.com ]] || _die "unsupported host: $source"
+    local repo=$parts[2]/$parts[3]
+    local file=${(j:/:)parts[4,-1]}
+
+    local commit state
+    if [[ $source == *@* ]]; then
+        commit=${source#*@}
+    else
+        state=pinned
+        commit=$(gh api repos/$repo/commits/HEAD --jq .sha)
+        jq --arg name $name --arg source $source@$commit '.skills[$name].source = $source' \
+            $MANIFEST > $MANIFEST.tmp && mv $MANIFEST.tmp $MANIFEST
+    fi
+
+    # Assigned apart from `local` so a failed fetch stops the script instead of writing an empty file.
+    local content
+    content=$(gh api "repos/$repo/contents/$file?ref=$commit" -H 'Accept: application/vnd.github.raw')
+    local dest=$DIR/skills/$name/SKILL.md
+    if [[ -z $state ]]; then
+        # shortcut: compares content only, so a pin bump, a hand edit and a first run all read "changed".
+        [[ -f $dest && $(<$dest) == $content ]] && state=unchanged || state=changed
+    fi
+    mkdir -p ${dest:h}
+    print -r -- $content > $dest
+    print -r -- "${(r:$width:)name}  ${commit[1,7]}  $state"
+}
+
+names=($@)
+(( $#names )) || names=(${(f)"$(jq -r '.skills | keys[]' $MANIFEST)"})
+
+# Pad names to the longest so the output lines up.
+integer width=0
+for name in $names; do (( $#name > width )) && width=$#name; done
+
+for name in $names; do
+    _vendor $name
+done
