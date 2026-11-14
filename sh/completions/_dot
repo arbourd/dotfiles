@@ -10,10 +10,6 @@ _dot() {
         'link:Symlink dotfiles and remove stale symlinks'
         'merge:Merge settings into Claude, Codex and Orca'
         'install:Install all packages'
-        'install-defaults:Install macOS defaults'
-        'install-brew:Install Homebrew packages'
-        'install-fisher:Install Fisher packages'
-        'install-vim:Install Vim packages'
         'update:Update the dotfiles repository'
         'version:Print the current commit SHA'
     )
@@ -22,7 +18,12 @@ _dot() {
 
     case $state in
         cmd) _describe 'command' commands ;;
-        target) [[ $line[1] == merge ]] && _values 'target' claude codex orca ;;
+        target)
+            case $line[1] in
+                merge) _values 'target' 'claude[Merge Claude settings]' 'codex[Merge Codex config]' 'orca[Merge Orca settings]' ;;
+                install) _values 'target' 'brew[Install Homebrew packages]' 'defaults[Install macOS defaults]' 'fisher[Install Fisher packages]' 'vim[Install Vim packages]' ;;
+            esac
+            ;;
     esac
 }
 

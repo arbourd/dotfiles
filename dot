@@ -294,21 +294,20 @@ _link_agents() {
 # _merge [claude|codex|orca]
 # Merges repo settings into live tool configs; runs all three without a target.
 _merge() {
-    case ${1:-} in
-        "")
-            _log "Merging settings"
-            _merge_claude_settings
-            _merge_codex_config
-            _merge_orca_settings
-            ;;
+    # branch on the count, so an empty target is rejected rather than run-all
+    if (( ! $# )); then
+        _log "Merging settings"
+        _merge_claude_settings
+        _merge_codex_config
+        _merge_orca_settings
+        return
+    fi
+
+    case $1 in
         claude) _merge_claude_settings ;;
         codex) _merge_codex_config ;;
         orca) _merge_orca_settings ;;
-        *)
-            _err "error: unknown merge target: \"$1\""
-            _usage >&2
-            exit 1
-            ;;
+        *) _usage_target merge "$1" ;;
     esac
 }
 
@@ -331,18 +330,77 @@ _usage() {
 Commands:
   help              prints this dialog
   init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
-  install           installs all packages
-  install-defaults  installs macos defaults
-  install-brew      installs homebrew packages
-  install-fisher    installs fisher packages
-  install-vim       installs vim packages
+  install [TARGET]  installs all packages (or one: brew|defaults|fisher|vim)
   link              symlinks dotfiles and removes stale symlinks
-  merge             merges settings into claude, codex and orca (or one: claude|codex|orca)
+  merge [TARGET]    merges settings into claude, codex and orca (or one: claude|codex|orca)
   update            updates the dotfiles repository
   version           prints the current commit sha
 Options:
   -v, --verbose     shows full output instead of spinners
+  -h, --help        prints usage for a command or target (e.g. install brew)
 "
+}
+
+# _targets <install|merge>
+# Prints the command's targets as "target:description" lines.
+_targets() {
+    case $1 in
+        install)
+            print -l \
+                "brew:installs homebrew packages" \
+                "defaults:installs macos defaults" \
+                "fisher:installs fisher packages" \
+                "vim:installs vim packages"
+            ;;
+        merge)
+            print -l \
+                "claude:merges agents/claude/settings.json into ~/.claude/settings.json" \
+                "codex:merges agents/codex/config.toml into ~/.codex/config.toml" \
+                "orca:merges orca/settings.jsonc into Orca's profile db"
+            ;;
+    esac
+}
+
+# _usage_target <install|merge> <target>
+# Prints usage for one target. Exits 1 with the command's usage on an unknown target.
+_usage_target() {
+    local cmd=$1 target=$2 entry
+
+    for entry in ${(f)"$(_targets "$cmd")"}; do
+        if [[ "${entry%%:*}" == "$target" ]]; then
+            echo "Usage: dot $cmd $target"
+            echo "${entry#*:}"
+            return
+        fi
+    done
+
+    _err "error: unknown $cmd target: \"$target\""
+    _usage_cmd "$cmd" >&2
+    exit 1
+}
+
+# _usage_cmd <install|merge> [target]
+# Prints usage for a command and its targets, or for one target if given.
+_usage_cmd() {
+    local cmd=$1 summary entry
+
+    # a target was given, even if empty
+    if (( $# > 1 )); then
+        _usage_target "$cmd" "$2"
+        return
+    fi
+
+    case $cmd in
+        install) summary="installs all packages in order, or one target" ;;
+        merge) summary="merges settings into claude, codex and orca, or one target" ;;
+    esac
+
+    echo "Usage: dot $cmd [TARGET]"
+    echo "$summary"
+    echo "Targets:"
+    for entry in ${(f)"$(_targets "$cmd")"}; do
+        printf '  %-9s %s\n' "${entry%%:*}" "${entry#*:}"
+    done
 }
 
 # _version
@@ -544,13 +602,39 @@ _install_vim() {
     _spin "vim plugins" zsh -c 'log=$(mktemp); echo | echo | vim +PlugUpdate +PlugClean! +qall &>$log; rc=$?; (( rc || $1 )) && cat $log; rm -f $log; exit $rc' _ "$VERBOSE"
 }
 
-# _install
-# Runs all install steps in order: brew, defaults, fisher, and vim.
+# _install [brew|defaults|fisher|vim]
+# Runs one install step, or all in order (brew, defaults, fisher, vim) without a target.
 _install() {
-    _install_brew
-    _install_defaults
-    _install_fisher
-    _install_vim
+    # branch on the count, so an empty target is rejected rather than run-all
+    if (( ! $# )); then
+        _install_brew
+        _install_defaults
+        _install_fisher
+        _install_vim
+        return
+    fi
+
+    case $1 in
+        brew) _install_brew ;;
+        defaults) _install_defaults ;;
+        fisher) _install_fisher ;;
+        vim) _install_vim ;;
+        *) _usage_target install "$1" ;;
+    esac
+}
+
+# _help [command [target]]
+# Prints usage for a command or target, like `dot <command> --help`.
+_help() {
+    case ${1:-} in
+        install|merge) _usage_cmd "$@" ;;
+        ""|help|init|link|update|version) _usage ;;
+        *)
+            _err "error: unknown command: \"$1\""
+            _usage >&2
+            exit 1
+            ;;
+    esac
 }
 
 # Only dispatch when executed. ZSH_EVAL_CONTEXT contains ":file" when sourced,
@@ -561,6 +645,7 @@ args=()
 for arg in "$@"; do
     case $arg in
         -v|--verbose) VERBOSE=1 ;;
+        -h|--help) args=(help "${args[@]}") ;; # `dot X --help` is `dot help X`
         *) args+=("$arg") ;;
     esac
 done
@@ -568,7 +653,7 @@ set -- "${args[@]}"
 
 case ${1:-} in
     help)
-        _usage
+        _help "${@:2}"
         exit 0
         ;;
     init)
@@ -580,27 +665,11 @@ case ${1:-} in
         ;;
     merge)
         _warn_location
-        _merge "${2:-}"
+        _merge "${@:2}"
         ;;
     install)
         _warn_location
-        _install
-        ;;
-    install-brew)
-        _warn_location
-        _install_brew
-        ;;
-    install-defaults)
-        _warn_location
-        _install_defaults
-        ;;
-    install-fisher)
-        _warn_location
-        _install_fisher
-        ;;
-    install-vim)
-        _warn_location
-        _install_vim
+        _install "${@:2}"
         ;;
     update)
         _warn_location

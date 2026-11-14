@@ -12,11 +12,7 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 | `init`              | Clones to `$GETPATH/github.com/arbourd/dotfiles`, symlinks `dot` into `~/.local/bin` |
 | `link`              | Symlinks dotfiles into `~` and removes stale symlinks |
 | `merge [target]`    | Merges Claude, Codex and Orca settings into their live configs (`claude`, `codex` or `orca` for one) |
-| `install`           | brew + defaults + fisher + vim, in order                              |
-| `install-brew`      | Homebrew packages from Brewfile                                       |
-| `install-defaults`  | macOS `defaults write` settings                                       |
-| `install-fisher`    | Fisher and fish plugins                                               |
-| `install-vim`       | vim-plug and Vim plugins                                              |
+| `install [target]`  | brew + defaults + fisher + vim, in order (`brew`, `defaults`, `fisher` or `vim` for one) |
 | `update`            | Pulls; prints short SHA (or old → new) as a GitHub link               |
 | `version`           | Current commit SHA                                                    |
 
@@ -125,6 +121,8 @@ When a `dot` command is added, renamed, or removed, update all six of these in t
 4. `.github/workflows/ci.yml` — `matrix.command` list
 5. `tests/dot.bats` — add or remove the corresponding test(s); the command-sync test only checks `dot`, completions, and CI, so README and AGENTS.md drift silently
 6. `sh/completions/` — `dot.fish`, `dot.bash`, and `_dot` command lists
+
+When an `install` or `merge` target is added, renamed, or removed, update `_usage_cmd` and the `_install`/`_merge` case in `dot`, the target lists in `sh/completions/`, and (for `install`) the CI matrix; a bats test checks they agree.
 
 ## Adding a new dotfile
 
