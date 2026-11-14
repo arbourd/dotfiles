@@ -18,15 +18,12 @@ Automated environment as code.
       Commands:
         help              prints this dialog
         init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
-        install           installs all packages
-        install-defaults  installs macos defaults
-        install-brew      installs homebrew packages
-        install-fisher    installs fisher packages
-        install-vim       installs vim packages
+        install [TARGET]  installs all packages (or one: brew|defaults|fisher|vim)
         link              symlinks dotfiles and removes stale symlinks
-        merge             merges settings into claude, codex and orca (or one: claude|codex|orca)
+        merge [TARGET]    merges settings into claude, codex and orca (or one: claude|codex|orca)
         update            updates the dotfiles repository
         version           prints the current commit sha
       Options:
         -v, --verbose     shows full output instead of spinners
+        -h, --help        prints usage for a command or target (e.g. install brew)
       ```
