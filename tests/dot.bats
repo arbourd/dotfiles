@@ -611,6 +611,21 @@ _orca_db() {
     [ "$output" = "1|1|1" ]
 }
 
+@test '.claude/skills links to the repo skills' {
+    [ -f "$DOTFILES/.claude/skills/orca-settings/SKILL.md" ]
+}
+
+@test 'orca/defaults.js prints defaults from a given dir and leaves it in place' {
+    command -v node > /dev/null || skip "node is not installed"
+    mkdir -p "$FAKE_HOME/asar/out/shared"
+    echo "exports.getDefaultSettings = () => ({ theme: 'system' });" > "$FAKE_HOME/asar/out/shared/constants.js"
+
+    run node "$DOTFILES/orca/defaults.js" "$FAKE_HOME/asar"
+    [ "$status" -eq 0 ]
+    [ "$(printf '%s' "$output" | jq -r .theme)" = system ]
+    [ -f "$FAKE_HOME/asar/out/shared/constants.js" ]
+}
+
 @test '_status prints plain kind and detail when not a tty' {
     run zsh -c "source '$FAKE_HOME/setup.zsh'; _status merged 'a -> b'"
     [ "$status" -eq 0 ]
