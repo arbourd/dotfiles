@@ -10,19 +10,31 @@ _dot() {
         'link:Symlink dotfiles and remove stale symlinks'
         'merge:Merge settings into Claude, Codex and Orca'
         'install:Install all packages'
-        'install-defaults:Install macOS defaults'
-        'install-brew:Install Homebrew packages'
-        'install-fisher:Install Fisher packages'
-        'install-vim:Install Vim packages'
         'update:Update the dotfiles repository'
         'version:Print the current commit SHA'
     )
 
-    _arguments '1: :->cmd' '2: :->target'
+    _arguments -C \
+        '(-h --help)'{-h,--help}'[Print usage for a command or target]' \
+        '(-v --verbose)'{-v,--verbose}'[Show full output instead of spinners]' \
+        '1: :->cmd' \
+        '*:: :->args'
 
     case $state in
         cmd) _describe 'command' commands ;;
-        target) [[ $line[1] == merge ]] && _values 'target' claude codex orca ;;
+        args)
+            # `dot help <command> <target>` completes like `dot <command> <target>`
+            if [[ $words[1] == help ]] && (( CURRENT > 2 )); then
+                shift words
+                (( CURRENT-- ))
+            fi
+
+            case $words[1] in
+                help) _describe 'command' commands ;;
+                merge) _values 'target' 'claude[Merge Claude settings]' 'codex[Merge Codex config]' 'orca[Merge Orca settings]' ;;
+                install) _values 'target' 'brew[Install Homebrew packages]' 'defaults[Install macOS defaults]' 'fisher[Install Fisher packages]' 'vim[Install Vim packages]' ;;
+            esac
+            ;;
     esac
 }
 
