@@ -30,11 +30,12 @@ dot         # entry point — init/update/link/install subcommands
 .macOS      # zsh script that applies macOS defaults write settings
 Brewfile    # Homebrew formulae, casks, and Mac App Store apps
 .github     # CI workflow and Renovate config
+.agents     # this repo's own skills (not linked by dot); .claude/skills symlinks here
 agents      # global AI agent instructions, persona, and skill definitions
 ghostty     # Ghostty terminal emulator config
 git         # global git config and gitignore
 gpg         # GPG agent config
-orca        # Orca CLI launcher and keybindings (symlinked), settings (merged into Orca's db), defaults.js (dumps Orca's defaults)
+orca        # Orca CLI launcher and keybindings (symlinked), settings (merged into Orca's db), defaults.js (dumps Orca's defaults), compare.js (diffs settings, defaults, and the live db)
 sh          # shell config: fish (primary), bash, and zsh fallback
 ssh         # SSH client config
 vim         # vimrc and vim-plug plugin list
@@ -48,8 +49,10 @@ AI configuration is managed via `agents/` and symlinked to tool-specific global 
 
 - `agents/AGENTS.md`: Shared global instructions, loaded by every tool on every project (e.g. "don't push without being asked"). Project-specific instructions still belong in that project's own `AGENTS.md`, not here.
 - `agents/personas`: Persona or subagent definitions.
-- `agents/skills`: Skill definitions and scripts. `orca-cli` and `orchestration` are generated (see Orca).
+- `agents/skills`: Skill definitions and scripts.
 - `agents/claude`: Claude Code-only files, symlinked into `~/.claude/` (except merged `settings.json`).
+
+`.agents/skills` holds skills for working on this repo only, separate from `agents/skills` (global, linked by `dot link`). `.claude/skills` is a symlink to it so Claude Code finds them; it is force-added because the global gitignore excludes `.claude`.
 
 Individual symlinks are used to allow personal, non-repo agents and skills to coexist in the target directories.
 
@@ -67,28 +70,7 @@ Antigravity paths are carried over from Gemini CLI and unverified.
 
 ## Orca
 
-`orca/settings.jsonc` is merged into Orca's SQLite profile db via `json_patch` (RFC 7396: objects merge, `null` deletes a key, arrays replace wholesale). Skipped while Orca is running (it overwrites settings on quit) or when `dot link` runs inside Orca's terminal.
-
-Only put non-default values in `orca/settings.jsonc`.
-
-After every Orca upgrade, refresh `orca/settings.jsonc` against the new defaults:
-
-1. Extract `app.asar` into a fresh empty dir and dump Orca's built-in defaults to `$d.json`:
-   ```bash
-   d=$(mktemp -d)
-   npx @electron/asar extract /Applications/Orca.app/Contents/Resources/app.asar "$d"
-   node orca/defaults.js "$d" > "$d.json"
-   ```
-2. For each key in `settings.jsonc`, compare it with `$d.json` and fix its `// Default: ...` comment if the default changed.
-3. Drop a key whose default now equals the value we set. Set a removed or renamed key to `null` so the merge deletes it from the db.
-4. Check the defaults for new keys worth overriding, but only add ones the user wants.
-
-`agents/skills/orca-cli` and `agents/skills/orchestration` are exported from the Orca binary, not hand-written. Don't edit them; re-export after every Orca upgrade (`brew upgrade --cask arbourd/tap/orca`):
-
-```bash
-orca skills get orca-cli > agents/skills/orca-cli/SKILL.md
-orca skills get orchestration > agents/skills/orchestration/SKILL.md
-```
+`orca/settings.jsonc` is merged into Orca's SQLite profile db by `dot link`, and holds only non-default values. After every Orca upgrade (`brew upgrade --cask arbourd/tap/orca`), or to check for settings drift, run the `orca-settings` skill. It has the merge, defaults, and comparison details.
 
 ## Shell
 

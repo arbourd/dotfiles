@@ -1,16 +1,16 @@
 // Prints Orca's built-in default settings as JSON, to diff against the profile db.
-// Usage: node orca/defaults.js <extracted app.asar dir>
-// Extract with: npx @electron/asar extract /Applications/Orca.app/Contents/Resources/app.asar <dir>
+// Usage: node orca/defaults.js [extracted app.asar dir]
+// With no dir, extracts /Applications/Orca.app's app.asar into a temp dir first, and removes it after.
 
+const { execFileSync } = require('child_process');
+const fs = require('fs');
 const Module = require('module');
 const os = require('os');
 const path = require('path');
 
-const [dir] = process.argv.slice(2);
-if (!dir) {
-  console.error('usage: node orca/defaults.js <extracted app.asar dir>');
-  process.exit(1);
-}
+let [dir] = process.argv.slice(2);
+const extracted = !dir;
+if (extracted) dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orca-asar-'));
 
 // app.asar imports npm modules (zod etc.) it doesn't ship; getDefaultSettings doesn't use them.
 const stub = new Proxy(function () {}, {
@@ -31,12 +31,19 @@ Module._load = function (request, ...rest) {
   }
 };
 
-const { getDefaultSettings } = require(path.resolve(dir, 'out/shared/constants.js'));
-
 // JSON.stringify would silently drop a default built from the stub, so fail instead.
 const noStub = (key, value) => {
   if (value === stub) throw new Error(`default "${key}" came from a stubbed module`);
   return value;
 };
 
-console.log(JSON.stringify(getDefaultSettings(os.homedir()), noStub, 2));
+try {
+  if (extracted) {
+    const asar = '/Applications/Orca.app/Contents/Resources/app.asar';
+    execFileSync('npx', ['--yes', '@electron/asar', 'extract', asar, dir], { stdio: ['ignore', 'ignore', 'inherit'] });
+  }
+  const { getDefaultSettings } = require(path.resolve(dir, 'out/shared/constants.js'));
+  console.log(JSON.stringify(getDefaultSettings(os.homedir()), noStub, 2));
+} finally {
+  if (extracted) fs.rmSync(dir, { recursive: true, force: true });
+}
