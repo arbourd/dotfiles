@@ -241,6 +241,8 @@ _assert_link() {
           "$FAKE_HOME/repo-mock/agents/skills/skill-a/SKILL.md" \
           "$FAKE_HOME/repo-mock/agents/skills/skill-b/SKILL.md"
     echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/settings.json"
+    mkdir -p "$FAKE_HOME/repo-mock/agents/codex"
+    touch "$FAKE_HOME/repo-mock/agents/codex/config.toml"
 
     zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _link_agents" > /dev/null
 
@@ -264,7 +266,8 @@ _assert_link() {
 }
 
 @test 'link-agents merges claude settings.json instead of symlinking it' {
-    mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
+    mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/repo-mock/agents/codex" "$FAKE_HOME/.claude"
+    touch "$FAKE_HOME/repo-mock/agents/codex/config.toml"
     cat > "$FAKE_HOME/repo-mock/agents/claude/settings.json" <<'JSON'
 {
   "theme": "dark",
@@ -323,6 +326,50 @@ JSON
     run jq -r '.effortLevel' "$FAKE_HOME/.claude/settings.json"
     [ "$output" = "high" ]
     [ "$(_perms "$FAKE_HOME/.claude/settings.json")" = "-rw-------" ]
+}
+
+@test 'merge-codex-config keeps existing keys and layers the repo tables on top' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/codex" "$FAKE_HOME/.codex"
+    cat > "$FAKE_HOME/repo-mock/agents/codex/config.toml" <<'TOML'
+[marketplaces.demo]
+source_type = "git"
+ref = "v2"
+TOML
+    cat > "$FAKE_HOME/.codex/config.toml" <<'TOML'
+model = "local-model"
+
+[marketplaces.demo]
+ref = "v1"
+
+[projects."/tmp/x"]
+trust_level = "trusted"
+TOML
+
+    zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_codex_config" > /dev/null
+
+    [ ! -L "$FAKE_HOME/.codex/config.toml" ]
+    run yq -p toml -oy -r '.model' "$FAKE_HOME/.codex/config.toml"
+    [ "$output" = "local-model" ]
+    run yq -p toml -oy -r '.projects."/tmp/x".trust_level' "$FAKE_HOME/.codex/config.toml"
+    [ "$output" = "trusted" ]
+    run yq -p toml -oy -r '.marketplaces.demo.ref' "$FAKE_HOME/.codex/config.toml"
+    [ "$output" = "v2" ]
+    [ "$(_perms "$FAKE_HOME/.codex/config.toml")" = "-rw-------" ]
+}
+
+@test 'merge-codex-config creates config.toml when none exists' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/codex"
+    printf '[plugins."a@b"]\nenabled = true\n' > "$FAKE_HOME/repo-mock/agents/codex/config.toml"
+
+    zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_codex_config" > /dev/null
+
+    run yq -p toml -oy -r '.plugins."a@b".enabled' "$FAKE_HOME/.codex/config.toml"
+    [ "$output" = "true" ]
+}
+
+@test 'repo codex config.toml pins every marketplace to a ref' {
+    run yq -p toml -oy -e '.marketplaces | to_entries | all_c((.value.ref // "") != "" and (.value.source | test("^https://github\\.com/[^/]+/[^/]+\\.git$")))' "$DOTFILES/agents/codex/config.toml"
+    [ "$status" -eq 0 ]
 }
 
 @test 'repo claude settings.json has no hooks key' {
@@ -428,8 +475,8 @@ JSON
 
 @test 'handling paths with spaces' {
     local space_repo="$FAKE_HOME/path with spaces"
-    mkdir -p "$space_repo/sh" "$space_repo/agents/claude"
-    touch "$space_repo/sh/.shrc"
+    mkdir -p "$space_repo/sh" "$space_repo/agents/claude" "$space_repo/agents/codex"
+    touch "$space_repo/sh/.shrc" "$space_repo/agents/codex/config.toml"
     echo '{}' > "$space_repo/agents/claude/settings.json"
 
     zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$space_repo'; _link" > /dev/null
