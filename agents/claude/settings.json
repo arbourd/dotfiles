@@ -2,6 +2,7 @@
   "enabledPlugins": {
     "agent-skills@addy-agent-skills": true,
     "claude-md-management@claude-plugins-official": true,
+    "go@go-skills": true,
     "gopls-lsp@claude-plugins-official": true,
     "ponytail@ponytail": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
@@ -17,6 +18,13 @@
         "source": "github",
         "repo": "addyosmani/agent-skills",
         "ref": "0.6.15"
+      }
+    },
+    "go-skills": {
+      "source": {
+        "source": "github",
+        "repo": "spf13/go-skills",
+        "ref": "c6ea8841a542d3a6f953e8b9b0ad596229163c1c"
       }
     },
     "ponytail": {
