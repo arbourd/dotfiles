@@ -28,6 +28,8 @@ description: Use after upgrading Orca, or when asked to check, refresh, or audit
    - `db differs`: not applied yet; the user applies it in step 5.
 
 3. **Live drift:** settings changed in Orca's UI that `settings.jsonc` doesn't have. Show the list to the user as a table (key, live, default) and add only the ones they want. The script already hides Orca-managed state (telemetry, plugin consents, seeds, migration flags, dismissed prompts, empty values); extend `internal` in `orca/compare.js` if more noise shows up.
+   Dotted keys (`voice.enabled`) nest as objects. If a live key sits under one of our `null` keys (`agentDefaultArgs.antigravity`), replace the `null` with the value.
+   Comment each new key `// Default: <value>.` and leave keys with no default uncommented.
 
 4. **New default keys absent from the db:** list them for the user, adding only the ones they want.
 

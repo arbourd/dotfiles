@@ -1,15 +1,66 @@
 {
-  // null deletes the key, resetting it to Orca's default ({}).
-  "agentDefaultArgs": null,
-  "agentDefaultEnv": null,
+  // Default: {}.
+  "agentDefaultArgs": {
+    "antigravity": "--mode auto",
+    "claude": "--permission-mode auto",
+    "codex": "--approve-for-me"
+  },
   // Default: "full-access".
   "agentPermissionDefault": "auto",
+  // null deletes the key; Orca seeds "own" for agents without an override.
+  "agentPermissionOverrides": {
+    "codex": "auto",
+    "codebuddy": null,
+    "openclaude": null,
+    "autohand": null,
+    "ante": null,
+    "trae": null,
+    "opencode": null,
+    "opencode2": null,
+    "omp": null,
+    "qoder": null,
+    "qoder-cn": null,
+    "gemini": null,
+    "antigravity": null,
+    "aider": null,
+    "goose": null,
+    "amp": null,
+    "kiro": null,
+    "crush": null,
+    "cline": null,
+    "command-code": null,
+    "continue": null,
+    "cursor": null,
+    "droid": null,
+    "kimi": null,
+    "mistral-vibe": null,
+    "qwen-code": null,
+    "rovo": null,
+    "hermes": null,
+    "copilot": null,
+    "grok": null,
+    "muse": null,
+    "zcode": null,
+    "devin": null
+  },
+  "aiVaultSearch": {
+    "enabled": true
+  },
   // Default: true.
   "artifactSharingEnabled": false,
+  "browserPasswordsOfferToSave": false,
   // Default: false.
   "combinedDiffFileTreeVisibleByDefault": true,
   // Default: null.
   "defaultTuiAgent": "blank",
+  // Default: [].
+  "disabledTuiAgents": ["claude-agent-teams"],
+  "experimentalAgentDashboardPopout": true,
+  "experimentalNativeChat": false,
+  // Default: false.
+  "experimentalNewWorktreeCardStyle": true,
+  // Default: false.
+  "experimentalTerminalAttention": true,
   // Default: true, "floating-button".
   "floatingTerminalEnabled": false,
   "floatingTerminalTriggerLocation": "status-bar",
@@ -21,6 +72,7 @@
   "nativeChatPermissionMode": "auto",
   // Default: true.
   "nativeChatResumeWorkOnRestart": false,
+  "newWorkspaceSetupOnly": false,
   "notifications": {
     // Default: false.
     "terminalBell": true
@@ -33,6 +85,7 @@
       "command": "zed"
     }
   ],
+  "orchestrationChatErrorEscalationEnabled": true,
   // Default: true.
   "primarySelectionMiddleClickPaste": false,
   // Default: true.
@@ -78,8 +131,17 @@
   "terminalThemeDark": "Solarized Dark",
   // Default: "system".
   "theme": "dark",
+  "updateDelayDays": 3,
+  // Default: ["github","gitlab","linear","jira"].
+  "visibleTaskProviders": ["github", "gitlab", "linear"],
+  "voice": {
+    // Default: false.
+    "enabled": true,
+    "language": "en",
+    // Default: "".
+    "sttModel": "parakeet-tdt-0.6b-v2-int8"
+  },
   "worktreeVisibilityDefaults": {
-    // Not set by default.
     "sourcePreferences": {
       "builtIn": {
         "claude": "show"
