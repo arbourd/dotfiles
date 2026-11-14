@@ -31,7 +31,7 @@ cwd=$(j '.cwd')
 folder=${cwd:t}
 branch=$(git -C "$cwd" branch --show-current 2>/dev/null)
 if [[ -n "$branch" ]]; then
-    read added deleted <<< $(git -C "$cwd" status --porcelain 2>/dev/null | awk '
+    read added deleted <<< $(git -C "$cwd" --no-optional-locks -c core.fsmonitor=false status --porcelain 2>/dev/null | awk '
         /^[ MARC?!]D|^D/{d++; next} {a++}
         END{print a+0, d+0}
     ')
