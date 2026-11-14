@@ -39,6 +39,7 @@ jobs:
           - install-fisher
           - install-vim
           - link
+          - merge
           - update
           - version
 

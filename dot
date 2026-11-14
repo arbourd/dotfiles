@@ -260,7 +260,6 @@ _link_agents() {
         [[ "${claude:t}" == "settings.json" ]] && continue
         _symlink "$claude" ~/.claude
     done
-    _merge_claude_settings
 
     local persona
     _ensure ~/.claude/agents/
@@ -290,8 +289,27 @@ _link_agents() {
     _symlink "$DIR/agents/AGENTS.md" ~/.gemini/GEMINI.md
     _symlink "$DIR/agents/AGENTS.md" ~/.codex/AGENTS.md
     _symlink "$DIR/agents/AGENTS.md" ~/.pi/agent/AGENTS.md
+}
 
-    _merge_codex_config
+# _merge [claude|codex|orca]
+# Merges repo settings into live tool configs; runs all three without a target.
+_merge() {
+    case ${1:-} in
+        "")
+            _log "Merging settings"
+            _merge_claude_settings
+            _merge_codex_config
+            _merge_orca_settings
+            ;;
+        claude) _merge_claude_settings ;;
+        codex) _merge_codex_config ;;
+        orca) _merge_orca_settings ;;
+        *)
+            _err "error: unknown merge target: \"$1\""
+            _usage >&2
+            exit 1
+            ;;
+    esac
 }
 
 # _clean
@@ -319,6 +337,7 @@ Commands:
   install-fisher    installs fisher packages
   install-vim       installs vim packages
   link              symlinks dotfiles and removes stale symlinks
+  merge             merges settings into claude, codex and orca (or one: claude|codex|orca)
   update            updates the dotfiles repository
   version           prints the current commit sha
 Options:
@@ -437,8 +456,6 @@ _link() {
     _ensure ~/.local/bin/
     _symlink "$DIR/orca/orca" ~/.local/bin/orca
 
-    _merge_orca_settings
-
     # ssh
     _ensure ~/.ssh/
     _symlink "$DIR/ssh/config" ~/.ssh/config
@@ -455,6 +472,8 @@ _link() {
     _link_agents
 
     _clean
+
+    _log "Run dot merge to merge settings"
 }
 
 # _install_defaults
@@ -558,6 +577,10 @@ case ${1:-} in
     link)
         _warn_location
         _link
+        ;;
+    merge)
+        _warn_location
+        _merge "${2:-}"
         ;;
     install)
         _warn_location

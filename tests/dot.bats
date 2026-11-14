@@ -265,7 +265,7 @@ _assert_link() {
     _assert_link "$FAKE_HOME/.pi/agent/AGENTS.md" "$FAKE_HOME/repo-mock/agents/AGENTS.md"
 }
 
-@test 'link-agents merges claude settings.json instead of symlinking it' {
+@test 'merge-claude-settings deep-merges over a live settings.json instead of symlinking it' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/repo-mock/agents/codex" "$FAKE_HOME/.claude"
     touch "$FAKE_HOME/repo-mock/agents/codex/config.toml"
     cat > "$FAKE_HOME/repo-mock/agents/claude/settings.json" <<'JSON'
@@ -283,7 +283,7 @@ JSON
 }
 JSON
 
-    zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _link_agents" > /dev/null
+    zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_claude_settings" > /dev/null
 
     [ ! -L "$FAKE_HOME/.claude/settings.json" ]
     [ -f "$FAKE_HOME/.claude/settings.json" ]
@@ -303,6 +303,30 @@ JSON
     # arrays are replaced wholesale by the repo's, not unioned
     run jq -c '.ignorePatterns' "$FAKE_HOME/.claude/settings.json"
     [ "$output" = '["repo-pattern"]' ]
+}
+
+@test 'link does not merge settings' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/repo-mock/agents/codex" "$FAKE_HOME/repo-mock/sh"
+    touch "$FAKE_HOME/repo-mock/sh/.shrc"
+    echo '{"theme":"dark"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.json"
+
+    zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _link" > /dev/null
+
+    [ ! -e "$FAKE_HOME/.claude/settings.json" ]
+    [ ! -e "$FAKE_HOME/.codex/config.toml" ]
+}
+
+@test 'merge runs a single target and rejects unknown ones' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/claude"
+    echo '{"theme":"dark"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.json"
+
+    zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge claude" > /dev/null
+    [ -f "$FAKE_HOME/.claude/settings.json" ]
+    [ ! -e "$FAKE_HOME/.codex/config.toml" ]
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; _merge nope 2>&1"
+    [ "$status" -eq 1 ]
+    [[ "$output" == *'unknown merge target: "nope"'* ]]
 }
 
 @test 'merge-claude-settings creates settings.json when none exists' {

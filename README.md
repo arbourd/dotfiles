@@ -24,6 +24,7 @@ Automated environment as code.
         install-fisher    installs fisher packages
         install-vim       installs vim packages
         link              symlinks dotfiles and removes stale symlinks
+        merge             merges settings into claude, codex and orca (or one: claude|codex|orca)
         update            updates the dotfiles repository
         version           prints the current commit sha
       Options:
