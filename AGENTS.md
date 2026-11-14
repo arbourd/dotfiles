@@ -29,9 +29,9 @@ Install steps hide noisy external commands behind a `gum` spinner via `_spin`. P
 dot         # entry point — init/update/link/install subcommands
 .macOS      # zsh script that applies macOS defaults write settings
 Brewfile    # Homebrew formulae, casks, and Mac App Store apps
-.github     # CI workflow and Renovate config
+.github     # CI and skills-vendoring workflows, Renovate config
 .agents     # this repo's own skills (not linked by dot); .claude/skills symlinks here
-agents      # global AI agent instructions, persona, and skill definitions
+agents      # global AI agent instructions, personas, and vendored skills (skills.json + vendor-skills)
 ghostty     # Ghostty terminal emulator config
 git         # global git config and gitignore
 gpg         # GPG agent config
@@ -49,7 +49,7 @@ AI configuration is managed via `agents/` and symlinked to tool-specific global 
 
 - `agents/AGENTS.md`: Shared global instructions, loaded by every tool on every project (e.g. "don't push without being asked"). Project-specific instructions still belong in that project's own `AGENTS.md`, not here.
 - `agents/personas`: Persona or subagent definitions.
-- `agents/skills`: Skill definitions and scripts.
+- `agents/skills`: Skill definitions and scripts. Vendored from upstream repos (see Vendored skills).
 - `agents/claude`: Claude Code-only files, symlinked into `~/.claude/` (except merged `settings.json`).
 
 `.agents/skills` holds skills for working on this repo only, separate from `agents/skills` (global, linked by `dot link`). `.claude/skills` is a symlink to it so Claude Code finds them; it is force-added because the global gitignore excludes `.claude`.
@@ -74,6 +74,15 @@ Antigravity paths are carried over from Gemini CLI and unverified.
 
 `orca/compare.js` and `orca/defaults.js` are read-only and safe to run while Orca is open; only `dot link` writes to the db.
 
+## Vendored skills
+
+Every skill in `agents/skills/` is fetched from an upstream repo, never hand-written. `agents/skills.json` lists each skill's `source` (`github.com/<owner>/<repo>/<path>@<commit>`). Upstream wins: don't edit `agents/skills/*`; `agents/vendor-skills` overwrites them from the pinned commits.
+
+- Renovate (two `custom.regex` managers in `.github/renovate.json`) bumps the pins in one `vendored skills` PR with no automerge; that PR is the review gate. An entry with a `version` tag tracks releases, one without tracks `main`; `source` always holds the immutable commit.
+- `.github/workflows/skills.yml` runs `agents/vendor-skills` on any PR that touches `agents/skills.json`, `agents/vendor-skills` or the workflow, and on manual dispatch. Only on Renovate's own same-repo `renovate/` PRs (keep that guard) does it commit the regenerated files to the branch and then fail if anything still differs from upstream; on a dispatch it runs the failing check only.
+- The `orca-cli` and `orchestration` upstream files are stubs that load a version-matched guide via `orca skills get`, so an Orca upgrade needs no skill update.
+- To add a skill, add its unpinned `source` to `agents/skills.json` and run `agents/vendor-skills <name>`, which pins it.
+
 ## Shell
 
 Primary shell is **fish** (`/opt/homebrew/bin/fish`). `sh/.shrc` is a POSIX-compatible fallback used for bash and zsh. `dot` is zsh to maintain compatibility with macOS.
@@ -92,7 +101,7 @@ Run the bats suite locally after any `dot` script change:
 bats tests/dot.bats
 ```
 
-The suite needs `zsh`, `jq`, `sqlite3`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, completions, and CI matrix drift apart, or if `agents/claude/settings.json` gains a `hooks` key.
+The suite needs `zsh`, `jq`, `sqlite3`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, completions, and CI matrix drift apart, or if `agents/claude/settings.json` gains a `hooks` key, or a vendored skill isn't pinned to a commit in `agents/skills.json`.
 
 Run `actionlint` after changing anything under `.github/workflows`.
 
