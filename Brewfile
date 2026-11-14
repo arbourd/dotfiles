@@ -1,4 +1,5 @@
 tap 'arbourd/tap', trusted: true
+tap 'hashicorp/tap', trusted: true
 
 brew 'actionlint'
 brew 'age'
@@ -69,7 +70,7 @@ brew 'wget'
 brew 'yamlfmt'
 brew 'yq'
 brew 'zig'
-brew 'neurosnap/tap/zmx'
+brew 'neurosnap/tap/zmx', trusted: true
 brew 'zoxide'
 brew 'zstd'
 
@@ -98,7 +99,7 @@ cask 'sabnzbd'
 cask 'signal'
 cask 'arbourd/tap/orca'
 cask 'tailscale-app'
-cask 'terraform-linters/tap/tflint'
+cask 'terraform-linters/tap/tflint', trusted: true
 cask 'utm'
 cask 'zed'
 
