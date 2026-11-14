@@ -72,6 +72,8 @@ Antigravity paths are carried over from Gemini CLI and unverified.
 
 `orca/settings.jsonc` is merged into Orca's SQLite profile db by `dot link`, and holds only non-default values. After every Orca upgrade (`brew upgrade --cask arbourd/tap/orca`), or to check for settings drift, run the `orca-settings` skill. It has the merge, defaults, and comparison details.
 
+`orca/compare.js` and `orca/defaults.js` are read-only and safe to run while Orca is open; only `dot link` writes to the db.
+
 ## Shell
 
 Primary shell is **fish** (`/opt/homebrew/bin/fish`). `sh/.shrc` is a POSIX-compatible fallback used for bash and zsh. `dot` is zsh to maintain compatibility with macOS.

@@ -27,7 +27,7 @@ description: Use after upgrading Orca, or when asked to check, refresh, or audit
    - `null still has a value`: either not applied yet, or Orca repopulated the key. Rerun after the user applies (step 5); if it persists, drop the key, but first ask the user whether the repopulated entries are intentional.
    - `db differs`: not applied yet; the user applies it in step 5.
 
-3. **Live drift:** settings changed in Orca's UI that `settings.jsonc` doesn't have. Show the list to the user as a table (key, live, default) and add only the ones they want. The script already hides Orca-managed state (telemetry, plugin consents, seeds, migration flags, dismissed prompts, empty values); extend `internal` in `orca/compare.js` if more noise shows up.
+3. **Live drift:** settings changed in Orca's UI that `settings.jsonc` doesn't have. Show the list to the user as a table (key, live, default) and add only the ones they want. The script already hides Orca-managed state (telemetry, plugin consents, seeds, migration flags, dismissed prompts, empty values); extend `INTERNAL_KEY` in `orca/compare.js` if more noise shows up.
    Dotted keys (`voice.enabled`) nest as objects. If a live key sits under one of our `null` keys (`agentDefaultArgs.antigravity`), replace the `null` with the value.
    Comment each new key `// Default: <value>.` and `// Default: unset.` when the default is `undefined`.
 
