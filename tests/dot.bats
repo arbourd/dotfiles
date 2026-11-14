@@ -35,6 +35,12 @@ _tty() {
     fi
 }
 
+# _assert_link <link> <target> checks that link is a symlink to target.
+_assert_link() {
+    [ -L "$1" ] || { echo "not a symlink: $1" >&2; return 1; }
+    [ "$(readlink "$1")" = "$2" ] || { echo "$1 -> $(readlink "$1"), want $2" >&2; return 1; }
+}
+
 @test '_ensure leaves existing files untouched' {
     mkdir -p "$FAKE_HOME/cfg"
     echo secret > "$FAKE_HOME/cfg/private"
@@ -77,8 +83,7 @@ _tty() {
 
     [ -d "$FAKE_HOME/src/github.com/arbourd" ]
     [ "$(cat "$FAKE_HOME/git_args")" = "clone https://github.com/arbourd/dotfiles.git $target" ]
-    [ -L "$FAKE_HOME/.local/bin/dot" ]
-    [ "$(readlink "$FAKE_HOME/.local/bin/dot")" = "$target/dot" ]
+    _assert_link "$FAKE_HOME/.local/bin/dot" "$target/dot"
 }
 
 @test 'init pulls and re-symlinks dot when target already exists' {
@@ -93,8 +98,7 @@ _tty() {
     "
 
     [ "$(cat "$FAKE_HOME/git_args")" = "-C $target pull" ]
-    [ -L "$FAKE_HOME/.local/bin/dot" ]
-    [ "$(readlink "$FAKE_HOME/.local/bin/dot")" = "$target/dot" ]
+    _assert_link "$FAKE_HOME/.local/bin/dot" "$target/dot"
 }
 
 @test 'update reports up to date when HEAD does not change' {
@@ -179,44 +183,27 @@ _tty() {
 @test 'link creates dotfile symlinks' {
     zsh -c "source '$FAKE_HOME/setup.zsh'; _link" > /dev/null
 
-    [ -L "$FAKE_HOME/.bash_profile" ]
-    [ "$(readlink "$FAKE_HOME/.bash_profile")" = "$DOTFILES/sh/.shrc" ]
-    [ -L "$FAKE_HOME/.bashrc" ]
-    [ "$(readlink "$FAKE_HOME/.bashrc")" = "$DOTFILES/sh/.shrc" ]
-    [ -L "$FAKE_HOME/.zshrc" ]
-    [ "$(readlink "$FAKE_HOME/.zshrc")" = "$DOTFILES/sh/.shrc" ]
-    [ -L "$FAKE_HOME/.config/fish/config.fish" ]
-    [ "$(readlink "$FAKE_HOME/.config/fish/config.fish")" = "$DOTFILES/sh/config.fish" ]
-    [ -L "$FAKE_HOME/.config/fish/fish_plugins" ]
-    [ "$(readlink "$FAKE_HOME/.config/fish/fish_plugins")" = "$DOTFILES/sh/fish_plugins" ]
+    _assert_link "$FAKE_HOME/.bash_profile" "$DOTFILES/sh/.shrc"
+    _assert_link "$FAKE_HOME/.bashrc" "$DOTFILES/sh/.shrc"
+    _assert_link "$FAKE_HOME/.zshrc" "$DOTFILES/sh/.shrc"
+    _assert_link "$FAKE_HOME/.config/fish/config.fish" "$DOTFILES/sh/config.fish"
+    _assert_link "$FAKE_HOME/.config/fish/fish_plugins" "$DOTFILES/sh/fish_plugins"
     local fn
     for fn in "$DOTFILES"/sh/functions/*.fish; do
-        [ "$(readlink "$FAKE_HOME/.config/fish/functions/${fn##*/}")" = "$fn" ]
+        _assert_link "$FAKE_HOME/.config/fish/functions/${fn##*/}" "$fn"
     done
-    [ -L "$FAKE_HOME/.config/fish/completions/dot.fish" ]
-    [ "$(readlink "$FAKE_HOME/.config/fish/completions/dot.fish")" = "$DOTFILES/sh/completions/dot.fish" ]
-    [ -L "$FAKE_HOME/.local/share/bash-completion/completions/dot" ]
-    [ "$(readlink "$FAKE_HOME/.local/share/bash-completion/completions/dot")" = "$DOTFILES/sh/completions/dot.bash" ]
-    [ -L "$FAKE_HOME/.zsh/completions/_dot" ]
-    [ "$(readlink "$FAKE_HOME/.zsh/completions/_dot")" = "$DOTFILES/sh/completions/_dot" ]
-    [ -L "$FAKE_HOME/.config/ghostty/config" ]
-    [ "$(readlink "$FAKE_HOME/.config/ghostty/config")" = "$DOTFILES/ghostty/config" ]
-    [ -L "$FAKE_HOME/.config/git/config" ]
-    [ "$(readlink "$FAKE_HOME/.config/git/config")" = "$DOTFILES/git/config" ]
-    [ -L "$FAKE_HOME/.config/git/gitignore" ]
-    [ "$(readlink "$FAKE_HOME/.config/git/gitignore")" = "$DOTFILES/git/gitignore" ]
-    [ -L "$FAKE_HOME/.gnupg/gpg-agent.conf" ]
-    [ "$(readlink "$FAKE_HOME/.gnupg/gpg-agent.conf")" = "$DOTFILES/gpg/gpg-agent.conf" ]
-    [ -L "$FAKE_HOME/.ssh/config" ]
-    [ "$(readlink "$FAKE_HOME/.ssh/config")" = "$DOTFILES/ssh/config" ]
-    [ -L "$FAKE_HOME/.vim/vimrc" ]
-    [ "$(readlink "$FAKE_HOME/.vim/vimrc")" = "$DOTFILES/vim/vimrc" ]
-    [ -L "$FAKE_HOME/.orca/keybindings.json" ]
-    [ "$(readlink "$FAKE_HOME/.orca/keybindings.json")" = "$DOTFILES/orca/keybindings.json" ]
-    [ -L "$FAKE_HOME/.local/bin/orca" ]
-    [ "$(readlink "$FAKE_HOME/.local/bin/orca")" = "$DOTFILES/orca/orca" ]
-    [ -L "$FAKE_HOME/.config/zed/settings.json" ]
-    [ "$(readlink "$FAKE_HOME/.config/zed/settings.json")" = "$DOTFILES/zed/settings.json" ]
+    _assert_link "$FAKE_HOME/.config/fish/completions/dot.fish" "$DOTFILES/sh/completions/dot.fish"
+    _assert_link "$FAKE_HOME/.local/share/bash-completion/completions/dot" "$DOTFILES/sh/completions/dot.bash"
+    _assert_link "$FAKE_HOME/.zsh/completions/_dot" "$DOTFILES/sh/completions/_dot"
+    _assert_link "$FAKE_HOME/.config/ghostty/config" "$DOTFILES/ghostty/config"
+    _assert_link "$FAKE_HOME/.config/git/config" "$DOTFILES/git/config"
+    _assert_link "$FAKE_HOME/.config/git/gitignore" "$DOTFILES/git/gitignore"
+    _assert_link "$FAKE_HOME/.gnupg/gpg-agent.conf" "$DOTFILES/gpg/gpg-agent.conf"
+    _assert_link "$FAKE_HOME/.ssh/config" "$DOTFILES/ssh/config"
+    _assert_link "$FAKE_HOME/.vim/vimrc" "$DOTFILES/vim/vimrc"
+    _assert_link "$FAKE_HOME/.orca/keybindings.json" "$DOTFILES/orca/keybindings.json"
+    _assert_link "$FAKE_HOME/.local/bin/orca" "$DOTFILES/orca/orca"
+    _assert_link "$FAKE_HOME/.config/zed/settings.json" "$DOTFILES/zed/settings.json"
 
     [ -d "$FAKE_HOME/.gnupg" ]
     [ "$(_perms "$FAKE_HOME/.gnupg")" = "drwx------" ]
@@ -234,9 +221,9 @@ _tty() {
     run zsh -c "source '$FAKE_HOME/setup.zsh'; _link"
     [ "$status" -eq 0 ]
 
-    [ "$(readlink "$FAKE_HOME/.zshrc")" = "$DOTFILES/sh/.shrc" ]
-    [ "$(readlink "$FAKE_HOME/.claude/AGENTS.md")" = "$DOTFILES/agents/AGENTS.md" ]
-    [ "$(readlink "$FAKE_HOME/.claude/CLAUDE.md")" = "$DOTFILES/agents/claude/CLAUDE.md" ]
+    _assert_link "$FAKE_HOME/.zshrc" "$DOTFILES/sh/.shrc"
+    _assert_link "$FAKE_HOME/.claude/AGENTS.md" "$DOTFILES/agents/AGENTS.md"
+    _assert_link "$FAKE_HOME/.claude/CLAUDE.md" "$DOTFILES/agents/claude/CLAUDE.md"
     [ "$(cat "$FAKE_HOME/.config/fish/private.fish")" = "secret" ]
     [ "$(cat "$FAKE_HOME/.config/git/private")" = "secret" ]
     [ ! -e "$FAKE_HOME/.claude/skills/skills" ]
@@ -257,37 +244,23 @@ _tty() {
 
     zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _link_agents" > /dev/null
 
-    [ -L "$FAKE_HOME/.claude/statusline.sh" ]
-    [ "$(readlink "$FAKE_HOME/.claude/statusline.sh")" = "$FAKE_HOME/repo-mock/agents/claude/statusline.sh" ]
-    [ -L "$FAKE_HOME/.claude/CLAUDE.md" ]
-    [ "$(readlink "$FAKE_HOME/.claude/CLAUDE.md")" = "$FAKE_HOME/repo-mock/agents/claude/CLAUDE.md" ]
+    _assert_link "$FAKE_HOME/.claude/statusline.sh" "$FAKE_HOME/repo-mock/agents/claude/statusline.sh"
+    _assert_link "$FAKE_HOME/.claude/CLAUDE.md" "$FAKE_HOME/repo-mock/agents/claude/CLAUDE.md"
 
-    [ -L "$FAKE_HOME/.claude/agents/helper.md" ]
-    [ "$(readlink "$FAKE_HOME/.claude/agents/helper.md")" = "$FAKE_HOME/repo-mock/agents/personas/helper.md" ]
-    [ -L "$FAKE_HOME/.gemini/agents/helper.md" ]
-    [ "$(readlink "$FAKE_HOME/.gemini/agents/helper.md")" = "$FAKE_HOME/repo-mock/agents/personas/helper.md" ]
-    [ -L "$FAKE_HOME/.pi/agent/prompts/helper.md" ]
-    [ "$(readlink "$FAKE_HOME/.pi/agent/prompts/helper.md")" = "$FAKE_HOME/repo-mock/agents/personas/helper.md" ]
-    [ -L "$FAKE_HOME/.config/opencode/agents/helper.md" ]
-    [ "$(readlink "$FAKE_HOME/.config/opencode/agents/helper.md")" = "$FAKE_HOME/repo-mock/agents/personas/helper.md" ]
+    _assert_link "$FAKE_HOME/.claude/agents/helper.md" "$FAKE_HOME/repo-mock/agents/personas/helper.md"
+    _assert_link "$FAKE_HOME/.gemini/agents/helper.md" "$FAKE_HOME/repo-mock/agents/personas/helper.md"
+    _assert_link "$FAKE_HOME/.pi/agent/prompts/helper.md" "$FAKE_HOME/repo-mock/agents/personas/helper.md"
+    _assert_link "$FAKE_HOME/.config/opencode/agents/helper.md" "$FAKE_HOME/repo-mock/agents/personas/helper.md"
 
-    [ -L "$FAKE_HOME/.claude/skills/skill-a" ]
-    [ "$(readlink "$FAKE_HOME/.claude/skills/skill-a")" = "$FAKE_HOME/repo-mock/agents/skills/skill-a" ]
-    [ -L "$FAKE_HOME/.agents/skills/skill-a" ]
-    [ "$(readlink "$FAKE_HOME/.agents/skills/skill-a")" = "$FAKE_HOME/repo-mock/agents/skills/skill-a" ]
-    [ -L "$FAKE_HOME/.claude/skills/skill-b" ]
-    [ "$(readlink "$FAKE_HOME/.claude/skills/skill-b")" = "$FAKE_HOME/repo-mock/agents/skills/skill-b" ]
-    [ -L "$FAKE_HOME/.agents/skills/skill-b" ]
-    [ "$(readlink "$FAKE_HOME/.agents/skills/skill-b")" = "$FAKE_HOME/repo-mock/agents/skills/skill-b" ]
+    _assert_link "$FAKE_HOME/.claude/skills/skill-a" "$FAKE_HOME/repo-mock/agents/skills/skill-a"
+    _assert_link "$FAKE_HOME/.agents/skills/skill-a" "$FAKE_HOME/repo-mock/agents/skills/skill-a"
+    _assert_link "$FAKE_HOME/.claude/skills/skill-b" "$FAKE_HOME/repo-mock/agents/skills/skill-b"
+    _assert_link "$FAKE_HOME/.agents/skills/skill-b" "$FAKE_HOME/repo-mock/agents/skills/skill-b"
 
-    [ -L "$FAKE_HOME/.claude/AGENTS.md" ]
-    [ "$(readlink "$FAKE_HOME/.claude/AGENTS.md")" = "$FAKE_HOME/repo-mock/agents/AGENTS.md" ]
-    [ -L "$FAKE_HOME/.gemini/GEMINI.md" ]
-    [ "$(readlink "$FAKE_HOME/.gemini/GEMINI.md")" = "$FAKE_HOME/repo-mock/agents/AGENTS.md" ]
-    [ -L "$FAKE_HOME/.codex/AGENTS.md" ]
-    [ "$(readlink "$FAKE_HOME/.codex/AGENTS.md")" = "$FAKE_HOME/repo-mock/agents/AGENTS.md" ]
-    [ -L "$FAKE_HOME/.pi/agent/AGENTS.md" ]
-    [ "$(readlink "$FAKE_HOME/.pi/agent/AGENTS.md")" = "$FAKE_HOME/repo-mock/agents/AGENTS.md" ]
+    _assert_link "$FAKE_HOME/.claude/AGENTS.md" "$FAKE_HOME/repo-mock/agents/AGENTS.md"
+    _assert_link "$FAKE_HOME/.gemini/GEMINI.md" "$FAKE_HOME/repo-mock/agents/AGENTS.md"
+    _assert_link "$FAKE_HOME/.codex/AGENTS.md" "$FAKE_HOME/repo-mock/agents/AGENTS.md"
+    _assert_link "$FAKE_HOME/.pi/agent/AGENTS.md" "$FAKE_HOME/repo-mock/agents/AGENTS.md"
 }
 
 @test 'link-agents merges claude settings.json instead of symlinking it' {
@@ -435,8 +408,7 @@ JSON
     zsh -c "source '$FAKE_HOME/setup.zsh'; _clean" > /dev/null
 
     [ -f "$FAKE_HOME/.ssh/id_rsa" ]
-    [ -L "$FAKE_HOME/.ssh/external_link" ]
-    [ "$(readlink "$FAKE_HOME/.ssh/external_link")" = "/etc/hosts" ]
+    _assert_link "$FAKE_HOME/.ssh/external_link" "/etc/hosts"
     [ -z "$(readlink "$FAKE_HOME/.ssh/stale_link" 2>/dev/null)" ]
 }
 
@@ -462,8 +434,7 @@ JSON
 
     zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$space_repo'; _link" > /dev/null
 
-    [ -L "$FAKE_HOME/.bash_profile" ]
-    [ "$(readlink "$FAKE_HOME/.bash_profile")" = "$space_repo/sh/.shrc" ]
+    _assert_link "$FAKE_HOME/.bash_profile" "$space_repo/sh/.shrc"
 }
 
 @test 'getpath resolution priority' {
@@ -494,8 +465,7 @@ JSON
         _init
     "
 
-    [ -L "$FAKE_HOME/.local/bin/dot" ]
-    [ "$(readlink "$FAKE_HOME/.local/bin/dot")" = "$target/dot" ]
+    _assert_link "$FAKE_HOME/.local/bin/dot" "$target/dot"
 }
 
 @test 'dot help prints usage and exits 0' {
@@ -706,7 +676,7 @@ _orca_db() {
 
 @test '_symlink creates the link and reports it' {
     run zsh -c "source '$FAKE_HOME/setup.zsh'; _symlink '$DOTFILES/sh/.shrc' '$FAKE_HOME/.zshrc'"
-    [ "$status" -eq 0 ]
+    _assert_link "$FAKE_HOME/.zshrc" "$DOTFILES/sh/.shrc"
     [ "$(readlink "$FAKE_HOME/.zshrc")" = "$DOTFILES/sh/.shrc" ]
     [ "$output" = "linked   ~/.zshrc → sh/.shrc" ]
 }
@@ -784,21 +754,19 @@ _orca_db() {
     local repo="$FAKE_HOME/repo"
     git init -q "$repo"
 
-    git -C "$repo" remote add origin git@github.com:arbourd/dotfiles.git
-    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
-    [ "$output" = "https://github.com/arbourd/dotfiles" ]
-
-    git -C "$repo" remote set-url origin https://github.com/arbourd/dotfiles.git
-    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
-    [ "$output" = "https://github.com/arbourd/dotfiles" ]
-
-    git -C "$repo" remote set-url origin ssh://git@github.com/arbourd/dotfiles.git
-    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
-    [ "$output" = "https://github.com/arbourd/dotfiles" ]
-
-    git -C "$repo" remote set-url origin https://github.com/arbourd/dotfiles
-    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
-    [ "$output" = "https://github.com/arbourd/dotfiles" ]
+    local url
+    local -a urls=(
+        git@github.com:arbourd/dotfiles.git
+        https://github.com/arbourd/dotfiles.git
+        ssh://git@github.com/arbourd/dotfiles.git
+        https://github.com/arbourd/dotfiles
+    )
+    git -C "$repo" remote add origin "${urls[0]}"
+    for url in "${urls[@]}"; do
+        git -C "$repo" remote set-url origin "$url"
+        run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
+        [ "$output" = "https://github.com/arbourd/dotfiles" ] || { echo "$url -> $output" >&2; false; }
+    done
 
     git -C "$repo" remote set-url origin https://example.com/x/y.git
     run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$repo'; _repo_url"
