@@ -79,6 +79,8 @@
   // Default: unset.
   "newWorkspaceSetupOnly": false,
   "notifications": {
+    // Default: true.
+    "agentTaskComplete": false,
     // Default: false.
     "terminalBell": true
   },
@@ -90,7 +92,7 @@
       "command": "zed"
     }
   ],
-  // Default: unset.
+  // Default: unset. Experimental; keep it, never null it.
   "orchestrationChatErrorEscalationEnabled": true,
   // Default: true.
   "primarySelectionMiddleClickPaste": false,
