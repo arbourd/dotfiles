@@ -29,8 +29,8 @@ description: Use after upgrading Orca, or when asked to check, refresh, or audit
 
 3. **Live drift:** settings changed in Orca's UI that `settings.jsonc` doesn't have. Show the list to the user as a table (key, live, default) and add only the ones they want. The script already hides Orca-managed state (telemetry, plugin consents, seeds, migration flags, dismissed prompts, empty values); extend `internal` in `orca/compare.js` if more noise shows up.
    Dotted keys (`voice.enabled`) nest as objects. If a live key sits under one of our `null` keys (`agentDefaultArgs.antigravity`), replace the `null` with the value.
-   Comment each new key `// Default: <value>.` and leave keys with no default uncommented.
+   Comment each new key `// Default: <value>.` and `// Default: unset.` when the default is `undefined`.
 
-4. **New default keys absent from the db:** list them for the user, adding only the ones they want.
+4. **New default keys absent from the db:** show them to the user as a table (key, default), adding only the ones they want.
 
 5. Applying is the user's job: `dot link` skips the merge inside Orca's terminal and while Orca runs, so you can't do it. If you edited `settings.jsonc`, tell the user to quit Orca and run `dot link` from another terminal, then rerun `node orca/compare.js` to confirm no `db differs` flags remain.

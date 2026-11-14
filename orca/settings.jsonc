@@ -43,11 +43,13 @@
     "zcode": null,
     "devin": null
   },
+  // Default: unset.
   "aiVaultSearch": {
     "enabled": true
   },
   // Default: true.
   "artifactSharingEnabled": false,
+  // Default: unset.
   "browserPasswordsOfferToSave": false,
   // Default: false.
   "combinedDiffFileTreeVisibleByDefault": true,
@@ -55,7 +57,9 @@
   "defaultTuiAgent": "blank",
   // Default: [].
   "disabledTuiAgents": ["claude-agent-teams"],
+  // Default: unset.
   "experimentalAgentDashboardPopout": true,
+  // Default: unset.
   "experimentalNativeChat": false,
   // Default: false.
   "experimentalNewWorktreeCardStyle": true,
@@ -72,6 +76,7 @@
   "nativeChatPermissionMode": "auto",
   // Default: true.
   "nativeChatResumeWorkOnRestart": false,
+  // Default: unset.
   "newWorkspaceSetupOnly": false,
   "notifications": {
     // Default: false.
@@ -85,6 +90,7 @@
       "command": "zed"
     }
   ],
+  // Default: unset.
   "orchestrationChatErrorEscalationEnabled": true,
   // Default: true.
   "primarySelectionMiddleClickPaste": false,
@@ -94,7 +100,7 @@
   "showMenuBarIcon": false,
   // Default: "list".
   "sourceControlViewMode": "tree",
-  // Solarized Dark; not set by default.
+  // Default: unset. Solarized Dark.
   "terminalColorOverrides": {
     "black": "#073642",
     "red": "#dc322f",
@@ -131,16 +137,19 @@
   "terminalThemeDark": "Solarized Dark",
   // Default: "system".
   "theme": "dark",
+  // Default: unset.
   "updateDelayDays": 3,
   // Default: ["github","gitlab","linear","jira"].
-  "visibleTaskProviders": ["github", "gitlab", "linear"],
+  "visibleTaskProviders": ["github"],
   "voice": {
     // Default: false.
     "enabled": true,
+    // Default: unset.
     "language": "en",
     // Default: "".
     "sttModel": "parakeet-tdt-0.6b-v2-int8"
   },
+  // Default: unset.
   "worktreeVisibilityDefaults": {
     "sourcePreferences": {
       "builtIn": {
