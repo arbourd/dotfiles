@@ -533,6 +533,17 @@ _orca_db() {
     [ "$(sqlite3 "$ORCA_DB" "SELECT json_extract(payload, '\$.terminalScopeHistoryByWorktree') FROM profile_state_documents WHERE domain='settings'")" = "0" ]
 }
 
+@test '_merge_orca_settings fails and leaves the db untouched when settings.jsonc is missing' {
+    _orca_db
+    mkdir -p "$FAKE_HOME/repo-mock"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; DIR='$FAKE_HOME/repo-mock'; _merge_orca_settings 2>&1"
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"produced no payload"* ]]
+    [ "$(sqlite3 "$ORCA_DB" "SELECT content_hash FROM profile_state_documents WHERE domain='settings'")" = "stale" ]
+    [ "$(sqlite3 "$ORCA_DB" "SELECT json_extract(payload, '\$.other') FROM profile_state_documents WHERE domain='settings'")" = "1" ]
+}
+
 @test '_merge_orca_settings skips when Orca is running' {
     _orca_db
     printf '#!/bin/sh\nexit 0\n' > "$FAKE_HOME/bin/pgrep"
