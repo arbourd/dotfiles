@@ -35,9 +35,25 @@
       "datasourceTemplate": "git-refs",
       "packageNameTemplate": "https://github.com/{{{depName}}}",
       "currentValueTemplate": "main"
+    },
+    {
+      "customType": "regex",
+      "description": "Homebrew install script pinned to a commit",
+      "managerFilePatterns": ["dot"],
+      "matchStrings": ["Homebrew/install/(?<currentDigest>[0-9a-f]{40})/install\\.sh"],
+      "depNameTemplate": "Homebrew/install",
+      "packageNameTemplate": "https://github.com/Homebrew/install",
+      "currentValueTemplate": "main",
+      "datasourceTemplate": "git-refs"
     }
   ],
   "packageRules": [
+    {
+      "description": "Homebrew/install moves several times a week, so bump it monthly",
+      "matchDepNames": ["Homebrew/install"],
+      "schedule": ["* * 1 * *"],
+      "updateNotScheduled": false
+    },
     {
       "matchManagers": ["github-actions"],
       "matchUpdateTypes": ["minor", "patch"],
