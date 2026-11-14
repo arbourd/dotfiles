@@ -571,14 +571,22 @@ _orca_db() {
     [ "$(sqlite3 :memory: "SELECT json_type(json(readfile('$DOTFILES/orca/settings.jsonc')))")" = object ]
 }
 
-@test '_merge_orca_settings deletes keys the repo sets to null' {
+@test '_merge_orca_settings deletes top-level and nested keys the repo sets to null' {
     _orca_db
-    sqlite3 "$ORCA_DB" "UPDATE profile_state_documents SET payload = '{\"agentDefaultArgs\":{\"claude\":\"--x\"},\"agentDefaultEnv\":{\"goose\":{}},\"other\":1}' WHERE domain='settings'"
+    mkdir -p "$FAKE_HOME/repo-mock/orca"
+    cat > "$FAKE_HOME/repo-mock/orca/settings.jsonc" <<'JSON'
+{"gone": null, "nested": {"gone": null, "set": 2}, "absent": {"gone": null, "set": 4}}
+JSON
+    sqlite3 "$ORCA_DB" "UPDATE profile_state_documents SET payload = '{\"gone\":{\"x\":1},\"nested\":{\"gone\":1,\"keep\":3},\"other\":1}' WHERE domain='settings'"
 
-    zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _merge_orca_settings" > /dev/null
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; DIR='$FAKE_HOME/repo-mock'; _merge_orca_settings"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"merged"* ]]
 
-    run sqlite3 "$ORCA_DB" "SELECT json_type(payload, '\$.agentDefaultArgs') IS NULL, json_type(payload, '\$.agentDefaultEnv') IS NULL, json_extract(payload, '\$.other') FROM profile_state_documents WHERE domain='settings'"
-    [ "$output" = "1|1|1" ]
+    run sqlite3 "$ORCA_DB" "SELECT payload FROM profile_state_documents WHERE domain='settings'"
+    local payload
+    payload="$(printf '%s' "$output" | jq -cS .)"
+    [ "$payload" = '{"absent":{"set":4},"nested":{"keep":3,"set":2},"other":1}' ] || { echo "$payload" >&2; false; }
 }
 
 @test '.claude/skills links to the repo skills' {
