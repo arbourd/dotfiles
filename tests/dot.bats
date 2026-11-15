@@ -593,6 +593,27 @@ _orca_db() {
     [ "$(printf '%s' "$payload" | shasum -a 256 | cut -d' ' -f1)" = "$hash" ]
 }
 
+@test '_merge_rex_settings writes the pinned keys through defaults' {
+    mkdir -p "$FAKE_HOME/bin"
+    printf '#!/bin/sh\n[ "$1" = write ] && echo "$*" >> "$HOME/defaults.log"\nexit 0\n' > "$FAKE_HOME/bin/defaults"
+    chmod +x "$FAKE_HOME/bin/defaults"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _merge_rex_settings"
+    [ "$status" -eq 0 ]
+    grep -qx 'write com.superlogical.rex Workspace.tabStyle -string vertical' "$FAKE_HOME/defaults.log"
+    grep -qx 'write com.superlogical.rex Workspace.terminalFontPointSize -float 14' "$FAKE_HOME/defaults.log"
+}
+
+@test '_merge_rex_settings skips when Rex has no preferences' {
+    mkdir -p "$FAKE_HOME/bin"
+    printf '#!/bin/sh\nexit 1\n' > "$FAKE_HOME/bin/defaults"
+    chmod +x "$FAKE_HOME/bin/defaults"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin':\$PATH; _merge_rex_settings"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"launch Rex once"* ]]
+}
+
 @test '_merge_orca_settings handles a quote in the dotfiles path' {
     _orca_db
     local quoted="$FAKE_HOME/it's dotfiles"
@@ -979,7 +1000,7 @@ _dot_stubbed() {
     local copy="$FAKE_HOME/dot-stubbed" fn
     {
         sed '/^# Only dispatch when executed/,$d' "$DOTFILES/dot"
-        for fn in _install_brew _install_defaults _install_fisher _install_vim _merge_claude_settings _merge_codex_config _merge_orca_settings; do
+        for fn in _install_brew _install_defaults _install_fisher _install_vim _merge_claude_settings _merge_codex_config _merge_orca_settings _merge_rex_settings; do
             echo "$fn() { echo ${fn#_}; }"
         done
         sed -n '/^# Only dispatch when executed/,$p' "$DOTFILES/dot"
@@ -997,7 +1018,7 @@ _steps() {
     [ "$(_steps install vim)" = "install_vim " ]
     [ "$(_steps install vim brew)" = "install_vim install_brew " ]
 
-    [ "$(_steps merge)" = "merge_claude_settings merge_codex_config merge_orca_settings " ]
+    [ "$(_steps merge)" = "merge_claude_settings merge_codex_config merge_orca_settings merge_rex_settings " ]
     [ "$(_steps merge codex)" = "merge_codex_config " ]
     [ "$(_steps merge orca claude)" = "merge_orca_settings merge_claude_settings " ]
 

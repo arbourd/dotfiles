@@ -251,6 +251,21 @@ _merge_orca_settings() {
     _status merged "orca settings → $db"
 }
 
+# _merge_rex_settings
+# Runs rex/settings.zsh to write the pinned Rex.app preferences.
+_merge_rex_settings() {
+    local domain=com.superlogical.rex
+
+    if ! defaults read $domain &>/dev/null; then
+        _status skipped "rex settings: no preferences yet, launch Rex once and rerun"
+        return 0
+    fi
+
+    "$DIR/rex/settings.zsh"
+
+    _status merged "rex settings → $domain"
+}
+
 # _link_agents
 # Symlinks agent skills, personas, and global instructions into all supported AI tool directories.
 _link_agents() {
@@ -306,18 +321,19 @@ _run() {
     done
 }
 
-# _merge_step <claude|codex|orca>
+# _merge_step <claude|codex|orca|rex>
 _merge_step() {
     case $1 in
         claude) _merge_claude_settings ;;
         codex) _merge_codex_config ;;
         orca) _merge_orca_settings ;;
+        rex) _merge_rex_settings ;;
         *) _err "error: no handler for merge target: \"$1\""; exit 1 ;;
     esac
 }
 
-# _merge [claude|codex|orca]...
-# Merges repo settings into the given live tool configs, or all three without a target.
+# _merge [claude|codex|orca|rex]...
+# Merges repo settings into the given live tool configs, or all four without a target.
 _merge() {
     (( $# )) || _log "Merging settings"
     _run merge _merge_step "$@"
@@ -342,7 +358,7 @@ Commands:
   init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
   install [TARGET]  installs all packages (or any of: brew|defaults|fisher|vim)
   link              symlinks dotfiles and removes stale symlinks
-  merge [TARGET]    merges settings into claude, codex and orca (or any of: claude|codex|orca)
+  merge [TARGET]    merges settings into claude, codex, orca and rex (or any of: claude|codex|orca|rex)
   update            updates the dotfiles repository
   version           prints the current commit sha
 Options:
@@ -366,7 +382,8 @@ _targets() {
             print -l \
                 "claude:merges agents/claude/settings.json into ~/.claude/settings.json" \
                 "codex:merges agents/codex/config.toml into ~/.codex/config.toml" \
-                "orca:merges orca/settings.jsonc into Orca's profile db"
+                "orca:merges orca/settings.jsonc into Orca's profile db" \
+                "rex:writes pinned Rex.app preferences with defaults write"
             ;;
     esac
 }
@@ -423,7 +440,7 @@ _usage_cmd() {
 
     case $cmd in
         install) summary="installs all packages in order, or just the targets given" ;;
-        merge) summary="merges settings into claude, codex and orca, or just the targets given" ;;
+        merge) summary="merges settings into claude, codex, orca and rex, or just the targets given" ;;
     esac
 
     local -a entries=(${(f)"$(_targets "$cmd")"})
