@@ -50,7 +50,7 @@ AI configuration is managed via `agents/` and symlinked to tool-specific global 
 - `agents/AGENTS.md`: Shared global instructions, loaded by every tool on every project (e.g. "don't push without being asked"). Project-specific instructions still belong in that project's own `AGENTS.md`, not here.
 - `agents/personas`: Persona or subagent definitions.
 - `agents/skills`: Skill definitions and scripts. Vendored from upstream repos (see Vendored skills).
-- `agents/claude`: Claude Code-only files, symlinked into `~/.claude/` (except merged `settings.json`).
+- `agents/claude`: Claude Code-only files, symlinked into `~/.claude/` (except merged `settings.jsonc`).
 - `agents/codex/config.toml`: Codex plugin marketplaces and enabled plugins, merged into `~/.codex/config.toml` by `dot merge` via `yq` (repo wins) because Codex writes machine paths and trust hashes there.
 
 `.agents/skills` holds skills for working on this repo only, separate from `agents/skills` (global, linked by `dot link`). `.claude/skills` is a symlink to it so Claude Code finds them; it is force-added because the global gitignore excludes `.claude`.
@@ -67,9 +67,11 @@ Individual symlinks are used to allow personal, non-repo agents and skills to co
 
 Antigravity paths are carried over from Gemini CLI and unverified.
 
-`agents/claude/settings.json` is not symlinked directly — it's merged into `~/.claude/settings.json` via `jq` by `dot merge` (deep merge, repo wins on conflicts), so a live machine's local settings additions survive `dot merge`.
+Plugin marketplaces in `agents/claude/settings.jsonc` and `agents/codex/config.toml` are pinned with `ref`. Renovate's regexes need `"repo"` then `"ref"` (JSON), or `source = "https://github.com/<owner>/<repo>.git"` then `ref` (TOML); keep that key order and the `.git` suffix.
 
-Plugin marketplaces in `agents/claude/settings.json` and `agents/codex/config.toml` are pinned with `ref`. Renovate's regexes need `"repo"` then `"ref"` (JSON), or `source = "https://github.com/<owner>/<repo>.git"` then `ref` (TOML); keep that key order and the `.git` suffix.
+## Claude Code settings
+
+`agents/claude/settings.jsonc` is merged into `~/.claude/settings.json` by `dot merge`, and holds only non-default values. After a Claude Code upgrade, or to check for settings drift, run the `claude-settings` skill. It has the merge, defaults, and comparison details.
 
 ## Orca
 
@@ -102,7 +104,7 @@ Run the bats suite locally after any `dot` script change:
 bats tests/dot.bats
 ```
 
-The suite needs `zsh`, `jq`, `yq`, `sqlite3`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, `install`/`merge` targets, completions, and CI matrix drift apart, or if `agents/claude/settings.json` gains a `hooks` key, or a vendored skill isn't pinned to a commit in `agents/skills.json`, or a Codex marketplace lacks a `.git` GitHub source or a non-empty `ref`.
+The suite needs `zsh`, `jq`, `yq`, `sqlite3`, `node`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, `install`/`merge` targets, completions, and CI matrix drift apart, or if `agents/claude/settings.jsonc` gains a `hooks` key or its marketplace pins stop matching the Renovate regexes, or a vendored skill isn't pinned to a commit in `agents/skills.json`, or a Codex marketplace lacks a `.git` GitHub source or a non-empty `ref`.
 
 Run `actionlint` after changing anything under `.github/workflows`.
 
@@ -137,5 +139,5 @@ For agents, skills, or personas, edit `_link_agents` instead of `_link`.
 
 ## What not to change
 
-- Do not add a `hooks` key to `agents/claude/settings.json`; `_merge_claude_settings` replaces arrays
+- Do not add a `hooks` key to `agents/claude/settings.jsonc`; `_merge_claude_settings` replaces arrays
   wholesale, silently deleting any hooks installed locally in `~/.claude/settings.json`.

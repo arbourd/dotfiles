@@ -48,14 +48,14 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["agents/claude/settings.json"],
+      "managerFilePatterns": ["agents/claude/settings.jsonc"],
       "matchStrings": ["\"repo\": \"(?<depName>[^\"]+)\",\\s*\"ref\": \"(?<currentValue>[^\".]+\\.[^\"]+)\""],
       "datasourceTemplate": "github-tags"
     },
     {
       "customType": "regex",
       "description": "Claude marketplaces without releases, pinned to a commit",
-      "managerFilePatterns": ["agents/claude/settings.json"],
+      "managerFilePatterns": ["agents/claude/settings.jsonc"],
       "matchStrings": ["\"repo\": \"(?<depName>[^\"]+)\",\\s*\"ref\": \"(?<currentDigest>[0-9a-f]{40})\""],
       "packageNameTemplate": "https://github.com/{{{depName}}}",
       "currentValueTemplate": "main",
@@ -76,7 +76,7 @@
       "updateNotScheduled": false
     },
     {
-      "matchFileNames": ["agents/claude/settings.json", "agents/codex/config.toml"],
+      "matchFileNames": ["agents/claude/settings.jsonc", "agents/codex/config.toml"],
       "description": "git-refs SHA pins have no release timestamp, so don't let the age gate block them",
       "minimumReleaseAge": "7 days",
       "minimumReleaseAgeBehaviour": "timestamp-optional",

@@ -189,18 +189,24 @@ _clean_dir() {
 }
 
 # _merge_claude_settings
-# Merges agents/claude/settings.json into ~/.claude/settings.json.
+# Merges agents/claude/settings.jsonc into ~/.claude/settings.json.
 _merge_claude_settings() {
-    _require jq
-    _ensure ~/.claude/settings.json
-    [[ -s ~/.claude/settings.json ]] || print -r -- '{}' > ~/.claude/settings.json
+    _require sqlite3
+    _ensure ~/.claude/
 
+    # json() reads JSONC; CAST stops it reading the file as JSONB. A missing or blank live file counts as {}.
+    # json_patch (RFC 7396) deep-merges with repo winning, like _merge_orca_settings.
+    local live=${HOME//\'/\'\'}/.claude/settings.json repo=${DIR//\'/\'\'}/agents/claude/settings.jsonc
+    local merged
+    merged=$(sqlite3 :memory: "SELECT json_patch(
+        json(coalesce(nullif(trim(CAST(readfile('$live') AS TEXT), ' '||char(9,10,13)), ''), '{}')),
+        json(CAST(readfile('$repo') AS TEXT)))")
+    [[ -n $merged ]] || { _err "Error: claude settings merge produced nothing (settings.jsonc missing?)"; exit 1; }
     local tmp=$(mktemp)
-    jq -s '.[0] * .[1]' ~/.claude/settings.json "$DIR/agents/claude/settings.json" > "$tmp"
-    mv "$tmp" ~/.claude/settings.json
-    chmod 600 ~/.claude/settings.json
+    print -r -- "$merged" > "$tmp" && chmod 600 "$tmp" && mv "$tmp" ~/.claude/settings.json \
+        || { rm -f "$tmp"; return 1; }
 
-    _status merged "$DIR/agents/claude/settings.json → $HOME/.claude/settings.json"
+    _status merged "$DIR/agents/claude/settings.jsonc → $HOME/.claude/settings.json"
 }
 
 # _merge_codex_config
@@ -210,7 +216,7 @@ _merge_codex_config() {
     _ensure ~/.codex/config.toml
 
     local tmp=$(mktemp)
-    yq -p toml -o toml eval-all '. as $i ireduce({}; . * $i)' ~/.codex/config.toml "$DIR/agents/codex/config.toml" > "$tmp"
+    yq -p toml -o toml eval-all '. as $i ireduce({}; . * $i)' ~/.codex/config.toml "$DIR/agents/codex/config.toml" > "$tmp" || { rm -f "$tmp"; return 1; }
     mv "$tmp" ~/.codex/config.toml
     chmod 600 ~/.codex/config.toml
 
@@ -272,7 +278,7 @@ _link_agents() {
     local claude persona skill
     _ensure ~/.claude/
     for claude in "$DIR/agents/claude"/*(N); do
-        [[ "${claude:t}" == "settings.json" ]] && continue
+        [[ "${claude:t}" == "settings.jsonc" ]] && continue
         _symlink "$claude" ~/.claude
     done
 
@@ -380,7 +386,7 @@ _targets() {
             ;;
         merge)
             print -l \
-                "claude:merges agents/claude/settings.json into ~/.claude/settings.json" \
+                "claude:merges agents/claude/settings.jsonc into ~/.claude/settings.json" \
                 "codex:merges agents/codex/config.toml into ~/.codex/config.toml" \
                 "orca:merges orca/settings.jsonc into Orca's profile db" \
                 "rex:writes pinned Rex.app preferences with defaults write"
