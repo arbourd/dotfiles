@@ -1,37 +1,47 @@
+// source: https://code.claude.com/docs/en/settings-reference#settings-index
 {
+  // Default: unset.
   "enabledPlugins": {
     "agent-skills@addy-agent-skills": true,
     "claude-md-management@claude-plugins-official": true,
-    "go@go-skills": true,
-    "gopls-lsp@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true
+    "go@go-skills": true
   },
+  // Default: unset.
   "env": {
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "DISABLE_TELEMETRY": "1"
   },
+  // Default: unset.
   "extraKnownMarketplaces": {
     "addy-agent-skills": {
       "source": {
         "source": "github",
         "repo": "addyosmani/agent-skills",
         "ref": "0.6.15"
-      }
+      },
+      "autoUpdate": true
     },
     "go-skills": {
       "source": {
         "source": "github",
         "repo": "spf13/go-skills",
         "ref": "383c2f8916313b7f1260a6d15d92a468e4ecc89e"
-      }
+      },
+      "autoUpdate": true
     }
   },
+  // Default: "notify".
+  "feedbackDrafts": "off",
+  // Default: unset.
   "feedbackSurveyRate": 0,
+  // Default: true.
   "spinnerTipsEnabled": false,
+  // Default: unset.
   "statusLine": {
     "type": "command",
     "command": "zsh ~/.claude/statusline.sh",
-    "refreshInterval": 5000
+    "refreshInterval": 5
   },
-  "theme": "dark"
+  // Default: unset.
+  "tui": "fullscreen"
 }

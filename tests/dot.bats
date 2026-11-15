@@ -240,7 +240,7 @@ _assert_link() {
           "$FAKE_HOME/repo-mock/agents/personas/helper.md" \
           "$FAKE_HOME/repo-mock/agents/skills/skill-a/SKILL.md" \
           "$FAKE_HOME/repo-mock/agents/skills/skill-b/SKILL.md"
-    echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/settings.json"
+    echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
     mkdir -p "$FAKE_HOME/repo-mock/agents/codex"
     touch "$FAKE_HOME/repo-mock/agents/codex/config.toml"
 
@@ -268,7 +268,7 @@ _assert_link() {
 @test 'merge-claude-settings deep-merges over a live settings.json instead of symlinking it' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/repo-mock/agents/codex" "$FAKE_HOME/.claude"
     touch "$FAKE_HOME/repo-mock/agents/codex/config.toml"
-    cat > "$FAKE_HOME/repo-mock/agents/claude/settings.json" <<'JSON'
+    cat > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc" <<'JSON'
 {
   "theme": "dark",
   "editor": { "theme": "repo-theme" },
@@ -308,7 +308,7 @@ JSON
 @test 'link does not merge settings' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/repo-mock/agents/codex" "$FAKE_HOME/repo-mock/sh"
     touch "$FAKE_HOME/repo-mock/sh/.shrc"
-    echo '{"theme":"dark"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.json"
+    echo '{"theme":"dark"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
 
     zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _link" > /dev/null
 
@@ -318,7 +318,7 @@ JSON
 
 @test 'merge runs a single target and rejects unknown ones' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude"
-    echo '{"theme":"dark"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.json"
+    echo '{"theme":"dark"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
 
     zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge claude" > /dev/null
     [ -f "$FAKE_HOME/.claude/settings.json" ]
@@ -331,7 +331,7 @@ JSON
 
 @test 'merge-claude-settings creates settings.json when none exists' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude"
-    echo '{"effortLevel": "high"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.json"
+    echo '{"effortLevel": "high"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
 
     zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_claude_settings" > /dev/null
 
@@ -341,7 +341,7 @@ JSON
 
 @test 'merge-claude-settings handles an empty settings.json and sets 0600' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
-    echo '{"effortLevel": "high"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.json"
+    echo '{"effortLevel": "high"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
     : > "$FAKE_HOME/.claude/settings.json"
     chmod 644 "$FAKE_HOME/.claude/settings.json"
 
@@ -396,9 +396,129 @@ TOML
     [ "$status" -eq 0 ]
 }
 
-@test 'repo claude settings.json has no hooks key' {
-    run jq -e 'has("hooks") | not' "$DOTFILES/agents/claude/settings.json"
+# _jsonc_query <file> <expr>: evaluates <expr> with j bound to the file's JSONC, parsed by sqlite.
+_jsonc_query() {
+    sqlite3 :memory: "WITH f(j) AS (SELECT json(CAST(readfile('$1') AS TEXT))) SELECT $2 FROM f"
+}
+
+@test 'repo claude settings.jsonc has no hooks key' {
+    [ "$(_jsonc_query "$DOTFILES/agents/claude/settings.jsonc" "json_type(j, '\$.hooks') IS NULL")" = 1 ]
+}
+
+@test 'repo claude settings.jsonc is a valid JSONC object' {
+    [ "$(_jsonc_query "$DOTFILES/agents/claude/settings.jsonc" "json_type(j)")" = object ]
+}
+
+@test 'repo claude settings.jsonc marketplace pins still match the Renovate regexes' {
+    local file="$DOTFILES/agents/claude/settings.jsonc"
+    local pins=$(_jsonc_query "$file" "(SELECT count(*) FROM json_each(j, '\$.extraKnownMarketplaces'))")
+    [ "$pins" -gt 0 ]
+    # Every pin must match one of the configured regexes, run as Renovate does over the raw file.
+    run node -e '
+        const fs = require("fs");
+        const [renovate, file] = process.argv.slice(1);
+        const text = fs.readFileSync(file, "utf8");
+        const regexes = JSON.parse(fs.readFileSync(renovate, "utf8")).customManagers
+            .filter((m) => m.managerFilePatterns.includes("agents/claude/settings.jsonc"))
+            .flatMap((m) => m.matchStrings)
+            .map((r) => new RegExp(r, "g"));
+        const matchedRepos = regexes.flatMap((r) => [...text.matchAll(r)].map((m) => m.groups.depName));
+        console.log(new Set(matchedRepos).size);
+    ' "$DOTFILES/.github/renovate.json" "$file"
     [ "$status" -eq 0 ]
+    [ "$output" -eq "$pins" ]
+}
+
+@test 'merge-claude-settings strips comments without touching strings that look like comments' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
+    cat > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc" <<'JSONC'
+{
+  // line comment with "quotes" and a trailing comma,
+  "url": "https://example.com//path", // after a value
+  /* block
+     comment { "hooks": [] } */
+  "glob": "src/**/*.ts",
+  "escaped": "a \"// not\" comment \\",
+  "block": "/* not a comment */",
+  "nested": { /* inline */ "theme": "repo" }
+}
+JSONC
+    cat > "$FAKE_HOME/.claude/settings.json" <<'JSON'
+{
+  // a comment Claude Code tolerates in the live file
+  "local": "kept"
+}
+JSON
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_claude_settings"
+    [ "$status" -eq 0 ]
+
+    run jq -c . "$FAKE_HOME/.claude/settings.json"
+    [ "$output" = '{"local":"kept","url":"https://example.com//path","glob":"src/**/*.ts","escaped":"a \"// not\" comment \\","block":"/* not a comment */","nested":{"theme":"repo"}}' ]
+}
+
+@test 'merge-claude-settings treats a whitespace-only settings.json as empty' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
+    echo '{"effortLevel": "high"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
+    printf '  \n\n' > "$FAKE_HOME/.claude/settings.json"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_claude_settings"
+    [ "$status" -eq 0 ]
+    [ "$(jq -c . "$FAKE_HOME/.claude/settings.json")" = '{"effortLevel":"high"}' ]
+}
+
+@test 'merge-claude-settings replaces a symlinked settings.json instead of writing through it' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
+    echo '{"effortLevel": "high"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
+    echo '{"local": "kept"}' > "$FAKE_HOME/target.json"
+    ln -s "$FAKE_HOME/target.json" "$FAKE_HOME/.claude/settings.json"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_claude_settings"
+    [ "$status" -eq 0 ]
+    [ ! -L "$FAKE_HOME/.claude/settings.json" ]
+    [ "$(jq -c . "$FAKE_HOME/.claude/settings.json")" = '{"local":"kept","effortLevel":"high"}' ]
+    [ "$(cat "$FAKE_HOME/target.json")" = '{"local": "kept"}' ]
+}
+
+@test 'claude-settings compare.js reports nested live drift and tolerates an empty live file' {
+    local skill="$FAKE_HOME/repo/.agents/skills/claude-settings/scripts"
+    mkdir -p "$skill" "$FAKE_HOME/repo/agents/claude" "$FAKE_HOME/.claude"
+    cp "$DOTFILES/.agents/skills/claude-settings/scripts/compare.js" "$skill/"
+    printf '{\n  // c\n  "enabledPlugins": { "a@m": true },\n  "env": { "A": "1" }\n}\n' > "$FAKE_HOME/repo/agents/claude/settings.jsonc"
+    echo '{"enabledPlugins":{"a@m":true,"old@m":true},"env":{"A":"1","B":"2"},"hooks":{"x":1},"model":"m"}' > "$FAKE_HOME/.claude/settings.json"
+
+    run env HOME="$FAKE_HOME" node "$skill/compare.js"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *'enabledPlugins.old@m live=true'* ]]
+    [[ "$output" == *'env.B live="2"'* ]]
+    [[ "$output" == *'model live="m"'* ]]
+    [[ "$output" != *'hooks'* ]]
+    [[ "$output" != *'a@m'* ]]
+
+    : > "$FAKE_HOME/.claude/settings.json"
+    run env HOME="$FAKE_HOME" node "$skill/compare.js"
+    [ "$status" -eq 0 ]
+    [[ "$output" == *'enabledPlugins ours='* ]]
+
+    # a null deletes the key, so a missing live key counts as applied
+    printf '{ "constructor": null, "theme": null }\n' > "$FAKE_HOME/repo/agents/claude/settings.jsonc"
+    echo '{"theme":"dark","constructor":1}' > "$FAKE_HOME/.claude/settings.json"
+    run env HOME="$FAKE_HOME" node "$skill/compare.js"
+    [[ "$output" == *'theme ours=null live="dark"'* ]]
+    echo '{"toString":1}' > "$FAKE_HOME/.claude/settings.json"
+    run env HOME="$FAKE_HOME" node "$skill/compare.js"
+    [[ "$output" != *'theme'* ]]
+    [[ "$output" == *'toString live=1'* ]]
+}
+
+@test 'merge-claude-settings fails and leaves settings.json untouched on invalid JSONC' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
+    printf '{\n  /* unterminated\n  "theme": "dark"\n}\n' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
+    echo '{"local":"kept"}' > "$FAKE_HOME/.claude/settings.json"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_claude_settings"
+    [ "$status" -ne 0 ]
+    [ "$(cat "$FAKE_HOME/.claude/settings.json")" = '{"local":"kept"}' ]
 }
 
 @test '_remove_stale_link guards and removal' {
@@ -501,7 +621,7 @@ TOML
     local space_repo="$FAKE_HOME/path with spaces"
     mkdir -p "$space_repo/sh" "$space_repo/agents/claude" "$space_repo/agents/codex"
     touch "$space_repo/sh/.shrc" "$space_repo/agents/codex/config.toml"
-    echo '{}' > "$space_repo/agents/claude/settings.json"
+    echo '{}' > "$space_repo/agents/claude/settings.jsonc"
 
     zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$space_repo'; _link" > /dev/null
 
@@ -671,7 +791,7 @@ _orca_db() {
 }
 
 @test 'orca/settings.jsonc is a valid JSONC object' {
-    [ "$(sqlite3 :memory: "SELECT json_type(json(CAST(readfile('$DOTFILES/orca/settings.jsonc') AS TEXT)))")" = object ]
+    [ "$(_jsonc_query "$DOTFILES/orca/settings.jsonc" "json_type(j)")" = object ]
 }
 
 @test '_merge_orca_settings deletes top-level and nested keys the repo sets to null' {
