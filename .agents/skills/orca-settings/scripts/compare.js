@@ -1,5 +1,5 @@
 // Compares orca/settings.jsonc with Orca's defaults and its live profile db.
-// Usage: node orca/compare.js   (runs orca/defaults.js; read-only, fine while Orca runs)
+// Usage: node compare.js   (runs defaults.js; read-only, fine while Orca runs)
 
 const { execFileSync } = require('child_process');
 const os = require('os');
@@ -29,8 +29,8 @@ function loadLive() {
 
 function loadOurs() {
   // sqlite's json() parses the JSONC the same way `dot merge` does.
-  const file = path.join(__dirname, 'settings.jsonc').replaceAll("'", "''"); // double ' inside the SQL string literal
-  return JSON.parse(run('sqlite3', [':memory:', `SELECT json(readfile('${file}'))`]));
+  const file = path.join(__dirname, '../../../../orca/settings.jsonc').replaceAll("'", "''"); // double ' inside the SQL string literal
+  return JSON.parse(run('sqlite3', [':memory:', `SELECT json(CAST(readfile('${file}') AS TEXT))`]));
 }
 
 const isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);

@@ -34,7 +34,7 @@ agents      # global AI agent instructions, personas, and vendored skills (skill
 ghostty     # Ghostty terminal emulator config
 git         # global git config and gitignore
 gpg         # GPG agent config
-orca        # Orca CLI launcher and keybindings (symlinked), settings (merged into Orca's db), defaults.js (dumps Orca's defaults), compare.js (diffs settings, defaults, and the live db)
+orca        # Orca CLI launcher and keybindings (symlinked), settings (merged into Orca's db)
 rex         # Rex.app preferences script, run by merge
 sh          # shell config: fish (primary), bash, and zsh fallback
 ssh         # SSH client config
@@ -74,8 +74,6 @@ Plugin marketplaces in `agents/claude/settings.json` and `agents/codex/config.to
 ## Orca
 
 `orca/settings.jsonc` is merged into Orca's SQLite profile db by `dot merge`, and holds only non-default values. After every Orca upgrade (`brew upgrade --cask arbourd/tap/orca`), or to check for settings drift, run the `orca-settings` skill. It has the merge, defaults, and comparison details.
-
-`orca/compare.js` and `orca/defaults.js` are read-only and safe to run while Orca is open; only `dot merge` writes to the db.
 
 ## Vendored skills
 

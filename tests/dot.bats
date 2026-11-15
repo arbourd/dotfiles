@@ -671,7 +671,7 @@ _orca_db() {
 }
 
 @test 'orca/settings.jsonc is a valid JSONC object' {
-    [ "$(sqlite3 :memory: "SELECT json_type(json(readfile('$DOTFILES/orca/settings.jsonc')))")" = object ]
+    [ "$(sqlite3 :memory: "SELECT json_type(json(CAST(readfile('$DOTFILES/orca/settings.jsonc') AS TEXT)))")" = object ]
 }
 
 @test '_merge_orca_settings deletes top-level and nested keys the repo sets to null' {
@@ -696,12 +696,12 @@ JSON
     [ -f "$DOTFILES/.claude/skills/orca-settings/SKILL.md" ]
 }
 
-@test 'orca/defaults.js prints defaults from a given dir and leaves it in place' {
+@test 'orca-settings defaults.js prints defaults from a given dir and leaves it in place' {
     command -v node > /dev/null || skip "node is not installed"
     mkdir -p "$FAKE_HOME/asar/out/shared"
     echo "exports.getDefaultSettings = () => ({ theme: 'system' });" > "$FAKE_HOME/asar/out/shared/constants.js"
 
-    run node "$DOTFILES/orca/defaults.js" "$FAKE_HOME/asar"
+    run node "$DOTFILES/.agents/skills/orca-settings/scripts/defaults.js" "$FAKE_HOME/asar"
     [ "$status" -eq 0 ]
     [ "$(printf '%s' "$output" | jq -r .theme)" = system ]
     [ -f "$FAKE_HOME/asar/out/shared/constants.js" ]
