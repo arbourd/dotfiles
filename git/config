@@ -32,7 +32,7 @@
 [init]
 	defaultBranch = main
 [interactive]
-	diffFilter = riff --color-only --unchanged-style red-green
+	diffFilter = riff --color=on --no-pager --unchanged-style red-green
 [url "https://github.com/"]
 	insteadOf = http://github.com/
 	insteadOf = git://github.com/
