@@ -4,7 +4,6 @@
     "claude-md-management@claude-plugins-official": true,
     "go@go-skills": true,
     "gopls-lsp@claude-plugins-official": true,
-    "ponytail@ponytail": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "superpowers@superpowers-dev": true
   },
@@ -25,13 +24,6 @@
         "source": "github",
         "repo": "spf13/go-skills",
         "ref": "c6ea8841a542d3a6f953e8b9b0ad596229163c1c"
-      }
-    },
-    "ponytail": {
-      "source": {
-        "source": "github",
-        "repo": "DietrichGebert/ponytail",
-        "ref": "v5.3.3"
       }
     },
     "superpowers-dev": {
