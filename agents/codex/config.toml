@@ -2,6 +2,9 @@ approval_policy = "on-request"
 approvals_reviewer = "auto_review"
 sandbox_mode = "workspace-write"
 
+[tui]
+show_tooltips = false
+
 [marketplaces.agent-skills]
 source_type = "git"
 source = "https://github.com/addyosmani/agent-skills.git"
