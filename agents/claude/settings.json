@@ -4,8 +4,7 @@
     "claude-md-management@claude-plugins-official": true,
     "go@go-skills": true,
     "gopls-lsp@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true,
-    "superpowers@superpowers-dev": true
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "env": {
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
@@ -24,13 +23,6 @@
         "source": "github",
         "repo": "spf13/go-skills",
         "ref": "383c2f8916313b7f1260a6d15d92a468e4ecc89e"
-      }
-    },
-    "superpowers-dev": {
-      "source": {
-        "source": "github",
-        "repo": "obra/superpowers",
-        "ref": "v7.0.2"
       }
     }
   },

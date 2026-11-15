@@ -76,9 +76,8 @@ jobs:
       - if: ${{ matrix.command == 'install brew' && steps.brew.outputs.skip != 'true' }}
         name: Skip installs
         run: |
-          # Container and Supacode both require MacOS 26 to install
+          # Container requires MacOS 26 to install
           echo "HOMEBREW_BUNDLE_BREW_SKIP=container" >> "$GITHUB_ENV"
-          echo "HOMEBREW_BUNDLE_CASK_SKIP=supacode" >> "$GITHUB_ENV"
 
           # MAS installs do not work in CI
           mas_ids=$(cat Brewfile | grep -oE "[0-9]{9,}" | tr '\n' ' ')

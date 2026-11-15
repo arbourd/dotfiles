@@ -7,13 +7,5 @@ source_type = "git"
 source = "https://github.com/addyosmani/agent-skills.git"
 ref = "0.6.15"
 
-[marketplaces.superpowers-dev]
-source_type = "git"
-source = "https://github.com/obra/superpowers.git"
-ref = "v7.0.2"
-
 [plugins."agent-skills@agent-skills"]
-enabled = true
-
-[plugins."superpowers@superpowers-dev"]
 enabled = true
