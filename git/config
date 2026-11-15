@@ -5,7 +5,7 @@
 [core]
 	excludesfile = ~/.config/git/gitignore
 	editor = /opt/homebrew/bin/vim
-	pager = `brew --prefix git`/share/git-core/contrib/diff-highlight/diff-highlight | less
+	pager = riff --unchanged-style red-green
 	autocrlf = input
 [credential]
 	helper = osxkeychain
@@ -32,7 +32,7 @@
 [init]
 	defaultBranch = main
 [interactive]
-	diffFilter = `brew --prefix git`/share/git-core/contrib/diff-highlight/diff-highlight | less
+	diffFilter = riff --color-only --unchanged-style red-green
 [url "https://github.com/"]
 	insteadOf = http://github.com/
 	insteadOf = git://github.com/
