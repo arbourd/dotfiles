@@ -11,7 +11,7 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 | `help`              | Usage                                                                 |
 | `init`              | Clones to `$GETPATH/github.com/arbourd/dotfiles`, symlinks `dot` into `~/.local/bin` |
 | `link`              | Symlinks dotfiles into `~` and removes stale symlinks |
-| `merge [target...]`   | Merges Claude, Codex and Orca settings into their live configs, or only the targets given, in order (`claude`, `codex`, `orca`) |
+| `merge [target...]`   | Merges Claude, Codex, Orca and Rex settings into their live configs, or only the targets given, in order (`claude`, `codex`, `orca`, `rex`) |
 | `install [target...]` | brew + defaults + fisher + vim, in order, or only the targets given (`brew`, `defaults`, `fisher`, `vim`) |
 | `update`            | Pulls; prints short SHA (or old → new) as a GitHub link               |
 | `version`           | Current commit SHA                                                    |
@@ -35,6 +35,7 @@ ghostty     # Ghostty terminal emulator config
 git         # global git config and gitignore
 gpg         # GPG agent config
 orca        # Orca CLI launcher and keybindings (symlinked), settings (merged into Orca's db), defaults.js (dumps Orca's defaults), compare.js (diffs settings, defaults, and the live db)
+rex         # Rex.app preferences script, run by merge
 sh          # shell config: fish (primary), bash, and zsh fallback
 ssh         # SSH client config
 vim         # vimrc and vim-plug plugin list

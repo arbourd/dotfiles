@@ -19,7 +19,7 @@ _dot() {
 
     [[ $word -ge 2 ]] || return
     case $cmd in
-        merge) COMPREPLY=($(compgen -W 'claude codex orca' -- "$cur")) ;;
+        merge) COMPREPLY=($(compgen -W 'claude codex orca rex' -- "$cur")) ;;
         install) COMPREPLY=($(compgen -W 'brew defaults fisher vim' -- "$cur")) ;;
     esac
 }

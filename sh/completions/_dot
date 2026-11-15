@@ -8,7 +8,7 @@ _dot() {
         'help:Print usage information'
         'init:Clone dotfiles and symlink dot to ~/.local/bin'
         'link:Symlink dotfiles and remove stale symlinks'
-        'merge:Merge settings into Claude, Codex and Orca'
+        'merge:Merge settings into Claude, Codex, Orca and Rex'
         'install:Install all packages'
         'update:Update the dotfiles repository'
         'version:Print the current commit SHA'
@@ -31,7 +31,7 @@ _dot() {
 
             case $words[1] in
                 help) _describe 'command' commands ;;
-                merge) _values 'target' 'claude[Merge Claude settings]' 'codex[Merge Codex config]' 'orca[Merge Orca settings]' ;;
+                merge) _values 'target' 'claude[Merge Claude settings]' 'codex[Merge Codex config]' 'orca[Merge Orca settings]' 'rex[Merge Rex settings]' ;;
                 install) _values 'target' 'brew[Install Homebrew packages]' 'defaults[Install macOS defaults]' 'fisher[Install Fisher packages]' 'vim[Install Vim packages]' ;;
             esac
             ;;

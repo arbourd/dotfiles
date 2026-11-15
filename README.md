@@ -20,7 +20,7 @@ Automated environment as code.
         init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
         install [TARGET]  installs all packages (or any of: brew|defaults|fisher|vim)
         link              symlinks dotfiles and removes stale symlinks
-        merge [TARGET]    merges settings into claude, codex and orca (or any of: claude|codex|orca)
+        merge [TARGET]    merges settings into claude, codex, orca and rex (or any of: claude|codex|orca|rex)
         update            updates the dotfiles repository
         version           prints the current commit sha
       Options:
