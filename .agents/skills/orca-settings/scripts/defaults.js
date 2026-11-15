@@ -1,5 +1,5 @@
 // Prints Orca's built-in default settings as JSON, to diff against the profile db.
-// Usage: node orca/defaults.js [extracted app.asar dir]
+// Usage: node defaults.js [extracted app.asar dir]
 // With no dir, extracts /Applications/Orca.app's app.asar into a temp dir first, and removes it after.
 
 const { execFileSync } = require('child_process');
