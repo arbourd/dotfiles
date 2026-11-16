@@ -8,6 +8,7 @@
 // from the command palette or from `Zed` application menu.
 {
   // Appearance
+  "diff_view_style": "unified",
   "theme": {
     "mode": "dark",
     "light": "One Light",
