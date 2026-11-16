@@ -3,7 +3,7 @@
     "git-get": { "source": "github.com/arbourd/git-get/skills/git-get/SKILL.md@bb7a08e2983fc0b4b4e0223fd0dc7297f812e4e5", "version": "v1.2.1" },
     "git-open": { "source": "github.com/arbourd/git-open/skills/git-open/SKILL.md@0b39a433ccc13ebc199621a736b6b74b096c2873", "version": "v1.2.0" },
     "git-sync": { "source": "github.com/arbourd/git-sync/skills/git-sync/SKILL.md@a2fe34200bacce6785860e506af4053f808d0c6a", "version": "v1.0.0" },
-    "orca-cli": { "source": "github.com/stablyai/orca/skills/orca-cli/SKILL.md@980c0024741812bd7ae934c0c22144d9926a784e", "version": "v1.4.259" },
-    "orchestration": { "source": "github.com/stablyai/orca/skills/orchestration/SKILL.md@980c0024741812bd7ae934c0c22144d9926a784e", "version": "v1.4.259" }
+    "orca-cli": { "source": "github.com/stablyai/orca/skills/orca-cli/SKILL.md@92d4266cc4ffa945dbc1fa52850e62448d2dfc1c", "version": "v1.4.261" },
+    "orchestration": { "source": "github.com/stablyai/orca/skills/orchestration/SKILL.md@92d4266cc4ffa945dbc1fa52850e62448d2dfc1c", "version": "v1.4.261" }
   }
 }
