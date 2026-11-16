@@ -9,7 +9,7 @@ const { isDeepStrictEqual } = require('util');
 const DB_PATH = path.join(os.homedir(), 'Library/Application Support/orca/profiles/local-default/profile-state.db');
 
 // Orca-managed state, not preferences.
-const INTERNAL_KEY = /^(telemetry|pluginConsents|activeClaudeManagedAccountIds)|Seed$|Migrated|Dismissed|SyncOffer/;
+const INTERNAL_KEY = /^(telemetry|pluginConsents|activeClaudeManagedAccountIds|defaultRepoSelection|computerAwakeMode)|Seed$|Migrated|Dismissed|SyncOffer/;
 
 const run = (cmd, args) => execFileSync(cmd, args, { encoding: 'utf8', maxBuffer: 1 << 26 });
 
