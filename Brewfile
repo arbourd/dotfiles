@@ -98,7 +98,7 @@ cask 'protonvpn'
 cask 'rwts-pdfwriter'
 cask 'sabnzbd'
 cask 'signal'
-cask 'arbourd/tap/orca'
+cask 'stablyai/orca/orca', trusted: true
 cask 'tailscale-app'
 cask 'terraform-linters/tap/tflint', trusted: true
 cask 'utm'
