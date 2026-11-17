@@ -71,7 +71,7 @@ Plugin marketplaces in `agents/claude/settings.jsonc` and `agents/codex/config.t
 
 ## Claude Code settings
 
-`agents/claude/settings.jsonc` is merged into `~/.claude/settings.json` by `dot merge`, and holds only the settings we chose to set, each with its default noted. After a Claude Code upgrade, or to check for settings drift, run the `dot:claude-settings` skill. It has the merge, defaults, and comparison details.
+`agents/claude/settings.jsonc` is merged into `~/.claude/settings.json` by `dot merge`, and holds only the settings we chose to set, each with its default noted.
 
 ## Orca
 

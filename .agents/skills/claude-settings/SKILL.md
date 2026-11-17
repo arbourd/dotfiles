@@ -39,7 +39,7 @@ Audit `agents/claude/settings.jsonc` (the repo file) against `~/.claude/settings
    node .agents/skills/claude-settings/scripts/compare.js
    ```
 
-2. **Drift.** For each live key the repo file lacks, including entries nested under keys we set (a plugin the repo dropped stays enabled, since the merge never deletes), show a table of key, live value, default, and machine-specific. Add only the ones the user wants. Flag these as likely machine-specific and recommend leaving them out (`LOCAL_KEYS` in `compare.js` already hides keys that are never shared):
+2. **Drift.** For each live key the repo file lacks, including entries nested under keys we set (a plugin the repo dropped stays enabled, since the merge never deletes), show a table of key, live value, default, and machine-specific. Add only the ones the user wants. Flag these as likely machine-specific and recommend leaving them out (`compare.js` already hides `hooks` and `apiKeyHelper`):
    - hooks and status lines installed by other tools;
    - auth and endpoints: `apiKeyHelper`, `awsAuthRefresh`, `otelHeadersHelper`, and `env` entries such as `ANTHROPIC_BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, proxy and `CLAUDE_CODE_USE_*` variables;
    - model pins tied to an account or gateway: `model`, `ANTHROPIC_DEFAULT_*_MODEL`, `modelSettings`;

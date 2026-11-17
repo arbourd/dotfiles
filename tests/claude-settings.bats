@@ -2,13 +2,8 @@
 
 load helpers
 
-setup() {
-    common_setup
-}
-
-teardown() {
-    common_teardown
-}
+setup() { common_setup; }
+teardown() { common_teardown; }
 
 # _compare_setup <repo file contents> <live file contents> lays out a fake repo and live file for compare.js. Safe to call again mid-test.
 _compare_setup() {
@@ -79,7 +74,7 @@ _section() {
     : > "$FAKE_HOME/repo/agents/claude/settings.jsonc"
     _compare
     [ "$status" -eq 1 ]
-    [[ "$output" == *'settings.jsonc'* ]]
+    [[ "$output" == *'compare.js: settings.jsonc:'* ]]
     [[ "$output" != *'# Unapplied'* ]]
 
     _compare_setup '[1]' '{"theme":"dark"}'

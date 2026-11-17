@@ -196,6 +196,7 @@ _merge_claude_settings() {
 
     # json() reads JSONC; CAST stops it reading the file as JSONB. A missing or blank live file counts as {}.
     # json_patch (RFC 7396) deep-merges with repo winning, like _merge_orca_settings.
+    # .agents/skills/claude-settings/scripts/compare.js runs the same SQL; keep them in step.
     local live=${HOME//\'/\'\'}/.claude/settings.json repo=${DIR//\'/\'\'}/agents/claude/settings.jsonc
     local merged
     merged=$(sqlite3 :memory: "SELECT json_patch(

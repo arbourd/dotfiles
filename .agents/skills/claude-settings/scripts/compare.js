@@ -1,6 +1,9 @@
 // Compares agents/claude/settings.jsonc with ~/.claude/settings.json, using the merge `dot merge claude` runs.
 // Usage: node .agents/skills/claude-settings/scripts/compare.js   (read-only)
 
+// Machine-specific keys that never belong in the repo; Live drift hides them. Top-level only.
+const LOCAL_KEYS = new Set(['apiKeyHelper', 'hooks']);
+
 const { execFileSync } = require('child_process');
 const os = require('os');
 const path = require('path');
@@ -9,21 +12,18 @@ const { isDeepStrictEqual } = require('util');
 const REPO_PATH = path.join(__dirname, '../../../../agents/claude/settings.jsonc');
 const LIVE_PATH = path.join(os.homedir(), '.claude/settings.json');
 
-// Machine-specific or installed by other tools; never belongs in the repo. Matches top-level keys only.
-const LOCAL_KEYS = new Set(['hooks', 'apiKeyHelper']);
-
 const fail = (message) => {
   console.error(`compare.js: ${message}`);
   process.exit(1);
 };
 
-// The same SQL as _merge_claude_settings in dot. json() accepts JSONC and CAST stops it reading the file as JSONB.
-// A missing or blank live file counts as {}. The repo file gets no such fallback: dot aborts without it.
-const quote = (file) => file.replaceAll("'", "''"); // double ' inside the SQL string literal
+// Same SQL as _merge_claude_settings in dot: json() reads JSONC, CAST avoids JSONB.
+// A missing or blank live file is {}; a missing repo file aborts, as in dot.
+const quote = (file) => file.replaceAll("'", "''"); // escape ' for SQL
 const liveSql = `json(coalesce(nullif(trim(CAST(readfile('${quote(LIVE_PATH)}') AS TEXT), ' '||char(9,10,13)), ''), '{}'))`;
 const repoSql = `json(CAST(readfile('${quote(REPO_PATH)}') AS TEXT))`;
 
-// Runs a SELECT through sqlite3 and parses the JSON it prints. An empty result is a NULL, which dot treats as a failed merge.
+// Runs a SELECT through sqlite3 and parses the JSON it prints. Empty output is NULL, a failed merge in dot.
 const query = (select, what) => {
   let out;
   try {
@@ -32,7 +32,7 @@ const query = (select, what) => {
     fail(`${what}: ${error.stderr?.toString().trim() || error.message}`);
   }
   if (!out) fail(`${what} is missing, so dot merge would abort`);
-  return JSON.parse(out); // known limit: numbers JSON.parse can't tell apart (huge integers, 1 vs 1.0, 0 vs -0) look unchanged
+  return JSON.parse(out); // known limit: numbers JSON.parse can't tell apart (huge ints, 1 vs 1.0, 0 vs -0) look unchanged
 };
 
 const preview = (value) => {
@@ -43,20 +43,20 @@ const preview = (value) => {
 const isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 
 const ours = query(repoSql, 'settings.jsonc');
-// A repo file that isn't an object would replace the whole live file, since json_patch takes a non-object patch as the result.
+// json_patch returns a non-object patch as the result, so it would replace the whole live file.
 if (!isObject(ours)) fail('settings.jsonc must be a JSON object, or dot merge would replace the whole live file with it');
 
 const liveRaw = query(liveSql, '~/.claude/settings.json');
-// json_patch treats a non-object target as {}, so a live file that isn't an object is lost entirely.
+// json_patch treats a non-object target as {}, so that live file is lost entirely.
 const liveIsObject = isObject(liveRaw);
 const live = liveIsObject ? liveRaw : {};
-// What `dot merge claude` would write: json_patch (RFC 7396) with the repo file winning.
+// What `dot merge claude` writes: json_patch (RFC 7396), repo wins.
 const merged = query(`json_patch(${liveSql}, ${repoSql})`, 'merge result');
 
-// Own property only, so inherited names like constructor read as missing.
+// Own properties only, so inherited names like constructor read as missing.
 const own = (object, key) => (Object.hasOwn(object, key) ? object[key] : undefined);
 
-// Yields [dotted key, before, after] for each leaf where `after` differs from `before`, descending into objects.
+// Yields [dotted key, before, after] for each differing leaf.
 function* changes(before, after, parents = []) {
   for (const key of new Set([...Object.keys(before), ...Object.keys(after)])) {
     const keyPath = [...parents, key];
@@ -66,7 +66,7 @@ function* changes(before, after, parents = []) {
   }
 }
 
-// Yields [dotted key, value] for live entries settings.jsonc lacks, descending into objects both set.
+// Yields [dotted key, value] for live entries the repo file lacks.
 function* drift(live, ours, parents = []) {
   for (const [key, value] of Object.entries(live)) {
     const keyPath = [...parents, key];
@@ -75,8 +75,7 @@ function* drift(live, ours, parents = []) {
   }
 }
 
-// Whether replacing `before` with `after` loses live data, as opposed to just changing a scalar.
-// A missing value, a live null, and an empty object or array hold nothing to lose.
+// Whether replacing `before` with `after` loses live data. Missing, null and empty values hold nothing to lose.
 const isEmpty = (value) => (Array.isArray(value) ? value.length === 0 : isObject(value) && Object.keys(value).length === 0);
 const loses = (before, after) => {
   if (before === undefined || before === null || isEmpty(before)) return false;
@@ -87,7 +86,7 @@ const loses = (before, after) => {
 
 const all = [...changes(live, merged)];
 
-// Names the files read: REPO_PATH comes from this script's checkout, which may not be the one `dot` merges from.
+// REPO_PATH is this script's checkout, which may not be the one `dot` merges from.
 console.log(`# Comparing ${REPO_PATH} with ${LIVE_PATH.replace(os.homedir(), '~')}\n`);
 
 console.log('# Unapplied: what `dot merge claude` would change in ~/.claude/settings.json');
