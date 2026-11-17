@@ -1,8 +1,9 @@
 #!/usr/bin/env bats
 
+load helpers
+
 setup() {
-    DOTFILES="$(cd "$BATS_TEST_DIRNAME/.." && pwd)"
-    FAKE_HOME="$(mktemp -d)"
+    common_setup
 
     cat > "$FAKE_HOME/setup.zsh" <<SETUP
 source '${DOTFILES}/dot'
@@ -14,7 +15,7 @@ SETUP
 }
 
 teardown() {
-    rm -rf "$FAKE_HOME"
+    common_teardown
 }
 
 _perms() {
@@ -478,37 +479,6 @@ JSON
     [ ! -L "$FAKE_HOME/.claude/settings.json" ]
     [ "$(jq -c . "$FAKE_HOME/.claude/settings.json")" = '{"local":"kept","effortLevel":"high"}' ]
     [ "$(cat "$FAKE_HOME/target.json")" = '{"local": "kept"}' ]
-}
-
-@test 'claude-settings compare.js reports nested live drift and tolerates an empty live file' {
-    local skill="$FAKE_HOME/repo/.agents/skills/claude-settings/scripts"
-    mkdir -p "$skill" "$FAKE_HOME/repo/agents/claude" "$FAKE_HOME/.claude"
-    cp "$DOTFILES/.agents/skills/claude-settings/scripts/compare.js" "$skill/"
-    printf '{\n  // c\n  "enabledPlugins": { "a@m": true },\n  "env": { "A": "1" }\n}\n' > "$FAKE_HOME/repo/agents/claude/settings.jsonc"
-    echo '{"enabledPlugins":{"a@m":true,"old@m":true},"env":{"A":"1","B":"2"},"hooks":{"x":1},"model":"m"}' > "$FAKE_HOME/.claude/settings.json"
-
-    run env HOME="$FAKE_HOME" node "$skill/compare.js"
-    [ "$status" -eq 0 ]
-    [[ "$output" == *'enabledPlugins.old@m live=true'* ]]
-    [[ "$output" == *'env.B live="2"'* ]]
-    [[ "$output" == *'model live="m"'* ]]
-    [[ "$output" != *'hooks'* ]]
-    [[ "$output" != *'a@m'* ]]
-
-    : > "$FAKE_HOME/.claude/settings.json"
-    run env HOME="$FAKE_HOME" node "$skill/compare.js"
-    [ "$status" -eq 0 ]
-    [[ "$output" == *'enabledPlugins ours='* ]]
-
-    # a null deletes the key, so a missing live key counts as applied
-    printf '{ "constructor": null, "theme": null }\n' > "$FAKE_HOME/repo/agents/claude/settings.jsonc"
-    echo '{"theme":"dark","constructor":1}' > "$FAKE_HOME/.claude/settings.json"
-    run env HOME="$FAKE_HOME" node "$skill/compare.js"
-    [[ "$output" == *'theme ours=null live="dark"'* ]]
-    echo '{"toString":1}' > "$FAKE_HOME/.claude/settings.json"
-    run env HOME="$FAKE_HOME" node "$skill/compare.js"
-    [[ "$output" != *'theme'* ]]
-    [[ "$output" == *'toString live=1'* ]]
 }
 
 @test 'merge-claude-settings fails and leaves settings.json untouched on invalid JSONC' {

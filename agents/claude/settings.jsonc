@@ -53,6 +53,8 @@
     "command": "zsh ~/.claude/statusline.sh",
     "refreshInterval": 5
   },
+  // Default: "dark".
+  "theme": "dark",
   // Default: unset.
   "tui": "fullscreen"
 }

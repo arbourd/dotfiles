@@ -1,43 +1,69 @@
 ---
-name: claude-settings
-description: Use after upgrading Claude Code, or when asked to check, refresh, or audit agents/claude/settings.jsonc, Claude Code setting defaults, or settings drift in the dotfiles repo.
+name: dot:claude-settings
+description: Check Claude settings for live drift, bad merges, and unapplied changes.
+disable-model-invocation: true
 ---
 
-# claude-settings
+# dot:claude-settings
 
-`agents/claude/settings.jsonc` is merged into `~/.claude/settings.json` by `_merge_claude_settings` in `dot` (run by `dot merge`). It holds only non-default values, each with a `// Default: ...` comment. `scripts/compare.js` diffs it against the live file; checking defaults is done by reading the docs.
+Audit `agents/claude/settings.jsonc` (the repo file) against `~/.claude/settings.json` (the live file), which `dot merge` merges it into (`_merge_claude_settings` in `dot`). Three questions:
 
-## How the pieces fit
+1. **Drift:** is the live file holding settings that belong in the repo file?
+2. **Merge safety:** would merging the repo file delete or overwrite something it shouldn't?
+3. **Applied:** has the repo file been merged yet, or does `dot merge claude` need running?
 
-- **Live file:** `~/.claude/settings.json`. Claude Code writes to it too (`/config`, `/model`, `/plugin`), and other tools install `hooks` there.
-- **Merge:** `sqlite3`'s `json()` parses both files as JSONC, and `json_patch` (RFC 7396) merges them (repo wins). Objects merge key by key, and arrays and scalars replace wholesale. A `null` in the repo deletes the key from the live file, but removing a key from `settings.jsonc` leaves it in the live file. That's why `settings.jsonc` must never get a `hooks` key (a bats test enforces this).
-- **Defaults:** Claude Code ships no defaults file. Each key's section in https://code.claude.com/docs/en/settings-reference has a **Default** line, and the settings index marks deprecated keys.
+## Ground rules
+
+- Read-only until the user says otherwise. Applying means `dot merge claude`, which rewrites their live file, so the user runs it.
+- The repo is shared across machines. Never move secrets, tokens, or machine paths into it.
+- The repo file holds only settings we chose to set, each with a `// Default: ...` comment. A key equal to its default is deliberate; leave it.
+
+## Merge model
+
+- **Live file:** Claude Code writes to it too (`/config`, `/model`, `/plugin`), and other tools install `hooks` there.
+- **Merge:** `sqlite3`'s `json()` parses both files as JSONC and `json_patch` (RFC 7396) merges them, repo winning. Objects merge key by key. Arrays and scalars replace wholesale. A `null` in the repo deletes the live key, but removing a key from the repo leaves it live.
+- **Why `hooks` never goes in the repo file:** the merge would replace the live array and wipe hooks installed by other tools. A bats test enforces this.
+
+## Known limits
+
+`compare.js` reads sqlite's output with `JSON.parse`, so a change that doesn't survive that parse is invisible even though the merge rewrites it: integers beyond 2^53 (such as 20-digit IDs), `1` vs `1.0`, and `0` vs `-0`. Settings rarely hold such values. If one matters, compare the `json_patch` text in `sqlite3` directly. Duplicate keys in a file also collapse to the last one.
 
 ## Steps
 
-1. Run the comparison. It is read-only:
+1. Run the comparison. It runs the same `json_patch` as `dot merge claude`, without writing anything, and names the repo file it read (check it's the checkout `dot` merges from). It prints three sections:
+   - Unapplied: every change the merge would make, as live → merged.
+   - Live drift: live keys the repo file lacks.
+   - Merge risks: the Unapplied lines that lose live data.
 
    ```bash
    node .agents/skills/claude-settings/scripts/compare.js
    ```
 
-2. **Unapplied:** keys in `settings.jsonc` that the live file doesn't match yet. The user applies them in step 5.
-
-3. **Live drift:** keys in `~/.claude/settings.json` that `settings.jsonc` doesn't have, including entries nested inside keys we do set (a plugin under `enabledPlugins` that the repo dropped stays enabled, since the merge never deletes). Show them to the user as a table (key, live value, default from the docs, machine-specific?) and add only the ones they want.
-
-   The repo is shared across machines, so much of the drift belongs only to this one. Flag these as likely machine-specific and recommend leaving them out (`scripts/compare.js` already hides the ones in `LOCAL_KEYS`, which should only hold keys that are never shared):
+2. **Drift.** For each live key the repo file lacks, including entries nested under keys we set (a plugin the repo dropped stays enabled, since the merge never deletes), show a table of key, live value, default, and machine-specific. Add only the ones the user wants. Flag these as likely machine-specific and recommend leaving them out (`compare.js` already hides `hooks` and `apiKeyHelper`):
    - hooks and status lines installed by other tools;
-   - auth and endpoints: `apiKeyHelper`, `awsAuthRefresh`, `otelHeadersHelper`, and `env` entries such as `ANTHROPIC_BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, proxy and provider (`CLAUDE_CODE_USE_*`) variables;
+   - auth and endpoints: `apiKeyHelper`, `awsAuthRefresh`, `otelHeadersHelper`, and `env` entries such as `ANTHROPIC_BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, proxy and `CLAUDE_CODE_USE_*` variables;
    - model pins tied to an account or gateway: `model`, `ANTHROPIC_DEFAULT_*_MODEL`, `modelSettings`;
    - local paths, and anything holding a secret or token.
 
-   When unsure, ask. Never move secrets, tokens, or machine paths into the repo.
+   When unsure, ask. Comment each key you add `// Default: <value>.`, or `// Default: unset.`
 
-4. **Our keys:** for each key in `settings.jsonc`, read its section in the settings reference and:
-   - fix the `// Default: ...` comment if it doesn't match (`unset` for anything the docs call unset);
-   - drop the key if its value equals the default;
-   - if it's deprecated, removed, or renamed, switch to the replacement the docs name, after asking the user. Removing a key from the repo doesn't remove it from the live file, so tell the user to delete it there too.
+3. **Merge safety.** Every Merge risks line is live data the merge would lose: an array that drops live entries, a `null` that deletes a live key, or a type change that replaces an object or array. For each, ask whether the user wants the loss. Usually the fix is to add the live entries to the repo array, or drop the `null`. A risk under `hooks` is always a bug: remove the key (see Merge model).
 
-   Check nested keys the docs give their own default for (e.g. `autoUpdate` in `extraKnownMarketplaces`) the same way. Comment each new key `// Default: <value>.`.
+4. **Applied.** Each Unapplied line is a change `dot merge claude` hasn't made yet. If there are any, or if you edited the repo file, run `bats tests/`, then tell the user to run `dot merge claude` and rerun step 1. The audit is done when Unapplied and Merge risks are empty and the user has decided every drift line.
 
-5. Applying is the user's job, since it rewrites their live settings. If you edited `settings.jsonc`, run `bats tests/dot.bats`, then tell the user to run `dot merge claude` and rerun `scripts/compare.js` to confirm nothing is listed under Unapplied.
+5. **Docs check (optional, after a Claude Code upgrade).** For each repo key, read its **Default** line in https://code.claude.com/docs/en/settings-reference. Claude Code ships no defaults file.
+   - Fix a `// Default: ...` comment that doesn't match (`unset` for anything the docs call unset). Check nested keys the docs default separately, such as `autoUpdate` under `extraKnownMarketplaces`.
+   - If a key is deprecated, removed or renamed, ask before switching to the replacement the docs name. Removing a key from the repo doesn't remove it from the live file, so tell the user to delete it there too.
+
+   The page is about 450k characters and WebFetch returns 100k per call. Pass `offset` in 100000 steps and ask for every key you need in one prompt per chunk, instead of one fetch per key.
+
+## Report
+
+End with this, skipping empty sections:
+
+```
+Drift:       <n> live keys not in the repo (table above); recommend adding <list>
+Merge risks: <n> (what each would lose)
+Unapplied:   <n> changes; run `dot merge claude`, then rerun the comparison
+Docs check:  <fixed comments, deprecated keys, or "not run">
+```
