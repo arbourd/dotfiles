@@ -1,45 +1,65 @@
 ---
 name: git-open
-description: Open a repository, file, commit, or line in the browser with `git open`, or get its web URL. Use when the user asks to open, view, share, or link to the repo, a file, a commit, or a line (e.g. "link me to line 42 of main.go") on GitHub, GitLab, Bitbucket, or Codeberg (or a self-hosted provider), or wants the web URL for something in the current repo. Prints the URL by default (`-n`); launches a browser only when explicitly asked. Not for reading local files.
+description: Get the web URL for, or open in the browser, the current Git repo, a file, folder, commit, or line with `git open`. Use when the user asks for a link to code or to open, view, or share the repo, a file, a line, or a commit, e.g. "link me to line 42 of main.go" or "give me a permalink". Not for PRs, issues, CI, blame, or reading local files.
 ---
 
 # git-open
 
-`git open [options] [path|commit]` opens the current repo's web page in the browser, inferred from the remote. Supports GitHub, GitLab, Bitbucket, and Codeberg out of the box.
+`git open [options] [path|commit]` prints or opens the web page for the current repo, built from the remote URL (the default remote, or `-R <name>`).
 
-Add `-n` (`--no-browser`), before or after the path, to print only the URL to stdout instead of launching a browser. Add `-R <name>` (`--remote <name>`) to build the URL from a named remote instead of the default; an unknown remote errors with `no such remote`. Always use `-n` when running it yourself. Omit it only when the user explicitly asked to open the page, then ask first.
+## Rules
+
+1. **Match the flag to the request.** If the user asks to open something in their browser ("open main.go in the browser"), run it without `-n`: that is what launches the browser, and it prints `Opening <url> in your browser.` For anything else, such as a link, a URL, or sharing, pass `-n` (`--no-browser`, before or after the path) and give them the printed URL. When it's unclear which they want, print with `-n` and offer to open it.
+2. **Give the user the printed URL as is.** Path prefixes and line anchors differ by provider (GitLab `/-/tree/main/a.go#L3-5`, Bitbucket `/src/main/a.go#lines-3:5`), so a hand-built or edited URL is likely wrong.
+3. **Run it inside the repo,** or run `git -C <dir> open` with the same arguments.
+
+## Recipes
+
+The flag follows the request:
 
 ```sh
-git open -n                  # repository root
-git open -n main.go          # file or folder
-git open -n 7605d91          # commit (lowercase hex SHA, 7-64 chars)
-git open -n -r v1.0.0        # root at a branch or tag (`-r <ref>` combines with a path; `--ref=v1.0.0` works)
-git open -n main.go:42       # line
-git open -n main.go:42-50    # line range
-git open -n -R fork main.go  # use remote `fork` (`-R <name>`; `--remote=fork` works)
-git -C ~/src/my-repo open -n # a repo other than the current directory
-git open -n -- -odd-name     # `--` makes later args paths, even if they start with `-`
-
-git open -n main.go:42
+git open -n main.go:42   # "link me to line 42 of main.go": print the URL
 # https://github.com/owner/repo/tree/feature-x/main.go#L42
+
+git open main.go         # "open main.go in the browser": launch it
 ```
 
-Use `git open -h` for usage (git intercepts `git open --help`) and `-v`/`--version` for the version. Unknown options and extra arguments exit 1 with `error: ...` on stderr.
+With no argument it targets the repo root, and a path may be a file or a folder. Other forms, shown without a flag (add `-n` to print the URL instead of opening the browser):
 
-## Behavior to know
+```sh
+git open main.go:42         # line; `main.go:42-50` for a range
+git open 7605d91            # commit
+git open -r main README.md  # link to main, for an unpushed branch; any branch or tag works
+git open -R fork main.go    # build the URL from remote `fork`
+git open -- -odd-name       # `--` makes later args paths, even with a leading `-`
+```
 
-- URLs use the current branch (the full SHA when HEAD is detached), so they aren't permalinks and 404 if the branch isn't pushed. For a stable link, pass a commit SHA, or `-r <ref>` to pick the ref for a path or the root. The ref is used literally (`origin/main` 404s) and isn't checked to exist.
-- A missing path, a path outside the repo, a path under a file, or `.` yields the current branch's tree URL (on GitHub `.../tree/<branch>`; other providers use a different prefix), not the repo root URL. Check the printed URL if the target matters. With `-r` a missing path is kept instead (it may exist at that ref), and `-r` can't be combined with a commit.
-- `:line` is dropped for directories, and ignored if a file literally named `main.go:42` exists.
-- Only a lowercase hex SHA is a commit, unless a file with that name exists. `HEAD`, branches, tags, and uppercase SHAs aren't commits and silently give the branch URL; use `-r` to open a branch or tag.
-- Local remotes aren't supported (`local remotes are not supported`), and an unknown host errors with `unable to find provider for: "<host>"`.
+**Stable link (permalink):** a plain path uses the current branch, so the link changes as the branch moves. Pin it to a commit with `-r`:
+
+```sh
+git open -n -r "$(git rev-parse HEAD)" main.go:42
+# https://github.com/owner/repo/tree/<full-sha>/main.go#L42
+```
+
+## Gotchas
+
+- **Ref:** the current branch, or the full SHA when HEAD is detached. `-r` replaces it and is used literally, so `origin/main` 404s; use `main`. `-r` can't be combined with a commit argument.
+- **Not validated:** URLs are built from local state and nothing is checked against the remote. They 404 if the branch or commit isn't pushed, or the path doesn't exist at that ref, and line numbers refer to the pushed file, so uncommitted edits can shift them.
+- **Paths:** relative to the current directory, or absolute. A path missing locally is kept, since it may exist at that ref. A path outside the repo, or `.` at the repo root, gives the tree URL of the ref (on GitHub `.../tree/<branch>`), not the repo root URL.
+- **`:line`:** ignored for directories, and ignored when a file literally named `main.go:42` exists.
+- **Commits:** only a lowercase hex SHA is a commit (it opens the commit page, not the file at that commit), unless a file with that name exists. `HEAD`, branch names, tags, and uppercase SHAs are treated as paths and give a URL that 404s (for example `.../tree/<branch>/HEAD`). Use `-r <ref>` for a branch or tag, and `git rev-parse` to turn `HEAD` into a SHA.
+- **Errors:** they print `error: <message>` and exit 1. `exit status 128` usually means no remote or no commits.
 
 ## Self-hosted providers
 
-Add a provider with git config (local repo config wins over global). `commitprefix` and `pathprefix` are required, or the provider is skipped. `lineformat` is optional: `%l` is a line number, at most two (start, end). More than two, or other verbs like `%v`, disable line anchors with a warning.
+An unknown host errors with `unable to find provider`. Add one with git config; `commitprefix` and `pathprefix` are required, `lineformat` is optional (`%l` is a line number). Suggest the commands to the user rather than changing their config:
 
 ```sh
 git config --global open.https://git.example.com.commitprefix commit
 git config --global open.https://git.example.com.pathprefix tree
 git config --global open.https://git.example.com.lineformat "L%l-L%l"
 ```
+
+## More
+
+`git open -h` prints usage; `git open --help` opens the man page.
