@@ -5,6 +5,7 @@
     "agent-skills@addy-agent-skills": true,
     "claude-md-management@claude-plugins-official": true,
     "go@go-skills": true,
+    "gopls-lsp@claude-plugins-official": true,
     "mattpocock-skills@mattpocock": true,
     "skill-creator@anthropic-plugin-directory": true
   },
