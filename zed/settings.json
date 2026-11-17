@@ -8,6 +8,11 @@
 // from the command palette or from `Zed` application menu.
 {
   // Appearance
+  "terminal": {
+    "shell": {
+      "program": "fish"
+    }
+  },
   "diff_view_style": "unified",
   "theme": {
     "mode": "dark",
@@ -52,6 +57,9 @@
     "model_parameters": [],
   },
   "agent_servers": {
+    "codex-acp": {
+      "type": "registry"
+    },
     "claude-acp": {
       "type": "registry",
       "default_config_options": {
