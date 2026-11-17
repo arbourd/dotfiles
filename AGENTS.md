@@ -71,7 +71,7 @@ Plugin marketplaces in `agents/claude/settings.jsonc` and `agents/codex/config.t
 
 ## Claude Code settings
 
-`agents/claude/settings.jsonc` is merged into `~/.claude/settings.json` by `dot merge`, and holds only non-default values. After a Claude Code upgrade, or to check for settings drift, run the `claude-settings` skill. It has the merge, defaults, and comparison details.
+`agents/claude/settings.jsonc` is merged into `~/.claude/settings.json` by `dot merge`, and holds only the settings we chose to set, each with its default noted. After a Claude Code upgrade, or to check for settings drift, run the `dot:claude-settings` skill. It has the merge, defaults, and comparison details.
 
 ## Orca
 
@@ -98,13 +98,13 @@ Packages are in `Brewfile`. Run with `HOMEBREW_BUNDLE_NO_LOCK=1`; the bundle is 
 
 ## Testing
 
-Run the bats suite locally after any `dot` script change:
+Run the bats suites locally after any `dot` script change:
 
 ```bash
-bats tests/dot.bats
+bats tests/
 ```
 
-The suite needs `zsh`, `jq`, `yq`, `sqlite3`, `node`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, `install`/`merge` targets, completions, and CI matrix drift apart, or if `agents/claude/settings.jsonc` gains a `hooks` key or its marketplace pins stop matching the Renovate regexes, or a vendored skill isn't pinned to a commit in `agents/skills.json`, or a Codex marketplace lacks a `.git` GitHub source or a non-empty `ref`.
+`tests/dot.bats` covers `dot` and the repo's config files. `tests/claude-settings.bats` covers the `dot:claude-settings` skill's `compare.js`, which is a repo-local script, not part of `dot`. The suites need `zsh`, `jq`, `yq`, `sqlite3`, `node`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, `install`/`merge` targets, completions, and CI matrix drift apart, or if `agents/claude/settings.jsonc` gains a `hooks` key or its marketplace pins stop matching the Renovate regexes, or a vendored skill isn't pinned to a commit in `agents/skills.json`, or a Codex marketplace lacks a `.git` GitHub source or a non-empty `ref`.
 
 Run `actionlint` after changing anything under `.github/workflows`.
 
