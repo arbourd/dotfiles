@@ -104,14 +104,14 @@ Run the bats suites locally after any `dot` script change:
 bats tests/
 ```
 
-`tests/dot.bats` covers `dot` and the repo's config files. `tests/claude-settings.bats` covers the `dot:claude-settings` skill's `compare.js`, which is a repo-local script, not part of `dot`. The suites need `zsh`, `jq`, `yq`, `sqlite3`, `node`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, `install`/`merge` targets, completions, and CI matrix drift apart, or if `agents/claude/settings.jsonc` gains a `hooks` key or its marketplace pins stop matching the Renovate regexes, or a vendored skill isn't pinned to a commit in `agents/skills.json`, or a Codex marketplace lacks a `.git` GitHub source or a non-empty `ref`.
+`tests/dot.bats` covers `dot` and the repo's config files. `tests/claude-settings.bats` covers the `dot:claude-settings` skill's `compare.js`, which is a repo-local script, not part of `dot`. The suites need `zsh`, `jq`, `yq`, `sqlite3`, `bun`, and `script` (tty tests run under a pty via `_tty`). It also fails if the `dot` command list, `install`/`merge` targets, completions, and CI matrix drift apart, or if `agents/claude/settings.jsonc` gains a `hooks` key or its marketplace pins stop matching the Renovate regexes, or a vendored skill isn't pinned to a commit in `agents/skills.json`, or a Codex marketplace lacks a `.git` GitHub source or a non-empty `ref`.
 
 Run `actionlint` after changing anything under `.github/workflows`.
 
-Validate `.github/renovate.json` after changing it:
+Validate `.github/renovate.json` after changing it. Leave off `--bun`: Renovate runs on Node because its native `re2` module crashes bun.
 
 ```bash
-npx --yes --package renovate -- renovate-config-validator --strict
+bunx --package renovate renovate-config-validator --strict
 ```
 
 ## Adding or removing a command

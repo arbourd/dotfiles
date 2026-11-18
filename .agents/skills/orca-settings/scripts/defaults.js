@@ -1,5 +1,5 @@
 // Prints Orca's built-in default settings as JSON, to diff against the profile db.
-// Usage: node defaults.js [extracted app.asar dir]
+// Usage: bun defaults.js [extracted app.asar dir]
 // With no dir, extracts /Applications/Orca.app's app.asar into a temp dir first, and removes it after.
 
 const { execFileSync } = require('child_process');
@@ -42,7 +42,7 @@ function rejectStub(key, value) {
 }
 
 function extractAsar(dir) {
-  execFileSync('npx', ['--yes', '@electron/asar', 'extract', ASAR_PATH, dir], {
+  execFileSync('bunx', ['--bun', '@electron/asar', 'extract', ASAR_PATH, dir], {
     stdio: ['ignore', 'ignore', 'inherit'],
   });
 }

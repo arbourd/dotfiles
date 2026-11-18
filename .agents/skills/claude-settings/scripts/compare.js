@@ -1,5 +1,5 @@
 // Compares agents/claude/settings.jsonc with ~/.claude/settings.json, using the merge `dot merge claude` runs.
-// Usage: node .agents/skills/claude-settings/scripts/compare.js   (read-only)
+// Usage: bun .agents/skills/claude-settings/scripts/compare.js   (read-only)
 
 // Machine-specific keys that never belong in the repo; Live drift hides them. Top-level only.
 const LOCAL_KEYS = new Set(['apiKeyHelper', 'hooks']);

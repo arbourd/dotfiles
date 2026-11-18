@@ -1,5 +1,5 @@
 // Compares orca/settings.jsonc with Orca's defaults and its live profile db.
-// Usage: node compare.js   (runs defaults.js; read-only, fine while Orca runs)
+// Usage: bun compare.js   (runs defaults.js; read-only, fine while Orca runs)
 
 const { execFileSync } = require('child_process');
 const os = require('os');
