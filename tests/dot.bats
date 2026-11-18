@@ -238,6 +238,7 @@ _assert_link() {
     touch "$FAKE_HOME/repo-mock/agents/AGENTS.md" \
           "$FAKE_HOME/repo-mock/agents/claude/CLAUDE.md" \
           "$FAKE_HOME/repo-mock/agents/claude/statusline.sh" \
+          "$FAKE_HOME/repo-mock/agents/claude/subagent-statusline.nu" \
           "$FAKE_HOME/repo-mock/agents/personas/helper.md" \
           "$FAKE_HOME/repo-mock/agents/skills/skill-a/SKILL.md" \
           "$FAKE_HOME/repo-mock/agents/skills/skill-b/SKILL.md"
@@ -248,6 +249,7 @@ _assert_link() {
     zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _link_agents" > /dev/null
 
     _assert_link "$FAKE_HOME/.claude/statusline.sh" "$FAKE_HOME/repo-mock/agents/claude/statusline.sh"
+    _assert_link "$FAKE_HOME/.claude/subagent-statusline.nu" "$FAKE_HOME/repo-mock/agents/claude/subagent-statusline.nu"
     _assert_link "$FAKE_HOME/.claude/CLAUDE.md" "$FAKE_HOME/repo-mock/agents/claude/CLAUDE.md"
 
     _assert_link "$FAKE_HOME/.claude/agents/helper.md" "$FAKE_HOME/repo-mock/agents/personas/helper.md"

@@ -53,6 +53,12 @@
     "command": "zsh ~/.claude/statusline.sh",
     "refreshInterval": 5
   },
+  // Default: unset. 
+  // Deprecated in favor of mods, but no mod render site covers agent-panel rows yet.
+  "subagentStatusLine": {
+    "type": "command",
+    "command": "nu --stdin -n ~/.claude/subagent-statusline.nu"
+  },
   // Default: "dark".
   "theme": "dark",
   // Default: unset.
