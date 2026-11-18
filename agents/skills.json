@@ -1,9 +1,28 @@
 {
   "skills": {
-    "git-get": { "source": "github.com/arbourd/git-get/skills/git-get/SKILL.md@bb7a08e2983fc0b4b4e0223fd0dc7297f812e4e5", "version": "v1.2.1" },
-    "git-open": { "source": "github.com/arbourd/git-open/skills/git-open/SKILL.md@fa99682f70fb5f18e625c3ec0cf3bb6949e22db0", "version": "v1.3.0" },
-    "git-sync": { "source": "github.com/arbourd/git-sync/skills/git-sync/SKILL.md@a2fe34200bacce6785860e506af4053f808d0c6a", "version": "v1.0.0" },
-    "orca-cli": { "source": "github.com/stablyai/orca/skills/orca-cli/SKILL.md@131f209f7703e21c9b4d933920abe766d0d12820", "version": "v1.4.263" },
-    "orchestration": { "source": "github.com/stablyai/orca/skills/orchestration/SKILL.md@131f209f7703e21c9b4d933920abe766d0d12820", "version": "v1.4.263" }
+    "git-get": {
+      "source": "github.com/arbourd/git-get/skills/git-get/SKILL.md@bb7a08e2983fc0b4b4e0223fd0dc7297f812e4e5",
+      "version": "v1.2.1"
+    },
+    "git-open": {
+      "source": "github.com/arbourd/git-open/skills/git-open/SKILL.md@fa99682f70fb5f18e625c3ec0cf3bb6949e22db0",
+      "version": "v1.3.0"
+    },
+    "git-sync": {
+      "source": "github.com/arbourd/git-sync/skills/git-sync/SKILL.md@a2fe34200bacce6785860e506af4053f808d0c6a",
+      "version": "v1.0.0"
+    },
+    "orca-cli": {
+      "source": "github.com/stablyai/orca/skills/orca-cli/SKILL.md@131f209f7703e21c9b4d933920abe766d0d12820",
+      "version": "v1.4.263"
+    },
+    "orchestration": {
+      "source": "github.com/stablyai/orca/skills/orchestration/SKILL.md@131f209f7703e21c9b4d933920abe766d0d12820",
+      "version": "v1.4.263"
+    },
+    "trash": {
+      "source": "github.com/arbourd/trash/skills/trash/SKILL.md@cd584f5b4c0f2486e0cb34fae8461b5255e819b8",
+      "version": "v0.4.0"
+    }
   }
 }
