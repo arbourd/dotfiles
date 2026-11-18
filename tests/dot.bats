@@ -1035,7 +1035,7 @@ JSON
     run "$DOTFILES/dot" install --help
     [ "$status" -eq 0 ]
     [[ "$output" == *"Usage: dot install [TARGET]"* ]]
-    [[ "$output" == *"brew"*"defaults"*"fisher"*"vim"* ]]
+    [[ "$output" == *"brew"*"defaults"*"fisher"*"numan"*"vim"* ]]
 
     run "$DOTFILES/dot" merge claude -h
     [ "$status" -eq 0 ]
@@ -1091,7 +1091,7 @@ _dot_stubbed() {
     local copy="$FAKE_HOME/dot-stubbed" fn
     {
         sed '/^# Only dispatch when executed/,$d' "$DOTFILES/dot"
-        for fn in _install_brew _install_defaults _install_fisher _install_vim _merge_claude_settings _merge_codex_config _merge_orca_settings _merge_rex_settings; do
+        for fn in _install_brew _install_defaults _install_fisher _install_numan _install_vim _merge_claude_settings _merge_codex_config _merge_orca_settings _merge_rex_settings; do
             echo "$fn() { echo ${fn#_}; }"
         done
         sed -n '/^# Only dispatch when executed/,$p' "$DOTFILES/dot"
@@ -1105,7 +1105,7 @@ _steps() {
 }
 
 @test 'dot install and merge run every step without a target, and the given ones with targets' {
-    [ "$(_steps install)" = "install_brew install_defaults install_fisher install_vim " ]
+    [ "$(_steps install)" = "install_brew install_defaults install_fisher install_numan install_vim " ]
     [ "$(_steps install vim)" = "install_vim " ]
     [ "$(_steps install vim brew)" = "install_vim install_brew " ]
 
@@ -1137,17 +1137,18 @@ _steps() {
     [[ "$output" != "brew"* ]]
 }
 
-@test '_install runs brew, defaults, fisher, vim in order' {
+@test '_install runs brew, defaults, fisher, numan, vim in order' {
     run zsh -c "
         source '$FAKE_HOME/setup.zsh'
         _install_brew() { echo brew; }
         _install_defaults() { echo defaults; }
         _install_fisher() { echo fisher; }
+        _install_numan() { echo numan; }
         _install_vim() { echo vim; }
         _install
     "
     [ "$status" -eq 0 ]
-    [ "$output" = $'brew\ndefaults\nfisher\nvim' ]
+    [ "$output" = $'brew\ndefaults\nfisher\nnuman\nvim' ]
 }
 
 @test '_install_defaults runs .macOS from the dotfiles dir' {
@@ -1201,4 +1202,70 @@ _steps() {
     for n in "$DOTFILES"/agents/skills/*/; do
         jq -e --arg n "$(basename "$n")" '.skills[$n]' "$src" > /dev/null
     done
+}
+
+@test '_install_numan inits, syncs, and installs each listed package, skipping comments' {
+    mkdir -p "$FAKE_HOME/repo"
+    printf '# c\n\nowner/a\n  # d\nowner/b@1.0\n' > "$FAKE_HOME/repo/Numanfile"
+    mkdir -p "$FAKE_HOME/bin" "$FAKE_HOME/root"
+    # a real init writes the config
+    printf '#!/bin/sh\necho "$@" >> "%s/numan_args"\n[ "$1" = init ] && touch "%s/root/config.toml"\nexit 0\n' "$FAKE_HOME" "$FAKE_HOME" > "$FAKE_HOME/bin/numan"
+    printf '#!/bin/sh\n' > "$FAKE_HOME/bin/nu"
+    chmod +x "$FAKE_HOME/bin/numan" "$FAKE_HOME/bin/nu"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo'; NUMAN_ROOT='$FAKE_HOME/root'; PATH='$FAKE_HOME/bin':\$PATH; _install_numan"
+    [ "$status" -eq 0 ]
+    [ "$(cat "$FAKE_HOME/numan_args")" = $'init\nregistry sync\ninstall owner/a\ninstall owner/b@1.0' ]
+}
+
+@test '_install_numan skips init on an existing root' {
+    mkdir -p "$FAKE_HOME/repo" "$FAKE_HOME/bin" "$FAKE_HOME/root"
+    : > "$FAKE_HOME/repo/Numanfile"
+    touch "$FAKE_HOME/root/config.toml"
+    printf '#!/bin/sh\necho "$@" >> "%s/numan_args"\nexit 0\n' "$FAKE_HOME" > "$FAKE_HOME/bin/numan"
+    printf '#!/bin/sh\n' > "$FAKE_HOME/bin/nu"
+    chmod +x "$FAKE_HOME/bin/numan" "$FAKE_HOME/bin/nu"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo'; NUMAN_ROOT='$FAKE_HOME/root'; PATH='$FAKE_HOME/bin':\$PATH; _install_numan"
+    [ "$status" -eq 0 ]
+    [ "$(cat "$FAKE_HOME/numan_args")" = $'registry sync' ]
+}
+
+@test '_install_numan points the official registry at the live URL' {
+    mkdir -p "$FAKE_HOME/repo" "$FAKE_HOME/bin" "$FAKE_HOME/root"
+    : > "$FAKE_HOME/repo/Numanfile"
+    printf '[registries.official]\nurl = "https://tonythethompson.github.io/numan-registry/index.json"\nenabled = true\n' > "$FAKE_HOME/root/config.toml"
+    printf '#!/bin/sh\nexit 0\n' > "$FAKE_HOME/bin/numan"
+    printf '#!/bin/sh\n' > "$FAKE_HOME/bin/nu"
+    chmod +x "$FAKE_HOME/bin/numan" "$FAKE_HOME/bin/nu"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo'; NUMAN_ROOT='$FAKE_HOME/root'; PATH='$FAKE_HOME/bin':\$PATH; _install_numan"
+    [ "$status" -eq 0 ]
+    [ "$(yq -p toml '.registries.official.url' "$FAKE_HOME/root/config.toml")" = "https://numan-cli.github.io/numan-registry/index.json" ]
+    [ "$(yq -p toml '.registries.official.enabled' "$FAKE_HOME/root/config.toml")" = "true" ]
+}
+
+@test '_install_numan fails and keeps the config when yq fails' {
+    mkdir -p "$FAKE_HOME/repo" "$FAKE_HOME/bin" "$FAKE_HOME/root"
+    : > "$FAKE_HOME/repo/Numanfile"
+    printf 'not = valid = toml\n' > "$FAKE_HOME/root/config.toml"
+    printf '#!/bin/sh\necho "$@" >> "%s/numan_args"\n' "$FAKE_HOME" > "$FAKE_HOME/bin/numan"
+    printf '#!/bin/sh\nexit 1\n' > "$FAKE_HOME/bin/yq"
+    printf '#!/bin/sh\n' > "$FAKE_HOME/bin/nu"
+    chmod +x "$FAKE_HOME/bin/numan" "$FAKE_HOME/bin/yq" "$FAKE_HOME/bin/nu"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo'; NUMAN_ROOT='$FAKE_HOME/root'; PATH='$FAKE_HOME/bin':\$PATH; _install_numan"
+    [ "$status" -ne 0 ]
+    [ "$(cat "$FAKE_HOME/root/config.toml")" = 'not = valid = toml' ]
+    [ ! -e "$FAKE_HOME/numan_args" ]
+}
+
+@test '_install_numan fails when nu is missing' {
+    mkdir -p "$FAKE_HOME/bin"
+    printf '#!/bin/sh\n' > "$FAKE_HOME/bin/numan"
+    chmod +x "$FAKE_HOME/bin/numan"
+
+    run zsh -c "source '$FAKE_HOME/setup.zsh'; PATH='$FAKE_HOME/bin:/usr/bin:/bin'; _install_numan"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"'nu' is required"* ]]
 }

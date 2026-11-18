@@ -12,7 +12,7 @@ Automated macOS environment as code. Dotfiles are symlinked into place; nothing 
 | `init`              | Clones to `$GETPATH/github.com/arbourd/dotfiles`, symlinks `dot` into `~/.local/bin` |
 | `link`              | Symlinks dotfiles into `~` and removes stale symlinks |
 | `merge [target...]`   | Merges Claude, Codex, Orca and Rex settings into their live configs, or only the targets given, in order (`claude`, `codex`, `orca`, `rex`) |
-| `install [target...]` | brew + defaults + fisher + vim, in order, or only the targets given (`brew`, `defaults`, `fisher`, `vim`) |
+| `install [target...]` | brew + defaults + fisher + numan + vim, in order, or only the targets given (`brew`, `defaults`, `fisher`, `numan`, `vim`) |
 | `update`            | Pulls; prints short SHA (or old → new) as a GitHub link               |
 | `version`           | Current commit SHA                                                    |
 
@@ -28,6 +28,7 @@ Install steps hide noisy external commands behind a `gum` spinner via `_spin`. P
 dot         # entry point — init/update/link/merge/install subcommands
 .macOS      # zsh script that applies macOS defaults write settings
 Brewfile    # Homebrew formulae, casks, and Mac App Store apps
+Numanfile   # Numan packages, installed by `dot install numan`
 .github     # CI and skills-vendoring workflows, Renovate config
 .agents     # this repo's own skills (not linked by dot); .claude/skills symlinks here
 agents      # global AI agent instructions, personas, and vendored skills (skills.json + vendor-skills)

@@ -48,6 +48,8 @@ brew 'make'
 brew 'mas'
 brew 'mkcert'
 brew 'node'
+brew 'numan-cli/numan/numan', trusted: true
+brew 'nushell'
 brew 'openssl'
 brew 'opentofu'
 brew 'parallel'
