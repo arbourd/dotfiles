@@ -18,7 +18,7 @@ description: Use after upgrading Orca, or when asked to check, refresh, or audit
 1. Run the comparison. It is read-only and safe while Orca runs. It prints three lists:
 
    ```bash
-   node .agents/skills/orca-settings/scripts/compare.js
+   bun .agents/skills/orca-settings/scripts/compare.js
    ```
 
 2. **Our keys:** every key in `settings.jsonc` with Orca's current default beside it. Check each `// Default: ...` comment in the file against that default and fix any mismatch; the script can't read comments. Act on the flags:

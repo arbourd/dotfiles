@@ -15,7 +15,7 @@ _compare_setup() {
 }
 
 _compare() {
-    run env HOME="$FAKE_HOME" node "$skill/compare.js"
+    run env HOME="$FAKE_HOME" bun "$skill/compare.js"
 }
 
 # _section <name> prints the lines under a section header of the last compare.js run, so tests can match a whole section.
@@ -54,7 +54,7 @@ _section() {
 
     _compare
     [ "$status" -eq 0 ]
-    # the output names the repo file it read (a suffix, since node resolves the macOS /var symlink)
+    # the output names the repo file it read (a suffix, since bun resolves the macOS /var symlink)
     [[ "$output" == '# Comparing '*'/repo/agents/claude/settings.jsonc with ~/.claude/settings.json'* ]]
     # a scalar overwrite, a live null and an array that only adds entries change live but lose nothing
     [[ "$output" == *'theme live="light" merged="dark"'* ]]

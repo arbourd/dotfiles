@@ -411,11 +411,12 @@ _jsonc_query() {
 }
 
 @test 'repo claude settings.jsonc marketplace pins still match the Renovate regexes' {
+    command -v bun > /dev/null || skip "bun is not installed"
     local file="$DOTFILES/agents/claude/settings.jsonc"
     local pins=$(_jsonc_query "$file" "(SELECT count(*) FROM json_each(j, '\$.extraKnownMarketplaces'))")
     [ "$pins" -gt 0 ]
     # Every pin must match one of the configured regexes, run as Renovate does over the raw file.
-    run node -e '
+    run bun -e '
         const fs = require("fs");
         const [renovate, file] = process.argv.slice(1);
         const text = fs.readFileSync(file, "utf8");
@@ -787,11 +788,11 @@ JSON
 }
 
 @test 'orca-settings defaults.js prints defaults from a given dir and leaves it in place' {
-    command -v node > /dev/null || skip "node is not installed"
+    command -v bun > /dev/null || skip "bun is not installed"
     mkdir -p "$FAKE_HOME/asar/out/shared"
     echo "exports.getDefaultSettings = () => ({ theme: 'system' });" > "$FAKE_HOME/asar/out/shared/constants.js"
 
-    run node "$DOTFILES/.agents/skills/orca-settings/scripts/defaults.js" "$FAKE_HOME/asar"
+    run bun "$DOTFILES/.agents/skills/orca-settings/scripts/defaults.js" "$FAKE_HOME/asar"
     [ "$status" -eq 0 ]
     [ "$(printf '%s' "$output" | jq -r .theme)" = system ]
     [ -f "$FAKE_HOME/asar/out/shared/constants.js" ]
