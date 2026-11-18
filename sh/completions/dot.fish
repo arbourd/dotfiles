@@ -23,4 +23,5 @@ complete -c dot -f -n "__fish_seen_subcommand_from merge; and not __fish_seen_su
 complete -c dot -f -n "__fish_seen_subcommand_from install; and not __fish_seen_subcommand_from brew"     -a brew     -d 'Install Homebrew packages'
 complete -c dot -f -n "__fish_seen_subcommand_from install; and not __fish_seen_subcommand_from defaults" -a defaults -d 'Install macOS defaults'
 complete -c dot -f -n "__fish_seen_subcommand_from install; and not __fish_seen_subcommand_from fisher"   -a fisher   -d 'Install Fisher packages'
+complete -c dot -f -n "__fish_seen_subcommand_from install; and not __fish_seen_subcommand_from numan"    -a numan    -d 'Install Numan packages'
 complete -c dot -f -n "__fish_seen_subcommand_from install; and not __fish_seen_subcommand_from vim"      -a vim      -d 'Install Vim packages'

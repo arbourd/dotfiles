@@ -38,6 +38,7 @@ jobs:
           - install brew
           - install defaults
           - install fisher
+          - install numan
           - install vim
           - link
           - merge
@@ -88,6 +89,10 @@ jobs:
       - if: ${{ matrix.command == 'install fisher' || matrix.command == 'install vim' }}
         name: Run dot link
         run: ./dot link
+
+      - if: ${{ matrix.command == 'install numan' }}
+        name: Install numan and nushell
+        run: brew install nushell numan-cli/numan/numan
 
       - if: ${{ !(matrix.command == 'install brew' && steps.brew.outputs.skip == 'true') }}
         run: ./dot ${{ matrix.command }}

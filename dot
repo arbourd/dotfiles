@@ -363,7 +363,7 @@ _usage() {
 Commands:
   help              prints this dialog
   init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
-  install [TARGET]  installs all packages (or any of: brew|defaults|fisher|vim)
+  install [TARGET]  installs all packages (or any of: brew|defaults|fisher|numan|vim)
   link              symlinks dotfiles and removes stale symlinks
   merge [TARGET]    merges settings into claude, codex, orca and rex (or any of: claude|codex|orca|rex)
   update            updates the dotfiles repository
@@ -383,6 +383,7 @@ _targets() {
                 "brew:installs homebrew packages" \
                 "defaults:installs macos defaults" \
                 "fisher:installs fisher packages" \
+                "numan:installs numan packages" \
                 "vim:installs vim packages"
             ;;
         merge)
@@ -642,6 +643,31 @@ _install_fisher() {
     _spin "fisher plugins" fish -c "curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/$version/functions/fisher.fish | source && fisher update"
 }
 
+# _install_numan
+# Sets up Numan and installs the packages in Numanfile.
+_install_numan() {
+    _require numan
+    _require nu
+    _require yq
+
+    _log "Numan"
+    local config=${NUMAN_ROOT:-~/Library/Application Support/numan}/config.toml
+    if [[ ! -e $config ]]; then
+        _spin "numan init" numan init
+    fi
+
+    local tmp
+    tmp=$(mktemp)
+    yq -p toml -o toml '.registries.official.url = "https://numan-cli.github.io/numan-registry/index.json"' "$config" > "$tmp" || { rm -f "$tmp"; return 1; }
+    mv "$tmp" "$config"
+    _spin "numan registry sync" numan registry sync
+
+    local pkg
+    for pkg in ${(f)"$(grep -v '^[[:space:]]*\(#\|$\)' "$DIR/Numanfile")"}; do
+        _spin "numan $pkg" numan install "$pkg"
+    done
+}
+
 # _install_vim
 # Installs vim-plug and updates all Vim plugins.
 _install_vim() {
@@ -663,13 +689,13 @@ _install_vim() {
     _spin "vim plugins" zsh -c 'log=$(mktemp); echo | echo | vim +PlugUpdate +PlugClean! +qall &>$log; rc=$?; (( rc || $1 )) && cat $log; rm -f $log; exit $rc' _ "$VERBOSE"
 }
 
-# _install_step <brew|defaults|fisher|vim>
+# _install_step <brew|defaults|fisher|numan|vim>
 _install_step() {
     "_install_$1"
 }
 
-# _install [brew|defaults|fisher|vim]...
-# Runs the given install steps in order, or all of them (brew, defaults, fisher, vim) without a target.
+# _install [brew|defaults|fisher|numan|vim]...
+# Runs the given install steps in order, or all of them (brew, defaults, fisher, numan, vim) without a target.
 _install() {
     _run install _install_step "$@"
 }

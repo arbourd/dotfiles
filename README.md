@@ -18,7 +18,7 @@ Automated environment as code.
       Commands:
         help              prints this dialog
         init              clones dotfiles to GETPATH (~/src) and symlinks dot to ~/.local/bin
-        install [TARGET]  installs all packages (or any of: brew|defaults|fisher|vim)
+        install [TARGET]  installs all packages (or any of: brew|defaults|fisher|numan|vim)
         link              symlinks dotfiles and removes stale symlinks
         merge [TARGET]    merges settings into claude, codex, orca and rex (or any of: claude|codex|orca|rex)
         update            updates the dotfiles repository

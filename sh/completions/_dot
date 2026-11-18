@@ -32,7 +32,7 @@ _dot() {
             case $words[1] in
                 help) _describe 'command' commands ;;
                 merge) _values 'target' 'claude[Merge Claude settings]' 'codex[Merge Codex config]' 'orca[Merge Orca settings]' 'rex[Merge Rex settings]' ;;
-                install) _values 'target' 'brew[Install Homebrew packages]' 'defaults[Install macOS defaults]' 'fisher[Install Fisher packages]' 'vim[Install Vim packages]' ;;
+                install) _values 'target' 'brew[Install Homebrew packages]' 'defaults[Install macOS defaults]' 'fisher[Install Fisher packages]' 'numan[Install Numan packages]' 'vim[Install Vim packages]' ;;
             esac
             ;;
     esac
