@@ -11,7 +11,7 @@ description: Use after upgrading Orca, or when asked to check, refresh, or audit
 
 - **Db:** `~/Library/Application Support/orca/profiles/local-default/profile-state.db`. Table `profile_state_documents`, row `domain='settings'`. `payload` is a JSON blob; `content_hash` is its SHA-256, which the merge recomputes.
 - **Merge:** `json_patch(payload, json(CAST(readfile(settings.jsonc) AS TEXT)))` (RFC 7396). The CAST matters: `readfile()` returns a BLOB, which SQLite 3.45+ first tries to read as JSONB. Objects merge key by key, `null` deletes a key, arrays replace wholesale. The merge is skipped while Orca is running, because Orca overwrites settings on quit, and when run from Orca's own terminal.
-- **Defaults:** `getDefaultSettings()` in `out/shared/constants.js` inside `/Applications/Orca.app/Contents/Resources/app.asar`. `scripts/defaults.js` extracts the asar to a temp dir, loads it, and stubs the npm modules the asar doesn't ship. It throws if a default depends on a stub, so a failure means the defaults need real modules and the script needs updating.
+- **Defaults:** `getDefaultSettings()` in `out/shared/orca-profiles/constants.js` inside `/Applications/Orca.app/Contents/Resources/app.asar`. `scripts/defaults.js` extracts the asar to a temp dir, loads it, and stubs the npm modules the asar doesn't ship. It throws if a default depends on a stub, so a failure means the defaults need real modules and the script needs updating.
 
 ## Steps
 
