@@ -31,34 +31,21 @@ const brew = (...args) => run(...args).split('\n').map((line) => line.trim()).fi
 // arbourd/tap/go and go are the same package for this comparison, so match on the last segment.
 const short = (name) => name.split('/').pop();
 
-// Maps each Brewfile entry to the canonical short name Homebrew installs it as, so aliases like kubectl for
-// kubernetes-cli match. Casks and formulae differ in their JSON keys.
-function canonical(flag, entries) {
-  if (!entries.length) return new Map();
-  let info;
-  try {
-    info = JSON.parse(run('info', '--json=v2', `--${flag}`, ...entries));
-  } catch (error) {
-    if (error instanceof SyntaxError) fail(`brew info --${flag}: unparseable output`);
-    throw error;
-  }
-  const items = (flag === 'cask' ? info.casks : info.formulae).map((item) =>
-    flag === 'cask'
-      ? { name: item.token, ids: [item.token, item.full_token, ...(item.old_tokens ?? [])] }
-      : { name: item.name, ids: [item.name, item.full_name, ...(item.aliases ?? []), ...(item.oldnames ?? [])] },
-  );
-  return new Map(entries.map((entry) => [entry, items.find((item) => item.ids.some((id) => id === entry || short(id) === short(entry)))?.name ?? short(entry)]));
-}
-
-function compare(flag, installedOnRequest) {
+function compare(flag, onRequestArgs) {
   const wanted = brew('bundle', 'list', `--${flag}`, `--file=${BREWFILE}`);
-  const names = canonical(flag, wanted);
-  const wantedShort = new Set(names.values());
-  const installed = brew(...installedOnRequest);
-  const installedShort = new Set(brew('list', `--${flag}`, '-1', '--full-name').map(short));
+  const wantedShort = new Set(wanted.map(short));
 
-  const extra = installed.filter((name) => !wantedShort.has(short(name)));
-  const missing = wanted.filter((name) => !installedShort.has(names.get(name)));
+  // Every name each installed package answers to: its name, full name and aliases, so kubectl matches kubernetes-cli.
+  const installed = JSON.parse(run('info', '--json=v2', '--installed'));
+  const ids = new Map(
+    (flag === 'cask' ? installed.casks : installed.formulae).map((item) => {
+      const names = flag === 'cask' ? [item.token, item.full_token, ...item.old_tokens] : [item.name, item.full_name, ...item.aliases, ...item.oldnames];
+      return [item.token ?? item.name, new Set(names.map(short))];
+    }),
+  );
+
+  const extra = brew(...onRequestArgs).filter((name) => ![...ids.get(short(name))].some((id) => wantedShort.has(id)));
+  const missing = wanted.filter((name) => ![...ids.values()].some((names) => names.has(short(name))));
   return { extra, missing };
 }
 

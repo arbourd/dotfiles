@@ -6,7 +6,7 @@ setup() { common_setup; }
 teardown() { common_teardown; }
 
 # _compare_setup <Brewfile-bundle-list-formula> <cask> <leaves> <installed-formula> <installed-cask> lays out a fake repo and a fake brew
-# whose output is the given newline-separated lists. The fake brew's `info` echoes each name back as its own canonical formula or cask.
+# answering from the given newline-separated lists. Its `info --installed` makes kubectl an alias of kubernetes-cli.
 _compare_setup() {
     skill="$FAKE_HOME/repo/.agents/skills/homebrew-drift/scripts"
     mkdir -p "$skill" "$FAKE_HOME/bin"
@@ -17,30 +17,33 @@ _compare_setup() {
     printf '%s\n' "$3" > "$FAKE_HOME/leaves"
     printf '%s\n' "$4" > "$FAKE_HOME/list-formula"
     printf '%s\n' "$5" > "$FAKE_HOME/list-cask"
-    cat > "$FAKE_HOME/bin/brew" <<SH
+    cat > "$FAKE_HOME/bin/brew" <<'SH'
 #!/bin/sh
 d="$FAKE_HOME"
-case "\$1 \$2" in
-    "bundle list") case "\$3" in --formula) cat "\$d/formula" ;; --cask) cat "\$d/cask" ;; esac ;;
-    "leaves --installed-on-request") cat "\$d/leaves" ;;
-    "list --formula") cat "\$d/list-formula" ;;
-    "list --cask") cat "\$d/list-cask" ;;
-    "info --json=v2") kind=\${3#--}; shift 3
-        if [ "\$kind" = cask ]; then
-            printf '{"casks":['; sep=; for n in "\$@"; do printf '%s{"token":"%s","full_token":"%s"}' "\$sep" "\${n##*/}" "\$n"; sep=,; done; printf ']}'
-        else
-            printf '{"formulae":['; sep=; for n in "\$@"; do
-                case "\$n" in kubectl) printf '%s{"name":"kubernetes-cli","full_name":"kubernetes-cli","aliases":["kubectl"]}' "\$sep" ;;
-                *) printf '%s{"name":"%s","full_name":"%s","aliases":[]}' "\$sep" "\${n##*/}" "\$n" ;; esac; sep=,; done; printf ']}'
-        fi ;;
-    *) echo "unexpected: \$*" >&2; exit 1 ;;
+case "$1 $2" in
+    "bundle list") case "$3" in --formula) cat "$d/formula" ;; --cask) cat "$d/cask" ;; esac ;;
+    "leaves --installed-on-request") cat "$d/leaves" ;;
+    "list --formula") cat "$d/list-formula" ;;
+    "list --cask") cat "$d/list-cask" ;;
+    "info --json=v2")
+        printf '{"formulae":['; sep=; while read -r n; do
+            [ -n "$n" ] || continue
+            case "$n" in kubernetes-cli) al='"kubectl"' ;; *) al= ;; esac
+            printf '%s{"name":"%s","full_name":"%s","aliases":[%s],"oldnames":[]}' "$sep" "${n##*/}" "$n" "$al"; sep=,
+        done < "$d/list-formula"
+        printf '],"casks":['; sep=; while read -r n; do
+            [ -n "$n" ] || continue
+            printf '%s{"token":"%s","full_token":"%s","old_tokens":[]}' "$sep" "${n##*/}" "$n"; sep=,
+        done < "$d/list-cask"
+        printf ']}' ;;
+    *) echo "unexpected: $*" >&2; exit 1 ;;
 esac
 SH
     chmod +x "$FAKE_HOME/bin/brew"
 }
 
 _compare() {
-    run env HOME="$FAKE_HOME" BREW="$FAKE_HOME/bin/brew" bun "$skill/compare.js"
+    run env FAKE_HOME="$FAKE_HOME" BREW="$FAKE_HOME/bin/brew" bun "$skill/compare.js"
 }
 
 # _section <name> prints the lines under a "## name" heading.
@@ -66,12 +69,18 @@ _section() {
     [ -z "$(_section 'Not installed')" ]
 }
 
+@test 'homebrew-drift compare.js treats a Brewfile entry brew has never heard of as not installed' {
+    _compare_setup $'git\nnot-a-real-tap/x/thing' 'slack' 'git' 'git' 'slack'
+
+    _compare
+    [ "$status" -eq 0 ]
+    [ -z "$(_section 'Not in Brewfile')" ]
+    [ "$(_section 'Not installed')" = 'formula not-a-real-tap/x/thing' ]
+}
+
 @test 'homebrew-drift compare.js errors when brew fails' {
     _compare_setup 'git' 'slack' 'git' 'git' 'slack'
-    printf '#!/bin/sh
-echo boom >&2
-exit 1
-' > "$FAKE_HOME/bin/brew"
+    printf '#!/bin/sh\necho boom >&2\nexit 1\n' > "$FAKE_HOME/bin/brew"
     _compare
     [ "$status" -eq 1 ]
     [[ "$output" == *'boom'* ]]
