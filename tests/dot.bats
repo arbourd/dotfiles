@@ -203,7 +203,6 @@ _assert_link() {
     _assert_link "$FAKE_HOME/.ssh/config" "$DOTFILES/ssh/config"
     _assert_link "$FAKE_HOME/.vim/vimrc" "$DOTFILES/vim/vimrc"
     _assert_link "$FAKE_HOME/.orca/keybindings.json" "$DOTFILES/orca/keybindings.json"
-    _assert_link "$FAKE_HOME/.local/bin/orca" "$DOTFILES/orca/orca"
     _assert_link "$FAKE_HOME/.config/zed/settings.json" "$DOTFILES/zed/settings.json"
 
     [ -d "$FAKE_HOME/.gnupg" ]

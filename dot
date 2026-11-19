@@ -584,9 +584,6 @@ _link() {
     _ensure ~/.orca/
     _symlink "$DIR/orca/keybindings.json" ~/.orca/keybindings.json
 
-    _ensure ~/.local/bin/
-    _symlink "$DIR/orca/orca" ~/.local/bin/orca
-
     # ssh
     _ensure ~/.ssh/
     _symlink "$DIR/ssh/config" ~/.ssh/config
