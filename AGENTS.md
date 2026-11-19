@@ -24,21 +24,21 @@ Wrap every external command in an install step in `_spin`, which hides its outpu
 
 ### Adding a dotfile
 
-1. Add the config file under an appropriately named directory.
-2. In `_link`, add an `_ensure` for its target directory if needed and a `_symlink` to its target path. For agents, skills, or personas, edit `_link_agents` instead.
-3. For a new target directory, add it to the `_clean_dir` list in `_clean` and to the `clean covers every directory it lists` test.
-4. Add any new package to `Brewfile`.
+1. In `_link`, add an `_ensure` for its target directory if needed and a `_symlink` to its target path. For agents, skills, or personas, edit `_link_agents` instead.
+2. For a new target directory, add it to the `_clean_dir` list in `_clean` and to the `clean covers every directory it lists` test.
+3. Add any new package to `Brewfile`.
 
 ## AI agents
 
 `agents/` is symlinked into each tool's global paths by `_link_agents`, one symlink per persona and skill so personal, non-repo agents and skills coexist in those directories. The `~/.gemini` paths (Antigravity) are carried over from Gemini CLI and unverified.
 
 - `agents/AGENTS.md`: global instructions loaded by every tool on every project. Project-specific instructions belong in that project's own `AGENTS.md`.
-- `agents/claude`: Claude Code-only files, symlinked into `~/.claude/`, except `settings.jsonc`.
+- `agents/claude`: Claude Code-only files, symlinked into `~/.claude/`, except `settings.jsonc` and `config.jsonc`.
 - `agents/claude/settings.jsonc`: merged into `~/.claude/settings.json` by `dot merge`. Holds only settings we chose, each with its default noted. Hooks stay local in `~/.claude/settings.json`: arrays replace wholesale on merge, so a repo `hooks` key would replace the installed hooks for every event it names.
+- `agents/claude/config.jsonc`: merged into `~/.claude.json` by the same `dot merge claude`, with the same rules. Claude Code reads global-config keys (`copyOnSelect`) only from that file, never `settings.json`.
 - `agents/codex/config.toml`: plugin marketplaces and enabled plugins, merged into `~/.codex/config.toml` by `dot merge` via `yq` (repo wins), since Codex writes machine paths and trust hashes there.
 
-Plugin marketplaces in both settings files are pinned with `ref`. Renovate's regexes (the `custom.regex` managers in `.github/renovate.json`) need `"repo"` then `"ref"` (JSON), or `source = "https://github.com/<owner>/<repo>.git"` then `ref` (TOML); keep that key order and the `.git` suffix.
+Plugin marketplaces in `settings.jsonc` and `codex/config.toml` are pinned with `ref`. Renovate's regexes (the `custom.regex` managers in `.github/renovate.json`) need `"repo"` then `"ref"` (JSON), or `source = "https://github.com/<owner>/<repo>.git"` then `ref` (TOML); keep that key order and the `.git` suffix.
 
 `.agents/skills` holds skills for working on this repo, not linked by `dot`. `.claude/skills` symlinks to it and is force-added because the global gitignore excludes `.claude`.
 
@@ -62,7 +62,7 @@ The `Brewfile` bundle is lock-free: run it with `HOMEBREW_BUNDLE_NO_LOCK=1`.
 
 ## Testing
 
-After any change, run `bats tests/` (needs `zsh`, `jq`, `yq`, `sqlite3`, `bun`, `script`); it covers `dot`, completions, CI, the settings and skills files, and the repo skills' scripts.
+After any change, run `bats tests/` (needs `zsh`, `jq`, `yq`, `sqlite3`, `bun`, `script`).
 
 After changing `.github/workflows`, run `actionlint`.
 

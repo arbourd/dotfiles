@@ -1,0 +1,7 @@
+// source: https://code.claude.com/docs/en/settings-reference#global-config-settings
+{
+  // Default: true.
+  "copyOnSelect": false,
+  // Default: true.
+  "leftArrowOpensAgents": false
+}
