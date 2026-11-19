@@ -188,26 +188,38 @@ _clean_dir() {
     (( removed )) || _status ok "none found"
 }
 
+# _json_patch <live file> <repo file>
+# Prints the repo file merged over the live one: json() reads JSONC, CAST stops it reading the file as JSONB,
+# and a missing or blank live file counts as {}. json_patch (RFC 7396) deep-merges with repo winning, like _merge_orca_settings.
+# .agents/skills/claude-settings-audit/scripts/compare.js runs the same SQL; keep them in step.
+_json_patch() {
+    local live=${1//\'/\'\'} repo=${2//\'/\'\'}
+    sqlite3 :memory: "SELECT json_patch(
+        json(coalesce(nullif(trim(CAST(readfile('$live') AS TEXT), ' '||char(9,10,13)), ''), '{}')),
+        json(CAST(readfile('$repo') AS TEXT)))"
+}
+
 # _merge_claude_settings
-# Merges agents/claude/settings.jsonc into ~/.claude/settings.json.
+# Merges agents/claude/settings.jsonc into ~/.claude/settings.json and agents/claude/config.jsonc into ~/.claude.json.
+# Claude Code reads global config keys only from ~/.claude.json, which it also writes itself.
 _merge_claude_settings() {
     _require sqlite3
     _ensure ~/.claude/
 
-    # json() reads JSONC; CAST stops it reading the file as JSONB. A missing or blank live file counts as {}.
-    # json_patch (RFC 7396) deep-merges with repo winning, like _merge_orca_settings.
-    # .agents/skills/claude-settings/scripts/compare.js runs the same SQL; keep them in step.
-    local live=${HOME//\'/\'\'}/.claude/settings.json repo=${DIR//\'/\'\'}/agents/claude/settings.jsonc
-    local merged
-    merged=$(sqlite3 :memory: "SELECT json_patch(
-        json(coalesce(nullif(trim(CAST(readfile('$live') AS TEXT), ' '||char(9,10,13)), ''), '{}')),
-        json(CAST(readfile('$repo') AS TEXT)))")
-    [[ -n $merged ]] || { _err "Error: claude settings merge produced nothing (settings.jsonc missing?)"; exit 1; }
-    local tmp=$(mktemp)
-    print -r -- "$merged" > "$tmp" && chmod 600 "$tmp" && mv "$tmp" ~/.claude/settings.json \
-        || { rm -f "$tmp"; return 1; }
+    local -a names=(settings.jsonc config.jsonc) lives=(~/.claude/settings.json ~/.claude.json) merged
+    local i tmp
+    # Merge both before writing either, so a missing or invalid file leaves both untouched.
+    for i in 1 2; do
+        merged[i]=$(_json_patch "${lives[i]}" "$DIR/agents/claude/${names[i]}")
+        [[ -n ${merged[i]} ]] || { _err "Error: claude merge produced nothing (${names[i]} missing?)"; exit 1; }
+    done
 
-    _status merged "$DIR/agents/claude/settings.jsonc → $HOME/.claude/settings.json"
+    for i in 1 2; do
+        tmp=$(mktemp)
+        print -r -- "${merged[i]}" > "$tmp" && chmod 600 "$tmp" && mv "$tmp" "${lives[i]}" \
+            || { rm -f "$tmp"; return 1; }
+        _status merged "$DIR/agents/claude/${names[i]} → ${lives[i]}"
+    done
 }
 
 # _merge_codex_config
@@ -279,7 +291,7 @@ _link_agents() {
     local claude persona skill
     _ensure ~/.claude/
     for claude in "$DIR/agents/claude"/*(N); do
-        [[ "${claude:t}" == "settings.jsonc" ]] && continue
+        [[ "${claude:t}" == (settings|config).jsonc ]] && continue
         _symlink "$claude" ~/.claude
     done
 
@@ -387,7 +399,7 @@ _targets() {
             ;;
         merge)
             print -l \
-                "claude:merges agents/claude/settings.jsonc into ~/.claude/settings.json" \
+                "claude:merges agents/claude/settings.jsonc into ~/.claude/settings.json and config.jsonc into ~/.claude.json" \
                 "codex:merges agents/codex/config.toml into ~/.codex/config.toml" \
                 "orca:merges orca/settings.jsonc into Orca's profile db" \
                 "rex:writes pinned Rex.app preferences with defaults write"

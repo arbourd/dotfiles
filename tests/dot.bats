@@ -268,6 +268,7 @@ _assert_link() {
 
 @test 'merge-claude-settings deep-merges over a live settings.json instead of symlinking it' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/repo-mock/agents/codex" "$FAKE_HOME/.claude"
+    echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/config.jsonc"
     touch "$FAKE_HOME/repo-mock/agents/codex/config.toml"
     cat > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc" <<'JSON'
 {
@@ -308,6 +309,7 @@ JSON
 
 @test 'link does not merge settings' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/repo-mock/agents/codex" "$FAKE_HOME/repo-mock/sh"
+    echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/config.jsonc"
     touch "$FAKE_HOME/repo-mock/sh/.shrc"
     echo '{"theme":"dark"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
 
@@ -319,6 +321,7 @@ JSON
 
 @test 'merge runs a single target and rejects unknown ones' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude"
+    echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/config.jsonc"
     echo '{"theme":"dark"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
 
     zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge claude" > /dev/null
@@ -332,6 +335,7 @@ JSON
 
 @test 'merge-claude-settings creates settings.json when none exists' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude"
+    echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/config.jsonc"
     echo '{"effortLevel": "high"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
 
     zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_claude_settings" > /dev/null
@@ -342,6 +346,7 @@ JSON
 
 @test 'merge-claude-settings handles an empty settings.json and sets 0600' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
+    echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/config.jsonc"
     echo '{"effortLevel": "high"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
     : > "$FAKE_HOME/.claude/settings.json"
     chmod 644 "$FAKE_HOME/.claude/settings.json"
@@ -351,6 +356,18 @@ JSON
     run jq -r '.effortLevel' "$FAKE_HOME/.claude/settings.json"
     [ "$output" = "high" ]
     [ "$(_perms "$FAKE_HOME/.claude/settings.json")" = "-rw-------" ]
+}
+
+@test 'merge-claude-settings merges config.jsonc into ~/.claude.json and keeps app state' {
+    mkdir -p "$FAKE_HOME/repo-mock/agents/claude"
+    echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
+    echo '{"copyOnSelect": false}' > "$FAKE_HOME/repo-mock/agents/claude/config.jsonc"
+    echo '{"copyOnSelect": true, "numStartups": 5, "projects": {"/x": {"a": 1}}}' > "$FAKE_HOME/.claude.json"
+
+    zsh -c "source '$FAKE_HOME/setup.zsh'; DIR='$FAKE_HOME/repo-mock'; _merge_claude_settings" > /dev/null
+
+    [ "$(jq -c '[.copyOnSelect, .numStartups, .projects."/x".a]' "$FAKE_HOME/.claude.json")" = '[false,5,1]' ]
+    [ "$(_perms "$FAKE_HOME/.claude.json")" = "-rw-------" ]
 }
 
 @test 'merge-codex-config keeps existing keys and layers the repo tables on top' {
@@ -433,6 +450,7 @@ _jsonc_query() {
 
 @test 'merge-claude-settings strips comments without touching strings that look like comments' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
+    echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/config.jsonc"
     cat > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc" <<'JSONC'
 {
   // line comment with "quotes" and a trailing comma,
@@ -461,6 +479,7 @@ JSON
 
 @test 'merge-claude-settings treats a whitespace-only settings.json as empty' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
+    echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/config.jsonc"
     echo '{"effortLevel": "high"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
     printf '  \n\n' > "$FAKE_HOME/.claude/settings.json"
 
@@ -471,6 +490,7 @@ JSON
 
 @test 'merge-claude-settings replaces a symlinked settings.json instead of writing through it' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
+    echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/config.jsonc"
     echo '{"effortLevel": "high"}' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
     echo '{"local": "kept"}' > "$FAKE_HOME/target.json"
     ln -s "$FAKE_HOME/target.json" "$FAKE_HOME/.claude/settings.json"
@@ -484,6 +504,7 @@ JSON
 
 @test 'merge-claude-settings fails and leaves settings.json untouched on invalid JSONC' {
     mkdir -p "$FAKE_HOME/repo-mock/agents/claude" "$FAKE_HOME/.claude"
+    echo '{}' > "$FAKE_HOME/repo-mock/agents/claude/config.jsonc"
     printf '{\n  /* unterminated\n  "theme": "dark"\n}\n' > "$FAKE_HOME/repo-mock/agents/claude/settings.jsonc"
     echo '{"local":"kept"}' > "$FAKE_HOME/.claude/settings.json"
 
