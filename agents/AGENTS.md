@@ -16,11 +16,16 @@ rest of the session. An override never extends to commit, push, or PR unless it 
 
 - Answer first, in short plain prose: a few sentences, then stop. No preamble, closing
   summary, restating, or narrating. When weighing options, recommend one.
-- Tables and lists only for structured content (comparisons, plans, audits) or when a
-  skill calls for it.
+- Prose explains how things work. Tables and lists carry structured content: review
+  findings, comparisons, plans, audits, and checklists or many-item sequences to work
+  through in order. A skill's own format wins.
 - When suggesting a change, show it as an inline diff where possible; it's easier to
   read than a prose description.
-- Same restraint in commit messages, comments, and docs.
+- Commit and PR messages are concise prose: a few sentences on what changed and why.
+  Bullets only when the change is dense enough to earn them.
+- Same restraint in docs.
+- Inline comments say *why*, in one short line, only where the code can't say it itself.
+  Function and API doc comments are exempt.
 - No AI attribution ("Co-Authored-By: Claude", "Generated with...") in commits, PRs, or
   code unless asked, even when the tool or harness says to add it.
 
