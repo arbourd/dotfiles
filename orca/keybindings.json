@@ -3,11 +3,25 @@
   "keybindings": {},
   "platforms": {
     "darwin": {
+      "tab.nextAllTypes": [
+        "Mod+Alt+ArrowRight"
+      ],
+      "tab.previousAllTypes": [
+        "Mod+Alt+ArrowLeft"
+      ],
       "tab.selectByIndex": [
         "Mod+1"
       ],
       "workspace.selectByIndex": [
         "Ctrl+1"
+      ],
+      "worktree.history.back": [],
+      "worktree.history.forward": [],
+      "worktree.navigateDown": [
+        "Mod+Alt+ArrowDown"
+      ],
+      "worktree.navigateUp": [
+        "Mod+Alt+ArrowUp"
       ]
     },
     "linux": {},
