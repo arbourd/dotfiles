@@ -48,7 +48,7 @@ function extractAsar(dir) {
 }
 
 function printDefaults(dir) {
-  const { getDefaultSettings } = require(path.resolve(dir, 'out/shared/constants.js'));
+  const { getDefaultSettings } = require(path.resolve(dir, 'out/shared/orca-profiles/constants.js'));
   console.log(JSON.stringify(getDefaultSettings(os.homedir()), rejectStub, 2));
 }
 

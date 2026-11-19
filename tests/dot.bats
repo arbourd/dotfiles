@@ -789,13 +789,13 @@ JSON
 
 @test 'orca-settings defaults.js prints defaults from a given dir and leaves it in place' {
     command -v bun > /dev/null || skip "bun is not installed"
-    mkdir -p "$FAKE_HOME/asar/out/shared"
-    echo "exports.getDefaultSettings = () => ({ theme: 'system' });" > "$FAKE_HOME/asar/out/shared/constants.js"
+    mkdir -p "$FAKE_HOME/asar/out/shared/orca-profiles"
+    echo "exports.getDefaultSettings = () => ({ theme: 'system' });" > "$FAKE_HOME/asar/out/shared/orca-profiles/constants.js"
 
     run bun "$DOTFILES/.agents/skills/orca-settings/scripts/defaults.js" "$FAKE_HOME/asar"
     [ "$status" -eq 0 ]
     [ "$(printf '%s' "$output" | jq -r .theme)" = system ]
-    [ -f "$FAKE_HOME/asar/out/shared/constants.js" ]
+    [ -f "$FAKE_HOME/asar/out/shared/orca-profiles/constants.js" ]
 }
 
 @test '_status prints plain kind and detail when not a tty' {
