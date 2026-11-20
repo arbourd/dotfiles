@@ -53,7 +53,7 @@
   // Default: unset.
   "statusLine": {
     "type": "command",
-    "command": "zsh ~/.claude/statusline.sh",
+    "command": "nu --stdin ~/.claude/statusline.nu",
     "refreshInterval": 5
   },
   // Default: "dark".
