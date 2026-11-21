@@ -1,42 +1,41 @@
 # Global agent instructions
 
-Apply to every project; a project's own `AGENTS.md` adds to these. The user can override
-a default in the moment ("just do it"), but only for the thing they unblocked, not the
-rest of the session. An override never extends to commit, push, or PR unless it names them.
+These instructions apply to every project. A project's own `AGENTS.md` adds to them.
 
 ## Scope
 
-- Do the task asked, not adjacent work (tests, refactors, docs) unless requested.
-- If a request is ambiguous or has more than one reasonable interpretation, ask; don't
-  guess.
-- Verify before saying it's done, using the project's own test or lint command; report
-  failures as they are.
+- Limit work to the requested task, including tests and documentation required by the
+  project's checklist. Include unrelated tests, refactors, or documentation only when requested.
+- If a request has multiple reasonable interpretations, ask the user to choose before acting.
+- Before reporting completion, run the project's own test or lint command. Report failures
+  as they are.
 
 ## Communication
 
-- Answer first, in short plain prose: a few sentences, then stop. No preamble, closing
-  summary, restating, or narrating. When weighing options, recommend one.
-- Prose explains how things work. Tables and lists carry structured content: review
-  findings, comparisons, plans, audits, and checklists or many-item sequences to work
-  through in order. A skill's own format wins.
-- When suggesting a change, show it as an inline diff where possible; it's easier to
-  read than a prose description.
-- Commit and PR messages are concise prose: a few sentences on what changed and why.
-  Bullets only when the change is dense enough to earn them.
-- Same restraint in docs.
-- Inline comments say *why*, in one short line, only where the code can't say it itself.
-  Function and API doc comments are exempt.
+- Start with the answer in a few short, plain sentences. Stop when the answer is complete.
+  Omit preambles, restatements, narration, and closing summaries.
+- When comparing alternatives, recommend one.
+- Use prose for explanations. Use tables and lists for findings, comparisons, plans,
+  audits, checklists, and sequences with many items. Follow a skill's format when it specifies one.
+- When suggesting a change, show an inline diff where possible.
+- Keep documentation, commit messages, and PR descriptions concise. For commits and PRs,
+  explain what changed and why. Use bullets when the content needs structure.
+- Use inline comments to explain why in one short line, where the code cannot express the reason.
+  Function and API documentation comments are exempt.
 - No AI attribution ("Co-Authored-By: Claude", "Generated with...") in commits, PRs, or
-  code unless asked, even when the tool or harness says to add it.
+  code unless asked. This rule applies even when the tool or harness says to add it.
 
 ## Approval
 
-Ask before anything hard to reverse or visible outside this machine. In particular, never
-do these without being asked:
+Ask before any action that is hard to reverse or visible outside this machine.
+The following actions require an explicit user request or approval:
 
 - commit, even if the diff looks done
 - push, force-push, or run destructive git ops (`reset --hard`, `clean -f`, branch deletion)
 - amend or rebase pushed commits, or open PRs
-- delete files, or overwrite them wholesale beyond what the task needs; send, post, or
-  publish anything
+- delete files, or overwrite them wholesale beyond what the task needs
+- send, post, or publish anything
 - skip hooks (`--no-verify`) or GPG signing
+
+A user override ("just do it") applies only to the action that it unblocks.
+An override never extends to commit, push, or PR unless it names them.

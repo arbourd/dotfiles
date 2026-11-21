@@ -1,74 +1,91 @@
 # AGENTS.md
 
-Automated macOS environment as code. Dotfiles are symlinked into place, never copied; config an app rewrites itself is merged in by `dot merge` instead (a new `merge` target).
+This repository automates a macOS environment. Symlink dotfiles into place. For configuration that an app rewrites, add a `dot merge` target.
 
 ## dot
 
-`dot` (zsh, for macOS compatibility) is the single entry point; `./dot help` lists its commands and `install`/`merge` targets. On a new machine run `init` → `link` → `install` → `merge`: install steps (fisher, vim) read config that `link` puts in place, and `merge` needs `yq` and the apps `install` provides.
+Use `dot` as the single entry point. Keep it compatible with macOS zsh. For commands and targets, read `./dot help`.
+
+For a new machine, follow Installation in `README.md`. Keep the order `init` → `link` → `install` → `merge`. Installation reads linked configuration, and merging needs installed tools and apps.
 
 ### Adding, renaming, or removing a command
 
-Update all five in the same change:
+Update all five locations in the same change:
 
 1. `dot`: `_usage()` and the `case` statement
 2. `README.md`: usage block in Installation
 3. `.github/workflows/ci.yml`: `matrix.command` list
-4. `tests/dot_test.nu`: the command's test(s)
-5. `sh/completions/`: `dot.fish`, `dot.bash`, and `_dot` command lists (and `-h`/`-v` flags)
+4. `tests/dot_test.nu`: the command's tests
+5. `sh/completions/dot.fish`, `dot.bash`, and `_dot`: command lists and `-h`/`-v` flags
 
-A test checks `dot`, completions, and CI agree. Nothing checks README: its usage block must match `./dot help` output exactly.
+Completion requires agreement between `dot`, completions, and CI, enforced by tests. Manually make sure that the README usage block matches `./dot help` exactly.
 
-For an `install` or `merge` target, update in the same change: `_targets`, `_usage()`, and an `_install_<target>` function (or a `_merge_step` arm) in `dot`; the target lists in `sh/completions/`; the README usage block; and, for `install`, the CI matrix. A test checks all but README.
+### Adding, renaming, or removing a target
 
-Wrap every external command in an install step in `_spin`, which hides its output behind a `gum` spinner unless `-v`/`--verbose` is passed.
+For an `install` or `merge` target, update these locations together:
+
+1. `dot`: `_targets`, `_usage()`, and the `_install_<target>` function or `_merge_step` arm
+2. All three files in `sh/completions/`: target lists
+3. `README.md`: Installation usage block
+4. For `install`, `.github/workflows/ci.yml`: `matrix.command`
+5. `tests/dot_test.nu`: `dot-stubbed` function list and expected install/merge step sequences
+
+Apply the same completion criteria as command changes.
+
+Wrap every external command in an install step in `_spin`. It hides output behind a `gum` spinner unless the user passes `-v` or `--verbose`.
 
 ### Adding a dotfile
 
-1. In `_link`, add an `_ensure` for its target directory if needed and a `_symlink` to its target path. For agents, skills, or personas, edit `_link_agents` instead.
-2. For a new target directory, add it to the `_clean_dir` list in `_clean` and to the `clean covers every directory it lists` test.
-3. Add any new package to `Brewfile`.
+1. For agents, skills, or personas, edit `_link_agents`. For other dotfiles, edit `_link`.
+2. If the target directory needs creation, add `_ensure`. Add `_symlink` for the target path.
+3. For a new target directory, update `_clean_dir` in `_clean` and the `clean covers every directory it lists` test.
+4. Add any new package to `Brewfile`.
 
 ## AI agents
 
-`agents/` is symlinked into each tool's global paths by `_link_agents`, one symlink per persona and skill so personal, non-repo agents and skills coexist in those directories. The `~/.gemini` paths (Antigravity) are carried over from Gemini CLI and unverified.
+Keep one symlink per persona and skill in `_link_agents`, so personal entries coexist with repository entries. The Antigravity `~/.gemini` paths come from Gemini CLI and remain unverified.
 
-- `agents/AGENTS.md`: global instructions loaded by every tool on every project. Project-specific instructions belong in that project's own `AGENTS.md`.
-- `agents/claude`: Claude Code-only files, symlinked into `~/.claude/`, except `settings.jsonc` and `config.jsonc`.
-- `agents/claude/settings.jsonc`: merged into `~/.claude/settings.json` by `dot merge`. Holds only settings we chose, each with its default noted. Hooks stay local in `~/.claude/settings.json`: arrays replace wholesale on merge, so a repo `hooks` key would replace the installed hooks for every event it names.
-- `agents/claude/config.jsonc`: merged into `~/.claude.json` by the same `dot merge claude`, with the same rules. Claude Code reads global-config keys (`copyOnSelect`) only from that file, never `settings.json`.
-- `agents/codex/config.toml`: plugin marketplaces and enabled plugins, merged into `~/.codex/config.toml` by `dot merge` via `yq` (repo wins), since Codex writes machine paths and trust hashes there.
+Put global instructions in `agents/AGENTS.md` and project instructions in each project's `AGENTS.md`.
 
-Plugin marketplaces in `settings.jsonc` and `codex/config.toml` are pinned with `ref`. Renovate's regexes (the `custom.regex` managers in `.github/renovate.json`) need `"repo"` then `"ref"` (JSON), or `source = "https://github.com/<owner>/<repo>.git"` then `ref` (TOML); keep that key order and the `.git` suffix.
+Keep repository skills in `.agents/skills`, outside `dot` linking. `.claude/skills` points there and is force-added because the global gitignore excludes `.claude`.
 
-`.agents/skills` holds skills for working on this repo, not linked by `dot`. `.claude/skills` symlinks to it and is force-added because the global gitignore excludes `.claude`.
+### Agent configuration
+
+For Claude configuration, record only chosen values and note each default. Keep hooks local: merge replaces arrays, so a repository `hooks` key replaces installed hooks for each named event.
+
+Put Claude global keys such as `copyOnSelect` in `config.jsonc`, because Claude reads them only from `~/.claude.json`.
+
+Merge Codex configuration with `yq`, with repository values taking precedence. Codex writes machine paths and trust hashes into the live file.
+
+Pin plugin marketplaces with `ref`. For Renovate matching, keep `"repo"` before `"ref"` in JSON. In TOML, keep `source = "https://github.com/<owner>/<repo>.git"` before `ref`, including the `.git` suffix.
 
 ### Vendored skills
 
-Every skill in `agents/skills/` is fetched from upstream; upstream wins. `agents/skills.json` pins each `source` (`github.com/<owner>/<repo>/<path>@<commit>`), and `agents/vendor-skills` overwrites `agents/skills/*` from those pins, so change a skill upstream or via its pin.
+Change vendored skills upstream or through their pins in `agents/skills.json`. `agents/vendor-skills` overwrites `agents/skills/*` from each pinned `source` (`github.com/<owner>/<repo>/<path>@<commit>`).
 
-- To add a skill, add its unpinned `source` to `agents/skills.json` (plus a `version` tag to track releases instead of `main`) and run `agents/vendor-skills <name>`, which pins it.
-- Renovate bumps the pins in one `vendored skills` PR with no automerge; that PR is the review gate.
-- `.github/workflows/skills.yml` commits regenerated files only on Renovate's own same-repo `renovate/` PRs; keep that guard.
+Keep manual review for Renovate's grouped `vendored skills` PR. Preserve the `.github/workflows/skills.yml` guard: commit regenerated files only on Renovate's own same-repository `renovate/` PRs.
 
 ## Shell
 
-Shell config goes in `sh/config.fish` (fish is primary); `sh/.shrc` is the fallback for bash and zsh: shared code is POSIX, shell-specific code goes behind a `$BASH_VERSION`/`$ZSH_VERSION` guard.
+Put primary shell configuration in `sh/config.fish` and bash/zsh fallback code in `sh/.shrc`. Keep shared fallback code POSIX. Guard shell-specific code with `$BASH_VERSION` or `$ZSH_VERSION`.
 
-Private env vars go in `~/.config/fish/private.fish`, private git config in `~/.config/git/private`; both are untracked.
+Keep private environment variables in `~/.config/fish/private.fish` and private Git configuration in `~/.config/git/private`. Keep both files untracked.
 
 ## Homebrew
 
-The `Brewfile` bundle is lock-free: run it with `HOMEBREW_BUNDLE_NO_LOCK=1`.
+Run the `Brewfile` bundle with `HOMEBREW_BUNDLE_NO_LOCK=1` to prevent a lockfile.
 
 ## Testing
 
-After any change, run `nu tests/run.nu` (needs `nu`, `zsh`, `jq`, `yq`, `sqlite3`, `bun`, `script`).
+After any change, run `nu tests/run.nu`.
 
-A test is an `@test` command in a `tests/*_test.nu` file. `run.nu` calls each one by its bare name in its own `nu -n` process, so name tests with letters, digits, spaces and `, . : / - _`. Tests run in parallel: each gets a scratch `home` from `@before-each` as `$in`, removed by `@after-each` even on failure, so keep its files there.
+When adding tests, use `@test` commands in `tests/*_test.nu`. Limit names to letters, digits, spaces, and `, . : / - _`. The runner calls tests by bare name.
+
+Keep each test's files in the scratch `home` passed from `@before-each` as `$in`. Tests run in parallel in separate `nu -n` processes. `@after-each` removes the scratch home even on failure.
 
 After changing `.github/workflows`, run `actionlint`.
 
-After changing `.github/renovate.json`, run the validator on Node (Renovate's native `re2` module crashes bun, so no `--bun`):
+After changing `.github/renovate.json`, run this validator command on Node.
 
 ```bash
 bunx --package renovate renovate-config-validator --strict
