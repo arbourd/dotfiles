@@ -21,8 +21,8 @@
       "version": "v1.4.267"
     },
     "trash": {
-      "source": "github.com/arbourd/trash/skills/trash/SKILL.md@cd584f5b4c0f2486e0cb34fae8461b5255e819b8",
-      "version": "v0.4.1"
+      "source": "github.com/arbourd/trash/skills/trash/SKILL.md@cf2a0be5674052f1048dacad6ce031a9f796e0a7",
+      "version": "v0.4.2"
     }
   }
 }
