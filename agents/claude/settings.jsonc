@@ -12,6 +12,9 @@
   // Default: unset.
   "env": {
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "DISABLE_AUTOUPDATER": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "DISABLE_FEEDBACK_COMMAND": "1",
     "DISABLE_TELEMETRY": "1"
   },
   // Default: unset.
@@ -50,7 +53,7 @@
   // Default: unset.
   "statusLine": {
     "type": "command",
-    "command": "zsh ~/.claude/statusline.sh",
+    "command": "nu --stdin ~/.claude/statusline.nu",
     "refreshInterval": 5
   },
   // Default: "dark".
