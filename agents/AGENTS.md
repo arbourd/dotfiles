@@ -4,8 +4,8 @@ These instructions apply to every project. A project's own `AGENTS.md` adds to t
 
 ## Scope
 
-- Limit work to the requested task. Include additional tests, refactors, or documentation
-  only when requested.
+- Limit work to the requested task, including tests and documentation required by the
+  project's checklist. Include unrelated tests, refactors, or documentation only when requested.
 - If a request has multiple reasonable interpretations, ask the user to choose before acting.
 - Before reporting completion, run the project's own test or lint command. Report failures
   as they are.

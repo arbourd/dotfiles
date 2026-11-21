@@ -28,6 +28,7 @@ For an `install` or `merge` target, update these locations together:
 2. All three files in `sh/completions/`: target lists
 3. `README.md`: Installation usage block
 4. For `install`, `.github/workflows/ci.yml`: `matrix.command`
+5. `tests/dot_test.nu`: `dot-stubbed` function list and expected install/merge step sequences
 
 Apply the same completion criteria as command changes.
 
@@ -62,12 +63,6 @@ Pin plugin marketplaces with `ref`. For Renovate matching, keep `"repo"` before 
 
 Change vendored skills upstream or through their pins in `agents/skills.json`. `agents/vendor-skills` overwrites `agents/skills/*` from each pinned `source` (`github.com/<owner>/<repo>/<path>@<commit>`).
 
-To add a skill:
-
-1. Add its unpinned `source` to `agents/skills.json`.
-2. To track releases instead of `main`, add a `version` tag.
-3. Run `agents/vendor-skills <name>` and make sure that it pins the source.
-
 Keep manual review for Renovate's grouped `vendored skills` PR. Preserve the `.github/workflows/skills.yml` guard: commit regenerated files only on Renovate's own same-repository `renovate/` PRs.
 
 ## Shell
@@ -90,7 +85,7 @@ Keep each test's files in the scratch `home` passed from `@before-each` as `$in`
 
 After changing `.github/workflows`, run `actionlint`.
 
-After changing `.github/renovate.json`, run this validator command on Node. Omit `--bun` because Renovate's native `re2` module crashes Bun.
+After changing `.github/renovate.json`, run this validator command on Node.
 
 ```bash
 bunx --package renovate renovate-config-validator --strict
