@@ -13,12 +13,12 @@ Update all five in the same change:
 1. `dot`: `_usage()` and the `case` statement
 2. `README.md`: usage block in Installation
 3. `.github/workflows/ci.yml`: `matrix.command` list
-4. `tests/dot.bats`: the command's test(s)
+4. `tests/dot_test.nu`: the command's test(s)
 5. `sh/completions/`: `dot.fish`, `dot.bash`, and `_dot` command lists (and `-h`/`-v` flags)
 
-A bats test checks `dot`, completions, and CI agree. Nothing checks README: its usage block must match `./dot help` output exactly.
+A test checks `dot`, completions, and CI agree. Nothing checks README: its usage block must match `./dot help` output exactly.
 
-For an `install` or `merge` target, update in the same change: `_targets`, `_usage()`, and an `_install_<target>` function (or a `_merge_step` arm) in `dot`; the target lists in `sh/completions/`; the README usage block; and, for `install`, the CI matrix. A bats test checks all but README.
+For an `install` or `merge` target, update in the same change: `_targets`, `_usage()`, and an `_install_<target>` function (or a `_merge_step` arm) in `dot`; the target lists in `sh/completions/`; the README usage block; and, for `install`, the CI matrix. A test checks all but README.
 
 Wrap every external command in an install step in `_spin`, which hides its output behind a `gum` spinner unless `-v`/`--verbose` is passed.
 
@@ -62,7 +62,9 @@ The `Brewfile` bundle is lock-free: run it with `HOMEBREW_BUNDLE_NO_LOCK=1`.
 
 ## Testing
 
-After any change, run `bats tests/` (needs `zsh`, `jq`, `yq`, `sqlite3`, `bun`, `script`).
+After any change, run `nu tests/run.nu` (needs `nu`, `zsh`, `jq`, `yq`, `sqlite3`, `bun`, `script`).
+
+A test is an `@test` command in a `tests/*_test.nu` file. `run.nu` calls each one by its bare name in its own `nu -n` process, so name tests with letters, digits, spaces and `, . : / - _`. Tests run in parallel: each gets a scratch `home` from `@before-each` as `$in`, removed by `@after-each` even on failure, so keep its files there.
 
 After changing `.github/workflows`, run `actionlint`.
 

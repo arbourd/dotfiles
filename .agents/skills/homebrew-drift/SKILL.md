@@ -29,7 +29,7 @@ Compare `Brewfile` in the repo root with the live Homebrew install. Two question
    - **Not in Brewfile:** suggest `add to Brewfile` (a tool or app the user plausibly wants on every machine) or `leave` (machine-specific, one-off, or a dependency). Look up unfamiliar names with `brew info` rather than guessing. Note `claude-code` vs `claude-code@latest`-style cases, where a different variant of a listed package is installed.
    - **Not installed:** suggest `brew bundle install` (never installed yet) or `remove from Brewfile` (obsolete, renamed, or replaced by an installed variant).
 
-3. The user decides each row. Only on approval, edit the Brewfile (keep its existing ordering and quote style). Suggest the user runs `brew bundle`; don't run it. If you edited anything, run `bats tests/`, then rerun step 1.
+3. The user decides each row. Only on approval, edit the Brewfile (keep its existing ordering and quote style). Suggest the user runs `brew bundle`; don't run it. If you edited anything, run `nu tests/run.nu`, then rerun step 1.
 
 ## Known limits
 

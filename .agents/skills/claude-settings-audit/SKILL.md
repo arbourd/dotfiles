@@ -23,7 +23,7 @@ Audit two repo files against the live files `dot merge claude` merges them into 
 
 - **Live files:** Claude Code writes to them too (`/config`, `/model`, `/plugin`), and other tools install `hooks` in `settings.json`. `~/.claude.json` is mostly app state (history, counters, per-project data), which `compare.js` hides from Live drift.
 - **Merge:** `sqlite3`'s `json()` parses both files as JSONC and `json_patch` (RFC 7396) merges them, repo winning. Objects merge key by key. Arrays and scalars replace wholesale. A `null` in the repo deletes the live key, but removing a key from the repo leaves it live.
-- **Why `hooks` never goes in `settings.jsonc`:** the merge would replace the live array and wipe hooks installed by other tools. A bats test enforces this.
+- **Why `hooks` never goes in `settings.jsonc`:** the merge would replace the live array and wipe hooks installed by other tools. A test in `tests/dot_test.nu` enforces this.
 
 ## Known limits
 
@@ -50,7 +50,7 @@ Audit two repo files against the live files `dot merge claude` merges them into 
 
 3. **Merge safety.** Every Merge risks line is live data the merge would lose: an array that drops live entries, a `null` that deletes a live key, or a type change that replaces an object or array. For each, ask whether the user wants the loss. Usually the fix is to add the live entries to the repo array, or drop the `null`. A risk under `hooks` is always a bug: remove the key (see Merge model).
 
-4. **Applied.** Each Unapplied line is a change `dot merge claude` hasn't made yet. If there are any, or if you edited a repo file, run `bats tests/`, then tell the user to run `dot merge claude` and rerun step 1. A running Claude Code can overwrite a live file from memory, so a key may reappear as Unapplied after merging: rerun the merge. The audit is done when Unapplied and Merge risks are `(none)` in both blocks and the user has decided every drift line.
+4. **Applied.** Each Unapplied line is a change `dot merge claude` hasn't made yet. If there are any, or if you edited a repo file, run `nu tests/run.nu`, then tell the user to run `dot merge claude` and rerun step 1. A running Claude Code can overwrite a live file from memory, so a key may reappear as Unapplied after merging: rerun the merge. The audit is done when Unapplied and Merge risks are `(none)` in both blocks and the user has decided every drift line.
 
 5. **Docs check (optional, after a Claude Code upgrade).** For each key in both repo files, read its **Default** line in https://code.claude.com/docs/en/settings-reference. Claude Code ships no defaults file.
    - Fix a `// Default: ...` comment that doesn't match (`unset` for anything the docs call unset). Check nested keys the docs default separately, such as `autoUpdate` under `extraKnownMarketplaces`.

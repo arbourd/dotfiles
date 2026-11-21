@@ -1,0 +1,58 @@
+# Runs the commands marked @test in tests/*_test.nu, each in its own nu process:
+# @before-each, the test with the setup's output as input, then @after-each.
+const TESTS = path self | path dirname
+
+# tests lists the test commands and the setup and teardown in one suite.
+def tests [file: string]: nothing -> record {
+    let cmds = ^nu -n -c $"source ($file | to nuon); scope commands | where type == custom | select name attributes | to nuon"
+        | from nuon
+        | each {|c| {name: $c.name, attrs: ($c.attributes | get name)} }
+    let with = {|attr| $cmds | where {|c| $attr in $c.attrs } | get name }
+    {
+        tests: (do $with 'test')
+        setup: (do $with 'before-each' | get 0?)
+        teardown: (do $with 'after-each' | get 0?)
+    }
+}
+
+# run-test runs one test and returns its error, or null when it passes.
+def run-test [file: string, suite: record, test: string]: nothing -> any {
+    let setup = $suite.setup | default 'null'
+    let teardown = if $suite.teardown == null { '' } else { $"$ctx | ($suite.teardown)" }
+    let script = $"
+        source ($file | to nuon)
+        let ctx = ($setup)
+        let err = try { $ctx | ($test); null } catch {|e| $e.rendered }
+        ($teardown)
+        if $err != null { print -e $err; exit 1 }
+    "
+    # styling tests expect color; NO_COLOR from the caller's shell would fail them
+    let r = with-env {NO_COLOR: null} { ^nu -n -c $script | complete }
+    if $r.exit_code == 0 { null } else { $r.stderr | str trim }
+}
+
+def main [
+    pattern?: string # only run tests whose name matches this regex
+    --path: string # directory holding the *_test.nu files (default: this one)
+] {
+    let dir = $path | default $TESTS
+    let results = glob ($dir | path join '*_test.nu') | sort | each {|file|
+        let suite = tests $file
+        $suite.tests
+            | where {|t| $pattern == null or $t =~ $pattern }
+            | par-each {|t| {suite: ($file | path parse | get stem), test: $t, error: (run-test $file $suite $t)} }
+    } | flatten
+
+    # a run that finds nothing is a broken run, not a passing one
+    if ($results | is-empty) {
+        print -e $"no tests found in ($dir)(if $pattern != null { $' matching ($pattern)' })"
+        exit 1
+    }
+
+    let failed = $results | where error != null
+    for f in $failed {
+        print $"(ansi red)FAIL(ansi reset) ($f.suite): ($f.test)\n($f.error)\n"
+    }
+    print $"($results | length) tests, ($failed | length) failed"
+    if ($failed | is-not-empty) { exit 1 }
+}
