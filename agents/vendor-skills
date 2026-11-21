@@ -1,60 +1,49 @@
-#!/usr/bin/env zsh
-# Vendors the skills in skills.json into skills/, fetching each SKILL.md at its pinned commit.
+#!/usr/bin/env nu
+# Copies the SKILL.md files listed in skills.json into skills/.
 #
 #   vendor-skills [name...]    all skills, or just the named ones
 #
-# A source is github.com/<owner>/<repo>/<path>@<commit>. One without a commit is
-# pinned to the repo's current HEAD first, which is how a new skill is added.
-# Renovate bumps the pins. Upstream wins: never hand-edit skills/*, running this overwrites them.
-set -euo pipefail
+# Sources use github.com/<owner>/<repo>/<path>@<commit>.
+# If you omit the commit, the script records the repository's current HEAD commit.
+# Renovate updates the commits. Do not edit these copies by hand. The script overwrites them.
+const DIR = path self | path dirname
 
-DIR=${0:A:h}
-MANIFEST=$DIR/skills.json
+def main [...names: string] {
+    let manifest_path = $DIR | path join skills.json
+    mut manifest = open $manifest_path
+    let names = if ($names | is-empty) { $manifest.skills | columns | sort } else { $names }
+    if ($names | is-empty) { return }
+    let width = $names | str length | math max
 
-_die() { print -u2 -r -- "error: $*"; exit 1; }
+    for name in $names {
+        let source = $manifest.skills | get -o $name | get -o source
+        if $source == null {
+            error make {msg: $"unknown skill: ($name)"}
+        }
+        let source_parts = $source | parse --regex '^github\.com/(?<repo>[^/]+/[^/]+)/(?<file>[^@]+)(?:@(?<commit>.+))?$' | get -o 0
+        if $source_parts == null {
+            error make {msg: $"unsupported host: ($source)"}
+        }
+        let pinned = $source_parts.commit == null
+        let commit = if $pinned {
+            let sha = ^gh api $"repos/($source_parts.repo)/commits/HEAD" --jq .sha | str trim --right --char "\n"
+            let key = ['skills' $name 'source'] | into cell-path
+            $manifest = $manifest | update $key $"($source)@($sha)"
+            $"($manifest | to json --indent 2)\n" | save --raw --force $"($manifest_path).tmp"
+            mv --force $"($manifest_path).tmp" $manifest_path
+            $sha
+        } else { $source_parts.commit }
 
-# _vendor <name> fetches one skill from its source, pinning the source first if needed.
-_vendor() {
-    local name=$1
-    local source
-    source=$(jq -r --arg name $name '.skills[$name].source // empty' $MANIFEST)
-    [[ -n $source ]] || _die "unknown skill: $name"
-
-    local -a parts=(${(s:/:)${source%%@*}})   # github.com <owner> <repo> <path...>
-    [[ $parts[1] == github.com ]] || _die "unsupported host: $source"
-    local repo=$parts[2]/$parts[3]
-    local file=${(j:/:)parts[4,-1]}
-
-    local commit state
-    if [[ $source == *@* ]]; then
-        commit=${source#*@}
-    else
-        state=pinned
-        commit=$(gh api repos/$repo/commits/HEAD --jq .sha)
-        jq --arg name $name --arg source $source@$commit '.skills[$name].source = $source' \
-            $MANIFEST > $MANIFEST.tmp && mv $MANIFEST.tmp $MANIFEST
-    fi
-
-    # Assigned apart from `local` so a failed fetch stops the script instead of writing an empty file.
-    local content
-    content=$(gh api "repos/$repo/contents/$file?ref=$commit" -H 'Accept: application/vnd.github.raw')
-    local dest=$DIR/skills/$name/SKILL.md
-    if [[ -z $state ]]; then
-        # shortcut: compares content only, so a pin bump, a hand edit and a first run all read "changed".
-        [[ -f $dest && $(<$dest) == $content ]] && state=unchanged || state=changed
-    fi
-    mkdir -p ${dest:h}
-    print -r -- $content > $dest
-    print -r -- "${(r:$width:)name}  ${commit[1,7]}  $state"
+        let content = ^gh api $"repos/($source_parts.repo)/contents/($source_parts.file)?ref=($commit)" -H 'Accept: application/vnd.github.raw' | str trim --right --char "\n"
+        let dest = $DIR | path join skills $name SKILL.md
+        let state = if $pinned {
+            'pinned'
+        } else if ($dest | path exists) and ((open --raw $dest | str trim --right --char "\n") == $content) {
+            'unchanged'
+        } else { 'changed' }
+        mkdir ($dest | path dirname)
+        # One trailing newline, so files compare equal to upstream.
+        $"($content)\n" | save --raw --force $dest
+        print $"($name | fill --width $width)  ($commit | str substring 0..6)  ($state)"
+    }
 }
-
-names=($@)
-(( $#names )) || names=(${(f)"$(jq -r '.skills | keys[]' $MANIFEST)"})
-
-# Pad names to the longest so the output lines up.
-integer width=0
-for name in $names; do (( $#name > width )) && width=$#name; done
-
-for name in $names; do
-    _vendor $name
-done

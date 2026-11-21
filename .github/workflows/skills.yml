@@ -26,7 +26,7 @@ jobs:
         with:
           # PRs check out a detached merge ref; pushing the result needs the branch
           ref: ${{ github.head_ref || github.ref_name }}
-      - run: sudo apt-get install -y zsh jq
+      - uses: hustcer/setup-nu@1b8faed9a8ff673c8ce0beae243e0b72d0787241 # v3.30
 
       - name: Vendor skills
         run: agents/vendor-skills
