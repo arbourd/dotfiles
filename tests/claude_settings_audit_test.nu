@@ -1,5 +1,5 @@
 # Tests for the claude-settings-audit skill's compare.js, run with:
-#   nu tests/run.nu
+#   tests/run
 
 use std/assert
 use std/testing *

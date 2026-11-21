@@ -1,5 +1,5 @@
 # Tests for dot and the repo's config files, run with:
-#   nu tests/run.nu
+#   tests/run
 #
 # zsh snippets are raw strings; they reach the repo and scratch home through the
 # DOTFILES and FAKE_HOME env vars that `run` exports, instead of nu interpolation.
