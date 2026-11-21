@@ -23,7 +23,7 @@
       "source": {
         "source": "github",
         "repo": "addyosmani/agent-skills",
-        "ref": "0.6.15"
+        "ref": "0.6.16"
       },
       "autoUpdate": true
     },
