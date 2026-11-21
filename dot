@@ -99,9 +99,10 @@ _err() {
 _spin() {
     local title=$1; shift
     if _has_gum && (( ! VERBOSE )); then
-        gum spin --spinner dot --title "$title" --show-error -- "$@"
+        gum spin --spinner dot --title "$title" --show-error -- "$@" || return
     else
-        "$@"
+        # errexit is off when a caller tests _spin, so return the failure explicitly
+        "$@" || return
         if (( VERBOSE )); then print; fi
     fi
     _status ok "$title"
@@ -220,6 +221,15 @@ _merge_claude_settings() {
             || { rm -f "$tmp"; return 1; }
         _status merged "$DIR/agents/claude/${names[i]} → ${lives[i]}"
     done
+}
+
+# _update_claude_marketplaces
+# Syncs Claude marketplaces to the merged refs.
+# Claude Code ignores a marketplace whose installed ref differs from settings.json until it syncs.
+_update_claude_marketplaces() {
+    command -v claude &>/dev/null || { _status skipped "claude marketplaces: claude not installed"; return 0; }
+    # a network failure must not block the local merges that follow
+    _spin "claude marketplaces" claude plugin marketplace update || _status warn "claude marketplaces: update failed"
 }
 
 # _merge_codex_config
@@ -343,7 +353,11 @@ _run() {
 # _merge_step <claude|codex|orca|rex>
 _merge_step() {
     case $1 in
-        claude) _merge_claude_settings ;;
+        claude)
+            # separate lines keep errexit on, so a failed settings write stops the merge
+            _merge_claude_settings
+            _update_claude_marketplaces
+            ;;
         codex) _merge_codex_config ;;
         orca) _merge_orca_settings ;;
         rex) _merge_rex_settings ;;
@@ -399,7 +413,7 @@ _targets() {
             ;;
         merge)
             print -l \
-                "claude:merges agents/claude/settings.jsonc into ~/.claude/settings.json and config.jsonc into ~/.claude.json" \
+                "claude:merges agents/claude/settings.jsonc into ~/.claude/settings.json and config.jsonc into ~/.claude.json, then updates marketplaces" \
                 "codex:merges agents/codex/config.toml into ~/.codex/config.toml" \
                 "orca:merges orca/settings.jsonc into Orca's profile db" \
                 "rex:writes pinned Rex.app preferences with defaults write"

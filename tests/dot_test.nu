@@ -296,6 +296,49 @@ def "merge-claude-settings deep-merges over a live settings.json instead of syml
 }
 
 @test
+def "update-claude-marketplaces syncs every marketplace" [] {
+    let c = $in
+    let h = $c.home
+    stub $c claude $"echo \"$*\" >> \"($h)/claude_args\"\n"
+
+    zsh-ok $c r#'PATH="$FAKE_HOME/bin:$PATH"; _update_claude_marketplaces'#
+
+    assert equal (open --raw $"($h)/claude_args" | lines) ["plugin marketplace update"]
+}
+
+@test
+def "update-claude-marketplaces skips when claude is not installed" [] {
+    let c = $in
+    let r = zsh $c 'PATH=/usr/bin:/bin; _update_claude_marketplaces'
+    assert equal $r.status 0
+    assert str contains $r.output "claude not installed"
+}
+
+@test
+def "update-claude-marketplaces warns and continues when the update fails" [] {
+    let c = $in
+    stub $c claude "exit 1\n"
+    let r = zsh $c r#'PATH="$FAKE_HOME/bin:$PATH"; _update_claude_marketplaces; echo after'#
+    assert equal $r.status 0
+    assert str contains $r.output "update failed"
+    assert str contains $r.output "after"
+}
+
+@test
+def "merge stops when the claude settings write fails" [] {
+    let c = $in
+    let r = zsh $c r#'
+        _merge_claude_settings() { return 1; }
+        _update_claude_marketplaces() { echo update_claude_marketplaces; }
+        _merge_codex_config() { echo merge_codex_config; }
+        _merge
+    '#
+    assert not equal $r.status 0
+    assert not ($r.output | str contains update_claude_marketplaces)
+    assert not ($r.output | str contains merge_codex_config)
+}
+
+@test
 def "link does not merge settings" [] {
     let c = $in
     let h = $c.home
@@ -318,7 +361,8 @@ def "merge runs a single target and rejects unknown ones" [] {
     "{}\n" | save $"($h)/repo-mock/agents/claude/config.jsonc"
     "{\"theme\":\"dark\"}\n" | save $"($h)/repo-mock/agents/claude/settings.jsonc"
 
-    zsh-ok $c r#'DIR="$FAKE_HOME/repo-mock"; _merge claude'#
+    stub $c claude ""
+    zsh-ok $c r#'PATH="$FAKE_HOME/bin:$PATH"; DIR="$FAKE_HOME/repo-mock"; _merge claude'#
     assert equal ($"($h)/.claude/settings.json" | path type) file
     assert not ($"($h)/.codex/config.toml" | path exists)
 
@@ -786,6 +830,19 @@ def "_spin propagates gum failure" [] {
 }
 
 @test
+def "_spin returns failure to a caller that tests it, with and without gum" [] {
+    let c = $in
+    stub $c gum "exit 1\n"
+
+    # errexit is off on the left of ||, so _spin must return the failure itself
+    let script = r#'PATH="$FAKE_HOME/bin:$PATH"; _spin title false || echo caught'#
+    for r in [(zsh $c --tty $script) (zsh $c $script)] {
+        assert str contains $r.output caught
+        assert not ($r.output =~ '(?s)ok .*title')
+    }
+}
+
+@test
 def "NO_COLOR disables styling even on a tty with gum installed" [] {
     let c = $in
     stub $c gum "echo gum-was-called\n"
@@ -1020,7 +1077,7 @@ def dot-stubbed [ctx: record, ...args: string]: nothing -> record {
     let at = $src | enumerate | where item =~ '^# Only dispatch when executed' | first | get index
     let fns = [
         _install_brew _install_defaults _install_fisher _install_vim
-        _merge_claude_settings _merge_codex_config _merge_orca_settings _merge_rex_settings
+        _merge_claude_settings _update_claude_marketplaces _merge_codex_config _merge_orca_settings _merge_rex_settings
     ]
     let stubs = $fns | each {|fn| $"($fn)\() { echo ($fn | str substring 1..); }" }
     $src | first $at | append $stubs | append ($src | skip $at) | str join "\n" | save -f $copy
@@ -1031,7 +1088,7 @@ def dot-stubbed [ctx: record, ...args: string]: nothing -> record {
 
 # steps lists the stubbed steps that ran.
 def steps [ctx: record, ...args: string]: nothing -> list<string> {
-    (dot-stubbed $ctx ...$args).output | lines | where $it =~ '^(install|merge)_'
+    (dot-stubbed $ctx ...$args).output | lines | where $it =~ '^(install|merge|update)_'
 }
 
 @test
@@ -1041,9 +1098,9 @@ def "dot install and merge run every step without a target, and the given ones w
     assert equal (steps $c install vim) [install_vim]
     assert equal (steps $c install vim brew) [install_vim install_brew]
 
-    assert equal (steps $c merge) [merge_claude_settings merge_codex_config merge_orca_settings merge_rex_settings]
+    assert equal (steps $c merge) [merge_claude_settings update_claude_marketplaces merge_codex_config merge_orca_settings merge_rex_settings]
     assert equal (steps $c merge codex) [merge_codex_config]
-    assert equal (steps $c merge orca claude) [merge_orca_settings merge_claude_settings]
+    assert equal (steps $c merge orca claude) [merge_orca_settings merge_claude_settings update_claude_marketplaces]
 
     # an unknown target fails before any step runs
     let r = dot-stubbed $c install brew nope
