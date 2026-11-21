@@ -22,7 +22,7 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       - run: sudo apt-get install -y zsh jq sqlite3
       - uses: hustcer/setup-nu@1b8faed9a8ff673c8ce0beae243e0b72d0787241 # v3.30
-      - run: nu tests/run.nu
+      - run: tests/run
 
   integration:
     runs-on: macos-latest

@@ -1,3 +1,4 @@
+#!/usr/bin/env nu
 # Runs the commands marked @test in tests/*_test.nu, each in its own nu process:
 # @before-each, the test with the setup's output as input, then @after-each.
 const TESTS = path self | path dirname

@@ -1,12 +1,12 @@
-# Tests for tests/run.nu itself, run with:
-#   nu tests/run.nu
+# Tests for tests/run itself, run with:
+#   tests/run
 #
-# Each test writes a fixture suite into its scratch home and runs run.nu against it with --path.
+# Each test writes a fixture suite into its scratch home and runs tests/run against it with --path.
 
 use std/assert
 use std/testing *
 
-const RUNNER = (path self | path dirname | path join run.nu)
+const RUNNER = (path self | path dirname | path join run)
 
 @before-each
 def setup [] {
@@ -33,7 +33,7 @@ def teardown [] { mkdir $in.marker }
 " | save $"($ctx.home)/fixture_test.nu"
 }
 
-# runner runs run.nu against the fixture suite.
+# runner runs tests/run against the fixture suite.
 def runner [ctx: record, ...args: string]: nothing -> record {
     let r = ^nu -n $RUNNER --path $ctx.home ...$args | complete
     {status: $r.exit_code, output: ($r.stdout + $r.stderr | ansi strip)}

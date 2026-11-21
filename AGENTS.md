@@ -77,7 +77,7 @@ Run the `Brewfile` bundle with `HOMEBREW_BUNDLE_NO_LOCK=1` to prevent a lockfile
 
 ## Testing
 
-After any change, run `nu tests/run.nu`.
+After any change, run `tests/run`.
 
 When adding tests, use `@test` commands in `tests/*_test.nu`. Limit names to letters, digits, spaces, and `, . : / - _`. The runner calls tests by bare name.
 
