@@ -1147,14 +1147,14 @@ def "_install_vim hides vim output on success and shows it on failure" [] {
 }
 
 @test
-def "vendored skills are pinned and listed in skills.json" [] {
+def "vendored skills are pinned and present in agents/skills" [] {
     let skills = open $"($DOTFILES)/agents/skills.json" | get skills
     # A commit pin is immutable; a branch or tag in its place would drift silently.
     let unpinned = $skills | values | get source | where not ($it =~ '@[0-9a-f]{40}$')
     assert equal $unpinned []
 
-    for dir in (ls $"($DOTFILES)/agents/skills" | where type == dir | get name) {
-        let name = $dir | path basename
-        assert ($name in ($skills | columns)) $"($name) missing from skills.json"
+    # Skills absent from skills.json are local and maintained here.
+    for name in ($skills | columns) {
+        assert ($"($DOTFILES)/agents/skills/($name)/SKILL.md" | path exists) $"($name) not vendored"
     }
 }

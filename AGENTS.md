@@ -63,6 +63,8 @@ Pin plugin marketplaces with `ref`. For Renovate matching, keep `"repo"` before 
 
 Change vendored skills upstream or through their pins in `agents/skills.json`. `agents/vendor-skills` overwrites `agents/skills/*` from each pinned `source` (`github.com/<owner>/<repo>/<path>@<commit>`).
 
+A skill in `agents/skills/` without a `skills.json` entry is local. Edit it in place.
+
 Keep manual review for Renovate's grouped `vendored skills` PR. Preserve the `.github/workflows/skills.yml` guard: commit regenerated files only on Renovate's own same-repository `renovate/` PRs.
 
 ## Shell
