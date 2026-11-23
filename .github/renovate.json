@@ -2,13 +2,21 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["helpers:pinGitHubActionDigestsToSemver"],
   "gitIgnoredAuthors": ["41898282+github-actions[bot]@users.noreply.github.com"],
-  "enabledManagers": ["custom.regex", "github-actions"],
+  "enabledManagers": ["custom.regex", "github-actions", "gomod"],
+  "postUpdateOptions": ["gomodTidy"],
   "customManagers": [
     {
       "customType": "regex",
       "managerFilePatterns": ["dot"],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n\\w+=(?<currentValue>\\S+)"
+      ]
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["internal/install/pins.go"],
+      "matchStrings": [
+        "// renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\nconst \\w+ = \"(?<currentValue>[^\"]+)\""
       ]
     },
     {
@@ -39,7 +47,7 @@
     {
       "customType": "regex",
       "description": "Homebrew install script pinned to a commit",
-      "managerFilePatterns": ["dot"],
+      "managerFilePatterns": ["dot", "internal/install/pins.go"],
       "matchStrings": ["Homebrew/install/(?<currentDigest>[0-9a-f]{40})/install\\.sh"],
       "depNameTemplate": "Homebrew/install",
       "packageNameTemplate": "https://github.com/Homebrew/install",
@@ -87,6 +95,11 @@
       "matchManagers": ["github-actions"],
       "matchUpdateTypes": ["minor", "patch"],
       "minimumReleaseAge": "7 days"
+    },
+    {
+      "matchManagers": ["gomod"],
+      "minimumReleaseAge": "7 days",
+      "automerge": false
     },
     {
       "matchManagers": ["github-actions"],
