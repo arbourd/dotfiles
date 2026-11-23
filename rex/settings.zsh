@@ -1,26 +1,29 @@
 #!/usr/bin/env zsh
 set -e
 
-# Default: not documented.
-defaults write com.superlogical.rex Workspace.tabStyle -string vertical
+# Default: unset
+defaults write com.superlogical.rex Workspace.appearance -string dark
 
-# Default: not documented.
-defaults write com.superlogical.rex Workspace.sidebarPosition -string left
+# Default: unset
+defaults write com.superlogical.rex Workspace.interfaceStyle -string useTheme
 
-# Default: not documented.
+# Default: unset
 defaults write com.superlogical.rex Workspace.paneDensity -string comfortable
 
-# Default: not documented. Fades surfaces, content, both, or neither.
-defaults write com.superlogical.rex Workspace.inactivePaneFadeMode -string both
+# Default: unset
+defaults write com.superlogical.rex Workspace.sidebarPosition -string left
 
-# Default: not documented.
-defaults write com.superlogical.rex Workspace.terminalFontName -string "Source Code Pro for Powerline"
+# Default: unset
+defaults write com.superlogical.rex Workspace.tabStyle -string vertical
 
-# Default: not documented.
-defaults write com.superlogical.rex Workspace.terminalFontPointSize -float 14
-
-# Default: not documented. Block, bar, or underline.
+# Default: unset
 defaults write com.superlogical.rex Workspace.terminalCursorStyle -string underline
 
-# Default: "" (login shell).
+# Default: unset
+defaults write com.superlogical.rex Workspace.terminalFontName -string "Source Code Pro for Powerline"
+
+# Default: unset
+defaults write com.superlogical.rex Workspace.terminalFontPointSize -float 14
+
+# Default: ""
 defaults write com.superlogical.rex Workspace.terminalStartupCommand -string /opt/homebrew/bin/fish
