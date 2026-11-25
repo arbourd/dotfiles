@@ -13,12 +13,12 @@
       "version": "v1.0.0"
     },
     "orca-cli": {
-      "source": "github.com/stablyai/orca/skills/orca-cli/SKILL.md@48fcb4dfa59a0b145779a98f6d92c2890ef58262",
-      "version": "v1.4.274"
+      "source": "github.com/stablyai/orca/skills/orca-cli/SKILL.md@06832a81b7a50d181dd99db3341a203087a91300",
+      "version": "v1.4.275"
     },
     "orchestration": {
-      "source": "github.com/stablyai/orca/skills/orchestration/SKILL.md@48fcb4dfa59a0b145779a98f6d92c2890ef58262",
-      "version": "v1.4.274"
+      "source": "github.com/stablyai/orca/skills/orchestration/SKILL.md@06832a81b7a50d181dd99db3341a203087a91300",
+      "version": "v1.4.275"
     },
     "trash": {
       "source": "github.com/arbourd/trash/skills/trash/SKILL.md@cf2a0be5674052f1048dacad6ce031a9f796e0a7",
