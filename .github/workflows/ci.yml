@@ -23,6 +23,12 @@ jobs:
       - run: sudo apt-get install -y zsh jq sqlite3
       - uses: hustcer/setup-nu@1b8faed9a8ff673c8ce0beae243e0b72d0787241 # v3.30
       - run: tests/run
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - run: test -z "$(gofmt -l cmd internal)"
+      - run: go test -race ./...
 
   integration:
     runs-on: macos-latest
@@ -51,12 +57,18 @@ jobs:
           # PRs check out a detached merge ref; `dot update` needs a branch to pull
           ref: ${{ github.head_ref || github.ref_name }}
 
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version-file: go.mod
+
+      - run: go build -o bin/dot ./cmd/dot
+
       - if: ${{ matrix.command == 'install brew' && github.event_name == 'pull_request' }}
         id: brew
         name: Skip brew if its inputs are unchanged
         run: |
           git fetch --depth=1 origin ${{ github.event.pull_request.base.sha }}
-          if git diff --quiet ${{ github.event.pull_request.base.sha }} HEAD -- Brewfile dot .github/workflows/ci.yml; then
+          if git diff --quiet ${{ github.event.pull_request.base.sha }} HEAD -- Brewfile dot .github/workflows/ci.yml cmd internal go.mod go.sum; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
 
@@ -67,23 +79,23 @@ jobs:
         name: Run brew uninstall go
         run: |
           versions=$(brew list | grep -E '^go$|^go@' || true)
-          echo $versions
+          echo "$versions"
 
           for v in $versions
           do
             echo "brew uninstall $v"
-            brew uninstall $v
+            brew uninstall "$v"
           done
 
       - if: ${{ matrix.command == 'install brew' && steps.brew.outputs.skip != 'true' }}
         name: Skip installs
         run: |
-          # Container requires MacOS 26 to install
+          # Container formula requires macOS 26.
           echo "HOMEBREW_BUNDLE_BREW_SKIP=container" >> "$GITHUB_ENV"
 
-          # MAS installs do not work in CI
+          # CI cannot install MAS apps.
           mas_ids=$(cat Brewfile | grep -oE "[0-9]{9,}" | tr '\n' ' ')
-          echo $mas_ids
+          echo "$mas_ids"
           echo "HOMEBREW_BUNDLE_MAS_SKIP=$mas_ids" >> "$GITHUB_ENV"
 
       - if: ${{ matrix.command == 'install fisher' || matrix.command == 'install vim' }}
@@ -99,3 +111,28 @@ jobs:
           export PATH="$HOME/.local/bin:$PATH"
           command -v dot
           dot version
+
+      # The Go dot runs after the zsh one; its init replaces ~/.local/bin/dot.
+      - if: ${{ matrix.command == 'install fisher' || matrix.command == 'install vim' }}
+        name: Run Go dot link
+        run: DOT_DIR=$PWD bin/dot link
+
+      - if: ${{ matrix.command == 'help' }}
+        name: Run Go dot --help
+        run: bin/dot --help
+
+      - if: ${{ matrix.command == 'init' }}
+        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
+        with:
+          args: release --snapshot --clean
+
+      - if: ${{ matrix.command == 'init' }}
+        name: Install Go dot from snapshot and run it
+        run: |
+          DOT_INSTALL_FROM=dist sh install.sh
+          unset DOT_DIR
+          ~/.local/bin/dot version
+
+      - if: ${{ matrix.command != 'help' && matrix.command != 'init' && !(matrix.command == 'install brew' && steps.brew.outputs.skip == 'true') }}
+        name: Run Go dot
+        run: DOT_DIR=$PWD bin/dot ${{ matrix.command }}
