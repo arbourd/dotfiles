@@ -8,7 +8,7 @@ show_tooltips = false
 [marketplaces.agent-skills]
 source_type = "git"
 source = "https://github.com/addyosmani/agent-skills.git"
-ref = "0.6.16"
+ref = "0.6.17"
 
 [plugins."agent-skills@agent-skills"]
 enabled = true
