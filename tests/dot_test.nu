@@ -325,6 +325,51 @@ def "update-claude-marketplaces warns and continues when the update fails" [] {
 }
 
 @test
+def "update-codex-marketplaces syncs every marketplace" [] {
+    let c = $in
+    let h = $c.home
+    stub $c codex $"echo \"$*\" >> \"($h)/codex_args\"\n"
+
+    zsh-ok $c r#'PATH="$FAKE_HOME/bin:$PATH"; _update_codex_marketplaces'#
+
+    assert equal (open --raw $"($h)/codex_args" | lines) ["plugin marketplace upgrade"]
+}
+
+@test
+def "update-codex-marketplaces skips when codex is not installed" [] {
+    let c = $in
+    let r = zsh $c 'PATH=/usr/bin:/bin; _update_codex_marketplaces'
+    assert equal $r.status 0
+    assert str contains $r.output "codex not installed"
+}
+
+@test
+def "update-codex-marketplaces warns and continues when the update fails" [] {
+    let c = $in
+    stub $c codex "exit 1\n"
+    let r = zsh $c r#'PATH="$FAKE_HOME/bin:$PATH"; _update_codex_marketplaces; echo after'#
+    assert equal $r.status 0
+    assert str contains $r.output "update failed"
+    assert str contains $r.output "after"
+}
+
+@test
+def "merge stops when the codex config write fails" [] {
+    let c = $in
+    let r = zsh $c r#'
+        _merge_claude_settings() { :; }
+        _update_claude_marketplaces() { :; }
+        _merge_codex_config() { return 1; }
+        _update_codex_marketplaces() { echo update_codex_marketplaces; }
+        _merge_orca_settings() { echo merge_orca_settings; }
+        _merge
+    '#
+    assert not equal $r.status 0
+    assert not ($r.output | str contains update_codex_marketplaces)
+    assert not ($r.output | str contains merge_orca_settings)
+}
+
+@test
 def "merge stops when the claude settings write fails" [] {
     let c = $in
     let r = zsh $c r#'
@@ -1077,7 +1122,7 @@ def dot-stubbed [ctx: record, ...args: string]: nothing -> record {
     let at = $src | enumerate | where item =~ '^# Only dispatch when executed' | first | get index
     let fns = [
         _install_brew _install_defaults _install_fisher _install_vim
-        _merge_claude_settings _update_claude_marketplaces _merge_codex_config _merge_orca_settings _merge_rex_settings
+        _merge_claude_settings _update_claude_marketplaces _merge_codex_config _update_codex_marketplaces _merge_orca_settings _merge_rex_settings
     ]
     let stubs = $fns | each {|fn| $"($fn)\() { echo ($fn | str substring 1..); }" }
     $src | first $at | append $stubs | append ($src | skip $at) | str join "\n" | save -f $copy
@@ -1098,8 +1143,8 @@ def "dot install and merge run every step without a target, and the given ones w
     assert equal (steps $c install vim) [install_vim]
     assert equal (steps $c install vim brew) [install_vim install_brew]
 
-    assert equal (steps $c merge) [merge_claude_settings update_claude_marketplaces merge_codex_config merge_orca_settings merge_rex_settings]
-    assert equal (steps $c merge codex) [merge_codex_config]
+    assert equal (steps $c merge) [merge_claude_settings update_claude_marketplaces merge_codex_config update_codex_marketplaces merge_orca_settings merge_rex_settings]
+    assert equal (steps $c merge codex) [merge_codex_config update_codex_marketplaces]
     assert equal (steps $c merge orca claude) [merge_orca_settings merge_claude_settings update_claude_marketplaces]
 
     # an unknown target fails before any step runs

@@ -246,6 +246,14 @@ _merge_codex_config() {
     _status merged "$DIR/agents/codex/config.toml → $HOME/.codex/config.toml"
 }
 
+# _update_codex_marketplaces
+# Syncs Codex Git marketplaces to the merged refs.
+_update_codex_marketplaces() {
+    command -v codex &>/dev/null || { _status skipped "codex marketplaces: codex not installed"; return 0; }
+    # a network failure must not block the local merges that follow
+    _spin "codex marketplaces" codex plugin marketplace upgrade || _status warn "codex marketplaces: update failed"
+}
+
 # _merge_orca_settings
 # Merges orca/settings.jsonc into Orca's profile db and updates its content_hash.
 _merge_orca_settings() {
@@ -358,7 +366,11 @@ _merge_step() {
             _merge_claude_settings
             _update_claude_marketplaces
             ;;
-        codex) _merge_codex_config ;;
+        codex)
+            # separate lines keep errexit on, so a failed config write stops the merge
+            _merge_codex_config
+            _update_codex_marketplaces
+            ;;
         orca) _merge_orca_settings ;;
         rex) _merge_rex_settings ;;
         *) _err "error: no handler for merge target: \"$1\""; exit 1 ;;
