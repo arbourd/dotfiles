@@ -1,10 +1,10 @@
 ---
-name: dot:claude-settings-audit
+name: claude-settings-audit
 description: Check Claude settings for live drift, bad merges, and unapplied changes.
 disable-model-invocation: true
 ---
 
-# dot:claude-settings-audit
+# claude-settings-audit
 
 Audit two repo files against the live files `dot merge claude` merges them into (`_merge_claude_settings` in `dot`): `agents/claude/settings.jsonc` → `~/.claude/settings.json`, and `agents/claude/config.jsonc` → `~/.claude.json`. Three questions:
 
