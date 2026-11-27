@@ -15,6 +15,7 @@ Audit two repo files against the live files `dot merge claude` merges them into 
 ## Ground rules
 
 - Read-only until the user says otherwise. Applying means `dot merge claude`, which rewrites their live file, so the user runs it.
+- Read the live files only through `compare.js`, which masks secret values by key name. Secrets inside args, commands, or URLs can still print. To see a masked value, ask the user.
 - The repo is shared across machines: keep secrets, tokens, and machine paths out of it.
 - The repo files hold only settings we chose to set, each with a `// Default: ...` comment. A key equal to its default is deliberate; leave it.
 - A key goes in `config.jsonc` if the docs list it under "Global config settings" (https://code.claude.com/docs/en/settings-reference), since Claude Code reads those only from `~/.claude.json` and ignores them in `settings.json`. Every other key goes in `settings.jsonc`.
@@ -40,7 +41,7 @@ Audit two repo files against the live files `dot merge claude` merges them into 
    bun .agents/skills/claude-settings-audit/scripts/compare.js
    ```
 
-2. **Drift.** For each live key the repo file lacks, including entries nested under keys we set (a plugin the repo dropped stays enabled, since the merge never deletes), show a table of key, live value, default, and machine-specific. Add only the ones the user wants. Flag these as likely machine-specific and recommend leaving them out:
+2. **Drift.** For each live key the repo file lacks, including entries nested under keys we set (a plugin the repo dropped stays enabled, since the merge never deletes), show a table of key, live value, default, and machine-specific. The script prints a string as `<redacted>` when a key on its path ends in a secret word such as token, key, or auth, or when it sits in `env`, `headers`, or `http_headers`. The mask reads key names only, so still look for secrets in commands, args, and URLs. Add only the ones the user wants. Flag these as likely machine-specific and recommend leaving them out:
    - status lines installed by other tools;
    - auth and endpoints: `awsAuthRefresh`, `otelHeadersHelper`, and `env` entries such as `ANTHROPIC_BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, proxy and `CLAUDE_CODE_USE_*` variables;
    - model pins tied to an account or gateway: `ANTHROPIC_DEFAULT_*_MODEL`, `modelSettings`;

@@ -15,6 +15,7 @@ Audit `agents/codex/config.toml` against the live file `dot merge codex` merges 
 ## Ground rules
 
 - Read-only until the user says otherwise. Applying means `dot merge codex`, which rewrites their live file, so the user runs it.
+- Read the live files only through `compare.js`, which masks secret values by key name. Secrets inside args, commands, or URLs can still print. To see a masked value, ask the user.
 - The repo is shared across machines: keep secrets, tokens, and machine paths out of it.
 - The repo file holds only non-default values. Put `# Default: <value>` directly above each key. For an unset default, write `unset`. Exceptions: `approval_policy`, `approvals_reviewer`, and `sandbox_mode` stay together for auto mode, and `tui.status_line_use_colors` is kept by choice.
 - Marketplace and plugin tables need no default comment. Keep a marketplace's `source`, including `.git`, directly before `ref` for Renovate.
@@ -34,7 +35,7 @@ Audit `agents/codex/config.toml` against the live file `dot merge codex` merges 
    bun .agents/skills/codex-settings-audit/scripts/compare.js
    ```
 
-2. **Drift.** For each Live drift line, show a table of key, live value, default, and machine-specific. Redact secrets. Add only the ones the user wants, with a `# Default: ...` comment. Flag auth, local paths, and anything holding a secret or token as machine-specific and recommend leaving it out. When unsure, ask.
+2. **Drift.** For each Live drift line, show a table of key, live value, default, and machine-specific. The script prints a string as `<redacted>` when a key on its path ends in a secret word such as token, key, or auth, or when it sits in `env`, `headers`, `http_headers`, or `shell_environment_policy.set`. The mask reads key names only, so still look for secrets in commands, args, and URLs. Add only the ones the user wants, with a `# Default: ...` comment. Flag auth, local paths, and anything holding a secret or token as machine-specific and recommend leaving it out. When unsure, ask.
 
 3. **Defaults.** Run `codex --version`. For each repo key and each drift key, read its default in these docs:
    - https://learn.chatgpt.com/docs/config-file/config-reference.md

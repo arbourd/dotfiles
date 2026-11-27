@@ -34,8 +34,21 @@ const parseToml = (file) => {
 
 const isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 
-const preview = (value) => {
-  const text = JSON.stringify(value);
+// Hide secret strings, by key name only, before values reach the agent transcript.
+// Secrets inside args, commands, or URLs still print.
+const SECRET_WORD = /(token|secret|password|passwd|key|credential|cookie|auth)s?$|^(authorization|bearer|pat)$/i;
+const SECRET_TABLE = /(^|\.)(env|headers|http_headers|shell_environment_policy\.set)\./;
+const lastWord = (key) => key.split(/[-_]|(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/).at(-1);
+const isSecret = (key) => key.split('.').some((part) => SECRET_WORD.test(lastWord(part))) || SECRET_TABLE.test(key);
+
+const redact = (key, value) => {
+  if (Array.isArray(value)) return value.map((item, i) => redact(`${key}.${i}`, item));
+  if (isObject(value)) return Object.fromEntries(Object.entries(value).map(([child, item]) => [child, redact(`${key}.${child}`, item)]));
+  return typeof value === 'string' && isSecret(key) ? '<redacted>' : value;
+};
+
+const preview = (key, value) => {
+  const text = JSON.stringify(redact(key, value));
   return text?.length > 70 ? `${text.slice(0, 70)}…` : text;
 };
 
@@ -55,7 +68,7 @@ const live = parseToml(LIVE_PATH);
 
 console.log('# Unapplied: in config.toml, not yet in ~/.codex/config.toml');
 for (const [key, value, liveValue] of unapplied(ours, live)) {
-  console.log(`${key} ours=${preview(value)} live=${preview(liveValue)}`);
+  console.log(`${key} ours=${preview(key, value)} live=${preview(key, liveValue)}`);
 }
 
 // Yields [dotted key, value] for live values that the repo lacks, skipping machine-local keys.
@@ -72,4 +85,4 @@ function* drift(live, ours, parents = []) {
 }
 
 console.log('\n# Live drift: set in ~/.codex/config.toml, not in config.toml');
-for (const [key, value] of drift(live, ours)) console.log(`${key} live=${preview(value)}`);
+for (const [key, value] of drift(live, ours)) console.log(`${key} live=${preview(key, value)}`);
