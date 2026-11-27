@@ -239,7 +239,7 @@ _merge_codex_config() {
     _ensure ~/.codex/config.toml
 
     local tmp=$(mktemp)
-    yq -p toml -o toml eval-all '. as $i ireduce({}; . * $i)' ~/.codex/config.toml "$DIR/agents/codex/config.toml" > "$tmp" || { rm -f "$tmp"; return 1; }
+    yq -p toml -o toml eval-all '. as $i ireduce({}; . * $i) | ... comments=""' ~/.codex/config.toml "$DIR/agents/codex/config.toml" > "$tmp" || { rm -f "$tmp"; return 1; }
     mv "$tmp" ~/.codex/config.toml
     chmod 600 ~/.codex/config.toml
 
