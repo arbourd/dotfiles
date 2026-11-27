@@ -4,7 +4,7 @@ tap 'hashicorp/tap', trusted: true
 brew 'actionlint'
 brew 'age'
 brew 'ansifilter'
-brew 'arbourd/tap/awman'
+brew 'prettysmartdev/tap/awman', trusted: true
 brew 'bash'
 brew 'bash-completion@2'
 brew 'bun'
