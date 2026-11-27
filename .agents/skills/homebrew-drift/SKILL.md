@@ -1,10 +1,10 @@
 ---
-name: dot:homebrew-drift
+name: homebrew-drift
 description: Check the root Brewfile against what Homebrew has installed, for formulae and casks.
 disable-model-invocation: true
 ---
 
-# dot:homebrew-drift
+# homebrew-drift
 
 Compare `Brewfile` in the repo root with the live Homebrew install. Two questions:
 

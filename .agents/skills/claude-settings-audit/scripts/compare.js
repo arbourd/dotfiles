@@ -41,12 +41,25 @@ const query = (select, what) => {
   return JSON.parse(out); // known limit: numbers JSON.parse can't tell apart (huge ints, 1 vs 1.0, 0 vs -0) look unchanged
 };
 
-const preview = (value) => {
-  const text = JSON.stringify(value);
-  return text?.length > 70 ? `${text.slice(0, 70)}…` : text;
+const isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+
+// Hide secret strings, by key name only, before values reach the agent transcript.
+// Secrets inside args, commands, or URLs still print.
+const SECRET_WORD = /(token|secret|password|passwd|key|credential|cookie|auth)s?$|^(authorization|bearer|pat)$/i;
+const SECRET_TABLE = /(^|\.)(env|headers|http_headers|shell_environment_policy\.set)\./;
+const lastWord = (key) => key.split(/[-_]|(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/).at(-1);
+const isSecret = (key) => key.split('.').some((part) => SECRET_WORD.test(lastWord(part))) || SECRET_TABLE.test(key);
+
+const redact = (key, value) => {
+  if (Array.isArray(value)) return value.map((item, i) => redact(`${key}.${i}`, item));
+  if (isObject(value)) return Object.fromEntries(Object.entries(value).map(([child, item]) => [child, redact(`${key}.${child}`, item)]));
+  return typeof value === 'string' && isSecret(key) ? '<redacted>' : value;
 };
 
-const isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+const preview = (key, value) => {
+  const text = JSON.stringify(redact(key, value));
+  return text?.length > 70 ? `${text.slice(0, 70)}…` : text;
+};
 
 // Own properties only, so inherited names like constructor read as missing.
 const own = (object, key) => (Object.hasOwn(object, key) ? object[key] : undefined);
@@ -110,14 +123,14 @@ function compare({ repoFile, livePath }) {
   out.push(`# ${repoFile} → ${liveName}`, `(${repoPath})`, '');
 
   out.push('## Unapplied');
-  addAll(all.map(([key, before, after]) => `${key} live=${preview(before)} merged=${preview(after)}`));
+  addAll(all.map(([key, before, after]) => `${key} live=${preview(key, before)} merged=${preview(key, after)}`));
 
   out.push('', '## Live drift');
-  addAll([...drift(live, ours)].filter(([key]) => !denied.has(key)).map(([key, value]) => `${key} live=${preview(value)}`));
+  addAll([...drift(live, ours)].filter(([key]) => !denied.has(key)).map(([key, value]) => `${key} live=${preview(key, value)}`));
 
   out.push('', '## Merge risks');
-  const risks = all.filter(([, before, after]) => loses(before, after)).map(([key, before, after]) => `${key} live=${preview(before)} merged=${preview(after)}`);
-  if (!liveIsObject && liveRaw !== null) risks.unshift(`(whole file) live=${preview(liveRaw)} is not a JSON object; the merge replaces it`);
+  const risks = all.filter(([, before, after]) => loses(before, after)).map(([key, before, after]) => `${key} live=${preview(key, before)} merged=${preview(key, after)}`);
+  if (!liveIsObject && liveRaw !== null) risks.unshift(`(whole file) live=${preview('', liveRaw)} is not a JSON object; the merge replaces it`);
   addAll(risks);
   return out.join('\n');
 }

@@ -1,14 +1,44 @@
+# source: https://learn.chatgpt.com/docs/config-file/config-reference.md
+
+# Default: "on-request"
 approval_policy = "on-request"
+# Default: "user"
 approvals_reviewer = "auto_review"
+# Default: "read-only"
 sandbox_mode = "workspace-write"
 
 [tui]
+# Default: "auto"
+copy_on_select = "never"
+# Default: true
 show_tooltips = false
+# Default: ["model-with-reasoning", "current-dir", "thread-name"]
+status_line = ["model", "reasoning", "project-name", "context-used", "context-window-size", "estimated-thread-cost", "pull-request-number"]
+# Default: unset
+theme = "one-half-light"
+# Default: true
+status_line_use_colors = true
 
 [marketplaces.agent-skills]
 source_type = "git"
 source = "https://github.com/addyosmani/agent-skills.git"
 ref = "0.6.17"
 
+[marketplaces.i-have-adhd]
+source_type = "git"
+source = "https://github.com/ayghri/i-have-adhd.git"
+ref = "v0.4.1"
+
+[marketplaces.mattpocock]
+source_type = "git"
+source = "https://github.com/mattpocock/skills.git"
+ref = "v1.3.2"
+
 [plugins."agent-skills@agent-skills"]
+enabled = true
+
+[plugins."i-have-adhd@i-have-adhd"]
+enabled = true
+
+[plugins."mattpocock-skills@mattpocock"]
 enabled = true

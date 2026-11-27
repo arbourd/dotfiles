@@ -73,7 +73,7 @@ def "claude-settings-audit compare.js reports nested live drift and tolerates an
     let r = _compare $c
     assert equal $r.status 0
     # hooks is hidden, and a@m is in both files so nothing is unapplied
-    assert equal (_section $r.output 'Live drift') "enabledPlugins.old@m live=true\nenv.B live=\"2\"\ntheme live=\"m\""
+    assert equal (_section $r.output 'Live drift') "enabledPlugins.old@m live=true\nenv.B live=\"<redacted>\"\ntheme live=\"m\""
     assert equal (_section $r.output 'Unapplied') ""
 
     "" | save -f $"($c.home)/.claude/settings.json"
@@ -184,4 +184,20 @@ def "claude-settings-audit compare.js flags a config.jsonc merge that loses live
     _compare_setup $c '{}' '{}' '{"x":[1]}' '{"x":[1,2]}'
     let r = _compare $c
     assert equal (_section $r.output 'Merge risks' 2) 'x live=[1,2] merged=[1]'
+}
+
+@test
+def "claude-settings-audit compare.js redacts secrets and keeps other values" [] {
+    let c = $in
+    _compare_setup $c r#'{"credentials":{"value":"FAKE_REPO"}}'# r#'{"credentials":{"value":"FAKE_LIVE"},"env":{"NESTED":{"value":"FAKE_ENV"}},"mcpServers":{"x":{"http_headers":{"X-Custom":"FAKE_HEADER"},"headers":{"X-Other":"FAKE_OTHER"}}},"api":{"apiKey":"FAKE_KEY","url":"https://e.x"},"APIKey":"FAKE_ACRONYM","accesstoken":"FAKE_NOSEP","pat":"FAKE_PAT","basicauth":"FAKE_BASICAUTH","includeCoAuthoredBy":false,"preferredAuthMethod":"oauth","maxTokens":8}'#
+    let r = _compare $c
+    assert equal $r.status 0
+    assert not ($r.output | str contains 'FAKE_')
+    assert equal (_section $r.output 'Unapplied') 'credentials.value live="<redacted>" merged="<redacted>"'
+    assert str contains $r.output 'env live={"NESTED":{"value":"<redacted>"}}'
+    assert str contains $r.output 'api live={"apiKey":"<redacted>","url":"https://e.x"}'
+    assert str contains $r.output 'APIKey live="<redacted>"'
+    assert str contains $r.output 'includeCoAuthoredBy live=false'
+    assert str contains $r.output 'preferredAuthMethod live="oauth"'
+    assert str contains $r.output 'maxTokens live=8'
 }
